@@ -32,6 +32,27 @@ output "The time is " + date::time;
 - Manage immutable operating systems
 - Extensive features for containerized workflows
 
+## Usage
+
+Whale is currently in development and should not be used except for development
+and testing purposes.
+
+Whale can be used through its command line tool.
+
+```fish
+git clone https://git.jeffa.io/whale
+cd whale
+cargo run --bin cli  
+```
+
+The CLI can run individual commands with the `-c` flag or you can specify a file
+path with `-p`. Without flags, the CLI will launch the interactive shell.
+
+```fish
+cargo run --bin cli -- -c 'output "foobar"' 
+cargo run --bin cli -- -p 'examples/hello_world.whale'
+```
+
 ## Motivation
 
 Using the command line is like speaking a language: you learn idioms and develop

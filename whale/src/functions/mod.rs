@@ -5,11 +5,12 @@ pub mod random;
 pub mod system;
 pub mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 9] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 10] = [
     &dir::Create,
     &dir::Read,
     &dir::Remove,
     &dir::Trash,
+    &dir::Move,
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,

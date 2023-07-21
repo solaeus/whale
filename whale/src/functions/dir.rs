@@ -1,6 +1,6 @@
 use crate::{BuiltinFunction, FunctionInfo, Result, Value};
 
-use std::fs::{create_dir_all, read_dir, remove_file};
+use std::fs::{copy, create_dir_all, read_dir, remove_dir_all, remove_file};
 
 #[derive(Copy, Clone)]
 pub struct Create;
@@ -95,11 +95,27 @@ pub struct Move;
 
 impl BuiltinFunction for Move {
     fn info(&self) -> FunctionInfo<'static> {
-        todo!()
+        FunctionInfo {
+            identifier: "dir::move",
+            description: "Move a directory to a new path.",
+        }
     }
 
-    fn run(&self, _argument: &Value) -> Result<Value> {
-        todo!()
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_tuple()?;
+
+        if argument.len() != 2 {
+            return Err(crate::Error::WrongFunctionArgumentAmount {
+                expected: 2,
+                actual: argument.len(),
+            });
+        }
+        let (from, to) = (argument[0].as_string()?, argument[1].as_string()?);
+
+        copy(&from, to)?;
+        remove_dir_all(from)?;
+
+        Ok(Value::Empty)
     }
 }
 
@@ -110,7 +126,7 @@ impl BuiltinFunction for Copy {
         todo!()
     }
 
-    fn run(&self, _argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         todo!()
     }
 }
@@ -122,19 +138,7 @@ impl BuiltinFunction for Metadata {
         todo!()
     }
 
-    fn run(&self, _argument: &Value) -> Result<Value> {
-        todo!()
-    }
-}
-
-pub struct Write;
-
-impl BuiltinFunction for Write {
-    fn info(&self) -> FunctionInfo<'static> {
-        todo!()
-    }
-
-    fn run(&self, _argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         todo!()
     }
 }
