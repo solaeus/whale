@@ -1,0 +1,24 @@
+[package]
+name = "whale"
+version = "0.1.2"
+description = "Programming language for system management"
+authors = ["jeff <dev@jeffa.io.com>"]
+repository = "https://git.jeffa.io/jeff/whale.git"
+homepage = "https://git.jeffa.io/jeff/whale"
+readme = "README.md"
+license = "MIT"
+edition = "2018"
+
+[lib]
+name = "whale"
+path = "src/lib.rs"
+
+[dependencies]
+rand = "0.8.5"
+chrono = "0.4.26"
+eframe = "0.22.0"
+trash = "3.0.3"
+lazy_static = "1.4.0"
+rayon = "1.7.0"
+serde = { version = "1.0.171", features = ["derive"] }
+sys-info = "0.9.1"

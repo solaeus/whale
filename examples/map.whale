@@ -1,0 +1,11 @@
+map.x = 1;
+map.y = 2;
+map.z = 3;
+map.a = "foo";
+map.b = "bar";
+map.c = "foobar";
+map.d = ("abc", "123", "xyz");
+map.e.foo = "hello";
+map.e.bar = "hiya";
+
+map

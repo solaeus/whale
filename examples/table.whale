@@ -1,0 +1,7 @@
+table (
+	("name", "age", "favorite color"), (
+		("jeff", 33, "purple"),
+		("bob", 2, "yellow"),
+		("susan", 57, "black"),
+	)
+)

@@ -1,0 +1,18 @@
+dnf::copr ("varlad/helix");
+dnf::repositories (
+	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",
+	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-nonfree-release-38.noarch.rpm"
+);
+dnf::packages (
+	"bat",
+	"egl-wayland",
+	"fish",
+	"fzf",
+	"lsd",
+	"kitty", 
+	"libwayland-cursor",
+	"libwayland-egl",
+	"wl-clipboard"
+);
+rust::default "stable";
+rust::packages ("starship", "zoxide");
