@@ -7,13 +7,14 @@ mod random;
 mod system;
 mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 12] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 13] = [
     &dir::Create,
     &dir::Read,
     &dir::Remove,
     &dir::Trash,
     &disk::List,
     &disk::Partition,
+    &package::Install,
     &package::Upgrade,
     &random::RandomFloat,
     &random::RandomInteger,
