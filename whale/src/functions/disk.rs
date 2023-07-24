@@ -1,6 +1,38 @@
 use std::process::Command;
 
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use sysinfo::{DiskExt, RefreshKind, System, SystemExt};
+
+use crate::{BuiltinFunction, FunctionInfo, Result, Value, VariableMap};
+
+pub struct List;
+
+impl BuiltinFunction for List {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "disk::list",
+            description: "List all block devices.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        argument.as_empty()?;
+
+        let mut sys = System::new_all();
+        sys.refresh_all();
+
+        let mut disk_list = Vec::new();
+
+        for disk in sys.disks() {
+            let mut map = VariableMap::new();
+            let kind = disk.kind();
+            map.set_value("kind", Value::String(format!("{kind:?}")))?;
+
+            disk_list.push(Value::Map(map));
+        }
+
+        Ok(Value::Tuple(disk_list))
+    }
+}
 
 pub struct Partition;
 
