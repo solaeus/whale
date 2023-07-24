@@ -1,15 +1,17 @@
 use crate::{Error, Result, Value};
 
-pub mod dir;
-pub mod random;
-pub mod system;
-pub mod table;
+mod dir;
+mod disk;
+mod random;
+mod system;
+mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 9] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 10] = [
     &dir::Create,
     &dir::Read,
     &dir::Remove,
     &dir::Trash,
+    &disk::Partition,
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,
