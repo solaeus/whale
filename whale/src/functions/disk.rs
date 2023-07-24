@@ -27,6 +27,23 @@ impl BuiltinFunction for List {
             let kind = disk.kind();
             map.set_value("kind", Value::String(format!("{kind:?}")))?;
 
+            let name = disk.name();
+            map.set_value("name", Value::String(format!("{name:?}")))?;
+
+            let file_system = String::from_utf8_lossy(disk.file_system()).to_string();
+            map.set_value("file_system", Value::String(file_system))?;
+
+            let mount_point = disk.mount_point().to_str().unwrap().to_string();
+            map.set_value("mount_point", Value::String(mount_point))?;
+
+            let total_space = disk.total_space() as i64;
+            map.set_value("total_space", Value::Int(total_space))?;
+
+            let available_space = disk.available_space() as i64;
+            map.set_value("available_space", Value::Int(available_space))?;
+
+            map.set_value("is_removable", Value::Boolean(disk.is_removable()))?;
+
             disk_list.push(Value::Map(map));
         }
 
