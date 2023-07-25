@@ -7,7 +7,7 @@ pub struct CoprRepositories;
 impl BuiltinFunction for CoprRepositories {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "package::copr_repositories",
+            identifier: "packages::copr_repositories",
             description: "Enable one or more COPR repositories.",
         }
     }
@@ -41,7 +41,7 @@ pub struct Install;
 impl BuiltinFunction for Install {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "package::install",
+            identifier: "packages::install",
             description: "Install one or more packages.",
         }
     }
@@ -70,12 +70,47 @@ impl BuiltinFunction for Install {
     }
 }
 
+pub struct RpmRepositories;
+
+impl BuiltinFunction for RpmRepositories {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "packages::rpm_repositories",
+            description: "Enable one or more RPM repositories.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        if let Ok(repo) = argument.as_string() {
+            Command::new("fish")
+                .arg("-c")
+                .arg(format!("sudo dnf -y config-manager --add-repo {repo}"))
+                .spawn()?
+                .wait()?;
+        } else if let Ok(repos) = argument.as_tuple() {
+            for repo in repos {
+                Command::new("fish")
+                    .arg("-c")
+                    .arg(format!("sudo dnf -y config-manager --add-repo {repo}"))
+                    .spawn()?
+                    .wait()?;
+            }
+        } else {
+            return Err(crate::Error::ExpectedString {
+                actual: argument.clone(),
+            });
+        };
+
+        Ok(Value::Empty)
+    }
+}
+
 pub struct Uninstall;
 
 impl BuiltinFunction for Uninstall {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "package::uninstall",
+            identifier: "packages::uninstall",
             description: "Uninstall one or more packages.",
         }
     }
@@ -109,7 +144,7 @@ pub struct Upgrade;
 impl BuiltinFunction for Upgrade {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "package::upgrade",
+            identifier: "packages::upgrade",
             description: "Upgrade all installed packages.",
         }
     }
