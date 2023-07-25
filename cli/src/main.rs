@@ -21,10 +21,6 @@ struct Args {
     /// Location of the file to run.
     #[arg(short, long)]
     path: Option<String>,
-
-    /// Launch the whale shell.
-    #[arg(short, long)]
-    shell: bool,
 }
 
 fn main() {
@@ -33,12 +29,13 @@ fn main() {
     if let Some(path) = args.path {
         let file_contents = read_to_string(path).unwrap();
         let eval_result = eval(&file_contents).unwrap();
+
         println!("{eval_result}");
-    }
-    if let Some(command) = args.command {
-        eval(&command).unwrap();
-    }
-    if args.shell {
+    } else if let Some(command) = args.command {
+        let eval_result = eval(&command).unwrap();
+
+        println!("{eval_result}");
+    } else {
         run_shell()
     }
 }
