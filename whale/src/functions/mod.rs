@@ -7,8 +7,9 @@ mod random;
 mod system;
 mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 16] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 17] = [
     &dir::Create,
+    &dir::Move,
     &dir::Read,
     &dir::Remove,
     &dir::Trash,

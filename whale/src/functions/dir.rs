@@ -1,6 +1,6 @@
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
 
-use std::fs::{create_dir_all, read_dir, remove_file};
+use std::{fs, path::PathBuf};
 
 #[derive(Copy, Clone)]
 pub struct Create;
@@ -15,7 +15,7 @@ impl BuiltinFunction for Create {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
-        create_dir_all(path)?;
+        fs::create_dir_all(path)?;
 
         Ok(Value::Empty)
     }
@@ -33,7 +33,7 @@ impl BuiltinFunction for Read {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
-        let dir = read_dir(path)?;
+        let dir = fs::read_dir(path)?;
         let mut file_list = Vec::new();
 
         for entry in dir {
@@ -66,7 +66,7 @@ impl BuiltinFunction for Remove {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
-        remove_file(path)?;
+        fs::remove_file(path)?;
 
         Ok(Value::Empty)
     }
@@ -95,11 +95,40 @@ pub struct Move;
 
 impl BuiltinFunction for Move {
     fn info(&self) -> FunctionInfo<'static> {
-        todo!()
+        FunctionInfo {
+            identifier: "dir::move",
+            description: "Move a directory to a new path.",
+        }
     }
 
-    fn run(&self, _argument: &Value) -> Result<Value> {
-        todo!()
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let mut argument = argument.as_tuple()?;
+
+        if argument.len() != 2 {
+            return Err(Error::WrongFunctionArgumentAmount {
+                expected: 2,
+                actual: argument.len(),
+            });
+        }
+
+        let target_path = argument.pop().unwrap().as_string()?;
+        let current_path = argument.pop().unwrap();
+        let file_list = Read.run(&current_path)?.as_tuple()?;
+
+        for path in file_list {
+            let path = PathBuf::from(path.as_string()?);
+
+            if path.is_file() {
+                fs::copy(&path, &target_path)?;
+            }
+
+            if path.is_symlink() && path.symlink_metadata()?.is_file() {
+                let new_path = PathBuf::from(&target_path).join(&path);
+                fs::copy(&path, new_path)?;
+            }
+        }
+
+        Ok(Value::Empty)
     }
 }
 
@@ -118,18 +147,6 @@ impl BuiltinFunction for Copy {
 pub struct Metadata;
 
 impl BuiltinFunction for Metadata {
-    fn info(&self) -> FunctionInfo<'static> {
-        todo!()
-    }
-
-    fn run(&self, _argument: &Value) -> Result<Value> {
-        todo!()
-    }
-}
-
-pub struct Write;
-
-impl BuiltinFunction for Write {
     fn info(&self) -> FunctionInfo<'static> {
         todo!()
     }
