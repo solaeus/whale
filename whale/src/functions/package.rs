@@ -2,6 +2,40 @@ use std::process::Command;
 
 use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
 
+pub struct CoprRepositories;
+
+impl BuiltinFunction for CoprRepositories {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "package::copr_repositories",
+            description: "Enable one or more COPR repositories.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let repo_list_string = if let Ok(repo) = argument.as_string() {
+            repo
+        } else if let Ok(repos) = argument.as_tuple() {
+            repos
+                .into_iter()
+                .map(|value| value.to_string() + " ")
+                .collect()
+        } else {
+            return Err(crate::Error::ExpectedString {
+                actual: argument.clone(),
+            });
+        };
+
+        Command::new("fish")
+            .arg("-c")
+            .arg(format!("sudo dnf -y copr enable {repo_list_string}"))
+            .spawn()?
+            .wait()?;
+
+        Ok(Value::Empty)
+    }
+}
+
 pub struct Install;
 
 impl BuiltinFunction for Install {
