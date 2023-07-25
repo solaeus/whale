@@ -1,9 +1,9 @@
-copr_repositories = ("varlad/helix");
-rpm_repositories = (
+packages::copr_repositories = ("varlad/helix");
+packages::rpm_repositories (
 	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",
 	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-nonfree-release-38.noarch.rpm"
 );
-packages = (
+packages::install (
 	"bat",
 	"egl-wayland",
 	"fish",
