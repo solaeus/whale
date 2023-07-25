@@ -131,7 +131,7 @@ impl BuiltinFunction for Uninstall {
 
         Command::new("fish")
             .arg("-c")
-            .arg(format!("sudo dnf -y uninstall {package_list_string}"))
+            .arg(format!("sudo dnf -y remove {package_list_string}"))
             .spawn()?
             .wait()?;
 
