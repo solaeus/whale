@@ -117,13 +117,13 @@ impl BuiltinFunction for Move {
 
         for path in file_list {
             let path = PathBuf::from(path.as_string()?);
+            let new_path = PathBuf::from(&target_path).join(&path);
 
             if path.is_file() {
                 fs::copy(&path, &target_path)?;
             }
 
             if path.is_symlink() && path.symlink_metadata()?.is_file() {
-                let new_path = PathBuf::from(&target_path).join(&path);
                 fs::copy(&path, new_path)?;
             }
         }
