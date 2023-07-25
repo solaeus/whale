@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use sysinfo::{DiskExt, RefreshKind, System, SystemExt};
+use sysinfo::{DiskExt, System, SystemExt};
 
 use crate::{BuiltinFunction, FunctionInfo, Result, Value, VariableMap};
 

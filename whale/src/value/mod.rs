@@ -75,7 +75,7 @@ impl Serialize for Value {
             }
             Value::Empty => todo!(),
             Value::Map(inner) => inner.serialize(serializer),
-            Value::Table { column_names, rows } => todo!(),
+            Value::Table { column_names: _, rows: _ } => todo!(),
         }
     }
 }
