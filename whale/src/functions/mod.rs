@@ -2,7 +2,7 @@ use crate::{Error, Result, Value};
 
 mod dir;
 mod disk;
-mod package;
+mod packages;
 mod random;
 mod system;
 mod table;
@@ -14,8 +14,8 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 13] = [
     &dir::Trash,
     &disk::List,
     &disk::Partition,
-    &package::Install,
-    &package::Upgrade,
+    &packages::Install,
+    &packages::Upgrade,
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,
