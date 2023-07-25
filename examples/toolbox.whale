@@ -1,18 +1,20 @@
-dnf::copr ("varlad/helix");
-dnf::repositories (
+copr_repositories = ("varlad/helix");
+rpm_repositories = (
 	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",
 	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-nonfree-release-38.noarch.rpm"
 );
-dnf::packages (
+packages = (
 	"bat",
 	"egl-wayland",
 	"fish",
 	"fzf",
 	"lsd",
-	"kitty", 
+	"kitty",
+	"helix",
 	"libwayland-cursor",
 	"libwayland-egl",
 	"wl-clipboard"
 );
-rust::default "stable";
-rust::packages ("starship", "zoxide");
+
+command::sh("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh");
+command::sh("cargo install starship zoxide");

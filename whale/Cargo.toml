@@ -23,3 +23,5 @@ rayon = "1.7.0"
 serde = { version = "1.0.171", features = ["derive"] }
 sys-info = "0.9.1"
 sysinfo = "0.29.6"
+toml = "0.7.6"
+toml_edit = "0.19.14"

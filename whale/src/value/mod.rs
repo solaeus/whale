@@ -3,7 +3,10 @@ use crate::{
     VariableMap,
 };
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    ser::{SerializeMap, SerializeTuple},
+    Deserialize, Serialize, Serializer,
+};
 use std::{
     convert::TryFrom,
     fmt::{self, Display, Formatter},
@@ -28,8 +31,7 @@ pub const EMPTY_VALUE: () = ();
 
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq, Deserialize)]
 pub enum Value {
     /// A string value.
     String(String),
@@ -50,6 +52,32 @@ pub enum Value {
         column_names: Vec<String>,
         rows: Vec<Vec<Value>>,
     },
+}
+
+impl Serialize for Value {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Value::String(inner) => serializer.serialize_str(&inner),
+            Value::Float(inner) => serializer.serialize_f64(*inner),
+            Value::Int(inner) => serializer.serialize_i64(*inner),
+            Value::Boolean(inner) => serializer.serialize_bool(*inner),
+            Value::Tuple(inner) => {
+                let mut tuple = serializer.serialize_tuple(inner.len())?;
+
+                for value in inner {
+                    tuple.serialize_element(value)?;
+                }
+
+                tuple.end()
+            }
+            Value::Empty => todo!(),
+            Value::Map(inner) => inner.serialize(serializer),
+            Value::Table { column_names, rows } => todo!(),
+        }
+    }
 }
 
 impl Default for Value {
@@ -91,6 +119,10 @@ impl Value {
     /// Returns true if `self` is a `Value::Empty`.
     pub fn is_empty(&self) -> bool {
         matches!(self, Value::Empty)
+    }
+
+    pub fn is_map(&self) -> bool {
+        matches!(self, Value::Map(_))
     }
 
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
@@ -161,6 +193,14 @@ impl Value {
     pub fn as_map(&self) -> Result<VariableMap> {
         match self {
             Value::Map(map) => Ok(map.clone()),
+            value => Err(Error::expected_map(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
+    pub fn as_table(&self) -> Result<(Vec<String>, Vec<Vec<Value>>)> {
+        match self {
+            Value::Table { column_names, rows } => Ok((column_names.clone(), rows.clone())),
             value => Err(Error::expected_map(value.clone())),
         }
     }

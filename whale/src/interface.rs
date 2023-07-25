@@ -12,7 +12,7 @@ use crate::{token, tree, Result, Value, VariableMap};
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval(string: &str) -> Result<Value> {
-    let mut context = VariableMap::new();
+    let mut context = VariableMap::new(None);
     let eval = eval_with_context(string, &mut context);
 
     match eval {

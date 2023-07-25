@@ -5,7 +5,7 @@ use std::{
 };
 
 use serde::{
-    de::{MapAccess, Visitor},
+    de::{value, MapAccess, Visitor},
     ser::SerializeMap,
     Deserialize, Serialize,
 };
@@ -15,20 +15,13 @@ use crate::{call_builtin_function, value::Value, Error, Result};
 /// A context that stores its mappings in hash maps.
 #[derive(Clone, Debug)]
 pub struct VariableMap {
+    parent_name: Option<String>,
     variables: BTreeMap<String, Value>,
 }
 
 impl VariableMap {
-    /// Creates a new instace.
-    pub fn new() -> Self {
-        VariableMap {
-            variables: BTreeMap::new(),
-        }
-    }
-
-    /// Returns a reference to the inner BTreeMap.
-    pub fn inner(&self) -> &BTreeMap<String, Value> {
-        &self.variables
+    pub fn call_function(&self, identifier: &str, argument: &Value) -> Result<Value> {
+        call_builtin_function(identifier, argument)
     }
 
     pub fn get_value(&self, identifier: &str) -> Result<Option<Value>> {
@@ -58,8 +51,22 @@ impl VariableMap {
         }
     }
 
-    pub fn call_function(&self, identifier: &str, argument: &Value) -> Result<Value> {
-        call_builtin_function(identifier, argument)
+    /// Returns a reference to the inner BTreeMap.
+    pub fn inner(&self) -> &BTreeMap<String, Value> {
+        &self.variables
+    }
+
+    /// Returns the number of stored variables.
+    pub fn len(&self) -> usize {
+        self.variables.len()
+    }
+
+    /// Creates a new instace.
+    pub fn new(parent_name: Option<String>) -> Self {
+        VariableMap {
+            parent_name,
+            variables: BTreeMap::new(),
+        }
     }
 
     pub fn set_value(&mut self, identifier: &str, value: Value) -> Result<()> {
@@ -82,7 +89,7 @@ impl VariableMap {
                     })
                 }
             } else {
-                let mut new_map = VariableMap::new();
+                let mut new_map = VariableMap::new(Some(map_name.to_string()));
 
                 new_map.set_value(next_identifier, value)?;
 
@@ -101,13 +108,15 @@ impl VariableMap {
 
 impl Display for VariableMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "(")?;
-
         for (key, value) in &self.variables {
-            write!(f, " {} = {};", key, value)?;
+            if let Some(parent) = &self.parent_name {
+                write!(f, "{parent}.{key} = {value}\n")?;
+            } else {
+                write!(f, "{key} = {value}\n")?;
+            }
         }
 
-        write!(f, " )")
+        write!(f, "")
     }
 }
 
@@ -128,6 +137,7 @@ impl PartialEq for VariableMap {
         true
     }
 }
+
 impl Serialize for VariableMap {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -161,7 +171,7 @@ impl<'de> Visitor<'de> for VariableMapVisitor {
 
     // Format a message stating what data this Visitor expects to receive.
     fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
-        formatter.write_str("a very special map")
+        formatter.write_str("VariableMap of key-value pairs.")
     }
 
     // Deserialize MyMap from an abstract "map" provided by the
@@ -171,7 +181,7 @@ impl<'de> Visitor<'de> for VariableMapVisitor {
     where
         M: MapAccess<'de>,
     {
-        let mut map = VariableMap::new();
+        let mut map = VariableMap::new(None);
 
         // While there are entries remaining in the input, add them
         // into our map.

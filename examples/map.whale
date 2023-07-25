@@ -1,11 +1,13 @@
-map.x = 1;
-map.y = 2;
-map.z = 3;
-map.a = "foo";
-map.b = "bar";
-map.c = "foobar";
-map.d = ("abc", "123", "xyz");
-map.e.foo = "hello";
-map.e.bar = "hiya";
+x = 1;
+y = 2;
+z = 3;
+a = "foo";
+b = "bar";
+c = "foobar";
+d = ("abc", "123", "xyz");
+e.foo = "hello";
+e.bar = "hiya";
+e.raboof.xyz = 777;
 
-map
+
+
