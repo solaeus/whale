@@ -197,9 +197,9 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_table(&self) -> Result<(Vec<String>, Vec<Vec<Value>>)> {
+    pub fn as_table(&self) -> Result<Table> {
         match self {
-            Value::Table(table) => Ok((table.column_names().clone(), table.rows().clone())),
+            Value::Table(table) => Ok(table.clone()),
             value => Err(Error::expected_map(value.clone())),
         }
     }

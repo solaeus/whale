@@ -8,7 +8,7 @@ mod random;
 mod system;
 mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 18] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 19] = [
     &command::Sh,
     &dir::Create,
     &dir::Move,
@@ -27,6 +27,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 18] = [
     &random::RandomString,
     &system::SystemCpu,
     &table::Create,
+    &table::Insert,
 ];
 
 pub trait BuiltinFunction: Sync + Send {

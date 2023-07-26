@@ -5,7 +5,7 @@ pub struct Create;
 impl BuiltinFunction for Create {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "table",
+            identifier: "table::create",
             description: "Define a new table.",
         }
     }
@@ -31,6 +31,27 @@ impl BuiltinFunction for Create {
         for row in rows {
             table.insert(row)?;
         }
+
+        Ok(Value::Table(table))
+    }
+}
+
+pub struct Insert;
+
+impl BuiltinFunction for Insert {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "table::insert",
+            description: "Add a new row to a table.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let mut argument = argument.as_tuple()?;
+        let row = argument.pop().unwrap().as_tuple()?;
+        let mut table = argument.pop().unwrap().as_table()?;
+
+        table.insert(row)?;
 
         Ok(Value::Table(table))
     }
