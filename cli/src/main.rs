@@ -1,12 +1,16 @@
 //! Command line interface for the whale programming language.
-use std::fs::read_to_string;
+use std::{
+    fs::read_to_string,
+    ptr::slice_from_raw_parts,
+    time::{Duration, Instant},
+};
 
 use clap::Parser;
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
-    DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline, ReedlineEvent,
-    ReedlineMenu, Signal, Suggestion,
+    DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Prompt, Reedline,
+    ReedlineEvent, ReedlineMenu, Signal, Suggestion,
 };
 use whale::{eval, eval_with_context, FunctionInfo, VariableMap};
 
@@ -52,11 +56,14 @@ fn run_shell() {
 
         match sig {
             Ok(Signal::Success(buffer)) => {
+                let start = Instant::now();
                 let eval_result = eval_with_context(&buffer, &mut context);
+                let time = start.elapsed().as_millis();
 
                 match eval_result {
                     Ok(value) => {
                         if !value.is_empty() {
+                            println!("Execution took {time} milliseconds.\n");
                             println!("{}", value)
                         }
                     }

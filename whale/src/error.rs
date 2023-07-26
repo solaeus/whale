@@ -7,6 +7,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
 pub enum Error {
+    /// A row was inserted with a wrong amount of arguments.
+    WrongColumnAmount {
+        /// The expected amount of arguments.
+        expected: usize,
+        /// The actual amount of arguments.
+        actual: usize,
+    },
+
     /// An operator was called with a wrong amount of arguments.
     WrongOperatorArgumentAmount {
         /// The expected amount of arguments.

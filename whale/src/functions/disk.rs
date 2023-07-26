@@ -23,7 +23,7 @@ impl BuiltinFunction for List {
         let mut disk_list = Vec::new();
 
         for disk in sys.disks() {
-            let mut map = VariableMap::new(Some("disk::list.output".to_string()));
+            let mut map = VariableMap::new(Some("disks".to_string()));
             let kind = disk.kind();
             map.set_value("kind", Value::String(format!("{kind:?}")))?;
 

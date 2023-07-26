@@ -18,6 +18,7 @@ mod error;
 mod functions;
 mod interface;
 mod operator;
+mod table;
 mod token;
 mod tree;
 mod value;
