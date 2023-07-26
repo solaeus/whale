@@ -8,8 +8,12 @@ mod random;
 mod system;
 mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 19] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 23] = [
     &command::Sh,
+    &command::Bash,
+    &command::Zsh,
+    &command::Fish,
+    &command::Raw,
     &dir::Create,
     &dir::Move,
     &dir::Read,
