@@ -1,7 +1,8 @@
-table (
-	("name", "age", "favorite color"), (
+table::create (
+	("name", "age", "favorite color"), 
+	(
 		("jeff", 33, "purple"),
 		("bob", 2, "yellow"),
-		("susan", 57, "black"),
+		("susan", 57, "black")
 	)
 )

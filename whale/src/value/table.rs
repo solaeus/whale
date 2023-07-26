@@ -1,3 +1,5 @@
+use std::fmt::{self, Display, Formatter};
+
 use crate::{Error, Result, Value};
 use serde::{Deserialize, Serialize};
 
@@ -62,5 +64,21 @@ impl Table {
             }
         }
         None
+    }
+}
+
+impl Display for Table {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        use comfy_table::presets::UTF8_FULL;
+        use comfy_table::Table as ComfyTable;
+
+        let mut table = ComfyTable::new();
+        table.load_preset(UTF8_FULL).set_header(&self.column_names);
+
+        for row in &self.rows {
+            table.add_row(row);
+        }
+
+        write!(f, "{table}")
     }
 }

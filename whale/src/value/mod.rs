@@ -235,19 +235,7 @@ impl Display for Value {
             }
             Value::Empty => write!(f, "()"),
             Value::Map(map) => write!(f, "{}", map),
-            Value::Table(table) => {
-                write!(f, "---\n")?;
-                for name in table.column_names() {
-                    write!(f, "| {name} |")?;
-                }
-                for row in table.rows() {
-                    write!(f, "\n")?;
-                    for column in row {
-                        write!(f, "| {column} |")?;
-                    }
-                }
-                write!(f, "\n---")
-            }
+            Value::Table(table) => table.fmt(f),
         }
     }
 }

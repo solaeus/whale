@@ -1,4 +1,4 @@
-table (
+table::create (
 	("name", "age"),
 	(
 		(random::string, random::integer(0, 100)),
@@ -101,6 +101,6 @@ table (
 		(random::string, random::integer(0, 100)),
 		(random::string, random::integer(0, 100)),
 		(random::string, random::integer(0, 100)),
-		(random::string, random::integer(0, 100)),
+		(random::string, random::integer(0, 100))
 	)
 )
