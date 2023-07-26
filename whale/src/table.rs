@@ -27,4 +27,32 @@ impl Table {
 
         Ok(())
     }
+
+    pub fn get(&self, index: usize) -> Option<&Vec<Value>> {
+        self.rows.get(index)
+    }
+
+    pub fn get_where(&self, column_name: &str, expected: &Value) -> Option<&Vec<Value>> {
+        let column_index = self.get_column_index(column_name)?;
+
+        for row in &self.rows {
+            let actual = row.get(column_index).unwrap();
+
+            if actual == expected {
+                return Some(row);
+            }
+        }
+
+        None
+    }
+
+    pub fn get_column_index(&self, column_name: &str) -> Option<usize> {
+        let column_names = &self.column_names;
+        for (i, column) in column_names.into_iter().enumerate() {
+            if column == column_name {
+                return Some(i);
+            }
+        }
+        None
+    }
 }
