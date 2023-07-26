@@ -10,16 +10,16 @@ pub use crate::{
     operator::Operator,
     token::PartialToken,
     tree::Node,
-    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE},
-    variable_map::VariableMap,
+    value::{
+        table::Table, value_type::ValueType, variable_map::VariableMap, EmptyType, FloatType,
+        IntType, TupleType, Value, EMPTY_VALUE,
+    },
 };
 
 mod error;
 mod functions;
 mod interface;
 mod operator;
-mod table;
 mod token;
 mod tree;
 mod value;
-mod variable_map;

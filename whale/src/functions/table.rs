@@ -1,8 +1,8 @@
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use crate::{BuiltinFunction, FunctionInfo, Result, Table, Value};
 
-pub struct Table;
+pub struct Create;
 
-impl BuiltinFunction for Table {
+impl BuiltinFunction for Create {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "table",
@@ -18,7 +18,7 @@ impl BuiltinFunction for Table {
             .as_tuple()?
             .iter()
             .map(|value| value.as_tuple().unwrap_or_default())
-            .collect();
+            .collect::<Vec<Vec<Value>>>();
         let column_names = argument
             .pop()
             .unwrap_or_default()
@@ -26,7 +26,12 @@ impl BuiltinFunction for Table {
             .iter()
             .map(|value| value.to_string())
             .collect();
+        let mut table = Table::new(column_names);
 
-        Ok(Value::Table { column_names, rows })
+        for row in rows {
+            table.insert(row)?;
+        }
+
+        Ok(Value::Table(table))
     }
 }

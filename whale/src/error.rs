@@ -522,6 +522,10 @@ impl fmt::Display for Error {
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             FunctionFailure(message) => write!(f, "Function failure: {}", message),
             CustomMessage(message) => write!(f, "Error: {}", message),
+            WrongColumnAmount { expected, actual } => write!(
+                f,
+                "Wrong number of columns for this table. Expected {expected}, found {actual}."
+            ),
         }
     }
 }

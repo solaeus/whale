@@ -26,7 +26,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 18] = [
     &random::RandomInteger,
     &random::RandomString,
     &system::SystemCpu,
-    &table::Table,
+    &table::Create,
 ];
 
 pub trait BuiltinFunction: Sync + Send {

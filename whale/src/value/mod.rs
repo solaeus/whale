@@ -1,6 +1,6 @@
 use crate::{
     error::{Error, Result},
-    VariableMap,
+    Table, VariableMap,
 };
 
 use serde::{
@@ -12,7 +12,9 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
+pub mod table;
 pub mod value_type;
+pub mod variable_map;
 
 /// The type used to represent integers in `Value::Int`.
 pub type IntType = i64;
@@ -48,10 +50,7 @@ pub enum Value {
     /// Collection of key-value pairs.
     Map(VariableMap),
     /// Structured collection of related items.
-    Table {
-        column_names: Vec<String>,
-        rows: Vec<Vec<Value>>,
-    },
+    Table(Table),
 }
 
 impl Serialize for Value {
@@ -75,7 +74,7 @@ impl Serialize for Value {
             }
             Value::Empty => todo!(),
             Value::Map(inner) => inner.serialize(serializer),
-            Value::Table { column_names: _, rows: _ } => todo!(),
+            Value::Table(inner) => inner.serialize(serializer),
         }
     }
 }
@@ -200,7 +199,7 @@ impl Value {
     /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
     pub fn as_table(&self) -> Result<(Vec<String>, Vec<Vec<Value>>)> {
         match self {
-            Value::Table { column_names, rows } => Ok((column_names.clone(), rows.clone())),
+            Value::Table(table) => Ok((table.column_names().clone(), table.rows().clone())),
             value => Err(Error::expected_map(value.clone())),
         }
     }
@@ -236,12 +235,12 @@ impl Display for Value {
             }
             Value::Empty => write!(f, "()"),
             Value::Map(map) => write!(f, "{}", map),
-            Value::Table { column_names, rows } => {
+            Value::Table(table) => {
                 write!(f, "---\n")?;
-                for name in column_names {
+                for name in table.column_names() {
                     write!(f, "| {name} |")?;
                 }
-                for row in rows {
+                for row in table.rows() {
                     write!(f, "\n")?;
                     for column in row {
                         write!(f, "| {column} |")?;
