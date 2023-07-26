@@ -1,21 +1,19 @@
 use std::{
-    fmt::Arguments,
     fs::{copy, metadata, remove_file, OpenOptions},
-    io::{Read, Write},
+    io::{Read as StdRead, Write as StdWrite},
     path::PathBuf,
     process::Command,
 };
 
 use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
 
-pub struct FileConvert;
+pub struct Convert;
 
-impl BuiltinFunction for FileConvert {
+impl BuiltinFunction for Convert {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::convert",
             description: "Convert a file's contents to a format and set the extension.",
-            examples: &[],
         }
     }
 
@@ -45,16 +43,17 @@ impl BuiltinFunction for FileConvert {
     }
 }
 
-pub struct FileRead;
+pub struct Read;
 
-impl BuiltinFunction for FileRead {
-    const FUNCTION_INFO: crate::FunctionInfo<'static> = FunctionInfo {
-        identifier: "file::read",
-        description: "Read file contents.",
-        examples: &[],
-    };
+impl BuiltinFunction for Read {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "file::read",
+            description: "Read file contents.",
+        }
+    }
 
-    fn run(argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
         let mut contents = String::new();
 
@@ -68,16 +67,17 @@ impl BuiltinFunction for FileRead {
     }
 }
 
-pub struct FileWrite;
+pub struct Write;
 
-impl BuiltinFunction for FileWrite {
-    const FUNCTION_INFO: FunctionInfo<'static> = FunctionInfo {
-        identifier: "file::write",
-        description: "Write data to a file.",
-        examples: &[],
-    };
+impl BuiltinFunction for Write {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "file::write",
+            description: "Write data to a file.",
+        }
+    }
 
-    fn run(argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         let strings = argument.as_tuple()?;
 
         if strings.len() < 2 {
@@ -107,13 +107,14 @@ impl BuiltinFunction for FileWrite {
 pub struct FileAppend;
 
 impl BuiltinFunction for FileAppend {
-    const FUNCTION_INFO: FunctionInfo<'static> = FunctionInfo {
-        identifier: "file::append",
-        description: "Append data to a file.",
-        examples: &[],
-    };
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "file::append",
+            description: "Append data to a file.",
+        }
+    }
 
-    fn run(argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         let strings = argument.as_tuple()?;
 
         if strings.len() < 2 {
@@ -136,16 +137,17 @@ impl BuiltinFunction for FileAppend {
     }
 }
 
-pub struct FileRemove;
+pub struct Remove;
 
-impl BuiltinFunction for FileRemove {
-    const FUNCTION_INFO: FunctionInfo<'static> = FunctionInfo {
-        identifier: "file::remove",
-        description: "Remove files.",
-        examples: &[],
-    };
+impl BuiltinFunction for Remove {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "file::remove",
+            description: "Remove files.",
+        }
+    }
 
-    fn run(argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
         remove_file(path)?;
 
@@ -153,16 +155,17 @@ impl BuiltinFunction for FileRemove {
     }
 }
 
-pub struct FileMove;
+pub struct Move;
 
-impl BuiltinFunction for FileMove {
-    const FUNCTION_INFO: FunctionInfo<'static> = FunctionInfo {
-        identifier: "file::move",
-        description: "Move a file to a new location.",
-        examples: &[],
-    };
+impl BuiltinFunction for Move {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "file::move",
+            description: "Move a file to a new location.",
+        }
+    }
 
-    fn run(argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         let mut paths = argument.as_tuple()?;
 
         if paths.len() != 2 {
@@ -181,16 +184,17 @@ impl BuiltinFunction for FileMove {
     }
 }
 
-pub struct FileMetadata;
+pub struct Metadata;
 
-impl BuiltinFunction for FileMetadata {
-    const FUNCTION_INFO: FunctionInfo<'static> = FunctionInfo {
-        identifier: "file::metadata",
-        description: "Get meteadata for files.",
-        examples: &[],
-    };
+impl BuiltinFunction for Metadata {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "file::metadata",
+            description: "Get meteadata for files.",
+        }
+    }
 
-    fn run(argument: &Value) -> Result<Value> {
+    fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
         let metadata = metadata(path)?;
 
