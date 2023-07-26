@@ -1,5 +1,6 @@
 use crate::{Error, Result, Value};
 
+mod command;
 mod dir;
 mod disk;
 mod packages;
@@ -7,7 +8,8 @@ mod random;
 mod system;
 mod table;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 17] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 18] = [
+    &command::Sh,
     &dir::Create,
     &dir::Move,
     &dir::Read,
