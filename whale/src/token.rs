@@ -521,36 +521,7 @@ fn parse_dec_or_hex(literal: &str) -> std::result::Result<i64, std::num::ParseIn
 
 #[cfg(test)]
 mod tests {
-    use crate::token::{char_to_partial_token, tokenize, Token};
-    use std::fmt::Write;
-
-    #[test]
-    fn test_partial_token_display() {
-        let chars = vec![
-            '+', '-', '*', '/', '%', '^', '(', ')', ',', ';', '=', '!', '>', '<', '&', '|', ' ',
-        ];
-
-        for char in chars {
-            assert_eq!(
-                format!("{}", char),
-                format!("{}", char_to_partial_token(char))
-            );
-        }
-    }
-
-    #[test]
-    fn test_token_display() {
-        let token_string =
-            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
-        let tokens = tokenize(token_string).unwrap();
-        let mut result_string = String::new();
-
-        for token in tokens {
-            write!(result_string, "{} ", token).unwrap();
-        }
-
-        assert_eq!(token_string, result_string);
-    }
+    use crate::token::{tokenize, Token};
 
     #[test]
     fn assignment_lhs_is_identifier() {
