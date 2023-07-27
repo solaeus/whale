@@ -13,7 +13,7 @@ use serde::{
 use crate::{call_builtin_function, value::Value, Error, Result};
 
 /// A context that stores its mappings in hash maps.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq)]
 pub struct VariableMap {
     variables: BTreeMap<String, Value>,
 }
@@ -27,6 +27,10 @@ impl VariableMap {
     }
 
     pub fn call_function(&self, identifier: &str, argument: &Value) -> Result<Value> {
+        if identifier == "context" {
+            return Ok(Value::Map(self.clone()));
+        }
+
         call_builtin_function(identifier, argument)
     }
 
@@ -116,24 +120,6 @@ impl Display for VariableMap {
         table.add_row(self.variables.values());
 
         write!(f, "{table}")
-    }
-}
-
-impl PartialEq for VariableMap {
-    fn eq(&self, other: &Self) -> bool {
-        if self.variables.len() != other.variables.len() {
-            return false;
-        }
-
-        for variable in &self.variables {
-            for other in &other.variables {
-                if variable != other {
-                    return false;
-                }
-            }
-        }
-
-        true
     }
 }
 

@@ -8,6 +8,7 @@ use serde::{
     Deserialize, Serialize, Serializer,
 };
 use std::{
+    cmp::Ordering,
     convert::TryFrom,
     fmt::{self, Display, Formatter},
 };
@@ -36,6 +37,37 @@ pub enum Value {
     Map(VariableMap),
     /// Structured collection of related items.
     Table(Table),
+}
+
+impl Eq for Value {}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Value {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Value::String(left), Value::String(right)) => left.cmp(right),
+            (Value::String(_), _) => Ordering::Greater,
+            (Value::Int(left), Value::Int(right)) => left.cmp(right),
+            (Value::Int(_), _) => Ordering::Greater,
+            (Value::Boolean(left), Value::Boolean(right)) => left.cmp(right),
+            (Value::Boolean(_), _) => Ordering::Greater,
+            (Value::Float(left), Value::Float(right)) => left.total_cmp(right),
+            (Value::Float(_), _) => Ordering::Greater,
+            (Value::List(left), Value::List(right)) => left.cmp(right),
+            (Value::List(_), _) => Ordering::Greater,
+            (Value::Map(left), Value::Map(right)) => left.cmp(right),
+            (Value::Map(_), _) => Ordering::Greater,
+            (Value::Table(left), Value::Table(right)) => left.cmp(right),
+            (Value::Table(_), _) => Ordering::Greater,
+            (Value::Empty, Value::Empty) => Ordering::Equal,
+            (Value::Empty, _) => Ordering::Less,
+        }
+    }
 }
 
 impl Serialize for Value {

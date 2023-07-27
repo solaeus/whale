@@ -7,6 +7,7 @@ mod file;
 mod map;
 mod packages;
 mod random;
+mod sort;
 mod system;
 mod table;
 mod wait;
@@ -16,7 +17,7 @@ mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 38] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -44,6 +45,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 38] = [
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,
+    &sort::Sort,
     &system::SystemCpu,
     &system::SystemInfo,
     &table::Create,

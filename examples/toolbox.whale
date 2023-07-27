@@ -6,6 +6,7 @@ packages::rpm_repositories (
 packages::install (
 	"bat",
 	"egl-wayland",
+	"fd-find",
 	"fish",
 	"fzf",
 	"lsd",

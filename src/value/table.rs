@@ -1,9 +1,31 @@
-use std::fmt::{self, Display, Formatter};
+use std::{
+    cmp::Ordering,
+    fmt::{self, Display, Formatter},
+};
 
-use crate::{Error, Result, Value, VariableMap};
+use crate::{Error, Result, Value};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+impl Eq for Table {}
+impl PartialOrd for Table {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.column_names.partial_cmp(&other.column_names)
+    }
+}
+
+impl Ord for Table {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.column_names.cmp(&other.column_names)
+    }
+}
+
+impl PartialEq for Table {
+    fn eq(&self, other: &Self) -> bool {
+        self.column_names == other.column_names
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Table {
     column_names: Vec<String>,
     rows: Vec<Vec<Value>>,
@@ -23,6 +45,10 @@ impl Table {
 
     pub fn rows(&self) -> &Vec<Vec<Value>> {
         &self.rows
+    }
+
+    pub fn sort(&mut self) {
+        self.rows.sort();
     }
 
     pub fn insert(&mut self, row: Vec<Value>) -> Result<()> {
