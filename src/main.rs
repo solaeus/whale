@@ -139,8 +139,8 @@ fn setup_reedline() -> Reedline {
         ]),
     );
     keybindings.add_binding(
-        KeyModifiers::NONE,
-        KeyCode::BackTab,
+        KeyModifiers::SHIFT,
+        KeyCode::Tab,
         ReedlineEvent::UntilFound(vec![
             ReedlineEvent::Menu("completion_menu".to_string()),
             ReedlineEvent::MenuPrevious,

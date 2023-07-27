@@ -238,6 +238,12 @@ impl From<trash::Error> for Error {
     }
 }
 
+impl From<sys_info::Error> for Error {
+    fn from(value: sys_info::Error) -> Self {
+        Error::FunctionFailure(value.to_string())
+    }
+}
+
 impl Error {
     pub(crate) fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
         Error::WrongOperatorArgumentAmount { actual, expected }

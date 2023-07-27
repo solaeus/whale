@@ -14,7 +14,7 @@ mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 34] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 35] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -42,6 +42,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 34] = [
     &random::RandomInteger,
     &random::RandomString,
     &system::SystemCpu,
+    &system::SystemInfo,
     &table::Create,
     &table::Find,
     &table::Insert,

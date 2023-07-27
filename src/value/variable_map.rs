@@ -20,6 +20,14 @@ pub struct VariableMap {
 }
 
 impl VariableMap {
+    /// Creates a new instace.
+    pub fn new(parent_name: Option<String>) -> Self {
+        VariableMap {
+            parent_name,
+            variables: BTreeMap::new(),
+        }
+    }
+
     pub fn call_function(&self, identifier: &str, argument: &Value) -> Result<Value> {
         call_builtin_function(identifier, argument)
     }
@@ -61,14 +69,6 @@ impl VariableMap {
         self.variables.len()
     }
 
-    /// Creates a new instace.
-    pub fn new(parent_name: Option<String>) -> Self {
-        VariableMap {
-            parent_name,
-            variables: BTreeMap::new(),
-        }
-    }
-
     pub fn set_value(&mut self, identifier: &str, value: Value) -> Result<()> {
         let split = identifier.split_once(".");
         let value = if let Ok(result) = self.call_function(identifier, &value) {
@@ -108,15 +108,16 @@ impl VariableMap {
 
 impl Display for VariableMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (key, value) in &self.variables {
-            if let Some(parent) = &self.parent_name {
-                write!(f, "{parent}.{key} = {value}\n")?;
-            } else {
-                write!(f, "{key} = {value}\n")?;
-            }
-        }
+        use comfy_table::presets::UTF8_FULL;
+        use comfy_table::Table as ComfyTable;
 
-        write!(f, "")
+        let mut table = ComfyTable::new();
+        table.load_preset(UTF8_FULL);
+
+        table.set_header(self.variables.keys());
+        table.add_row(self.variables.values());
+
+        write!(f, "{table}")
     }
 }
 
