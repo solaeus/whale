@@ -56,3 +56,28 @@ impl BuiltinFunction for Insert {
         Ok(Value::Table(table))
     }
 }
+
+pub struct Find;
+
+impl BuiltinFunction for Find {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "table::find",
+            description: "Search for a row based on a predicate.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let mut argument = argument.as_tuple()?;
+        let expected = argument.pop().unwrap();
+        let column_name = argument.pop().unwrap().as_string()?;
+        let table = argument.pop().unwrap().as_table()?;
+        let find = table.get_where(&column_name, &expected);
+
+        if let Some(row) = find {
+            Ok(Value::Tuple(row.clone()))
+        } else {
+            Ok(Value::Empty)
+        }
+    }
+}

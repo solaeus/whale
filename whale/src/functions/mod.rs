@@ -10,7 +10,7 @@ mod system;
 mod table;
 mod whale;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 31] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 32] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -39,6 +39,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 31] = [
     &random::RandomString,
     &system::SystemCpu,
     &table::Create,
+    &table::Find,
     &table::Insert,
     &whale::Run,
     &whale::Async,

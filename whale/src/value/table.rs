@@ -45,6 +45,7 @@ impl Table {
     pub fn get_where(&self, column_name: &str, expected: &Value) -> Option<&Vec<Value>> {
         let column_index = self.get_column_index(column_name)?;
 
+        println!("hi");
         for row in &self.rows {
             let actual = row.get(column_index).unwrap();
 

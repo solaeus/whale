@@ -200,7 +200,7 @@ impl Value {
     pub fn as_table(&self) -> Result<Table> {
         match self {
             Value::Table(table) => Ok(table.clone()),
-            value => Err(Error::expected_map(value.clone())),
+            value => Err(Error::expected_table(value.clone())),
         }
     }
 
