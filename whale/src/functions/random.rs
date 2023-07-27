@@ -21,7 +21,7 @@ impl BuiltinFunction for RandomInteger {
 
                 Ok(Value::Int(integer))
             }
-            Value::Tuple(min_max) => {
+            Value::List(min_max) => {
                 if min_max.len() != 2 {
                     return Err(Error::WrongFunctionArgumentAmount {
                         expected: 2,

@@ -10,10 +10,7 @@ pub use crate::{
     operator::Operator,
     token::PartialToken,
     tree::Node,
-    value::{
-        table::Table, value_type::ValueType, variable_map::VariableMap, EmptyType, FloatType,
-        IntType, TupleType, Value, EMPTY_VALUE,
-    },
+    value::{table::Table, value_type::ValueType, variable_map::VariableMap, Value},
 };
 
 mod error;

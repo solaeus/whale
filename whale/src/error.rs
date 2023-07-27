@@ -553,7 +553,7 @@ mod tests {
             Error::expected_boolean(Value::Empty)
         );
         assert_eq!(
-            Error::expected_type(&Value::Tuple(vec![]), Value::Empty),
+            Error::expected_type(&Value::List(vec![]), Value::Empty),
             Error::expected_tuple(Value::Empty)
         );
         assert_eq!(

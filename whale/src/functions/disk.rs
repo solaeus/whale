@@ -92,7 +92,7 @@ impl BuiltinFunction for Partition {
         if range.len() != 2 {
             return Err(crate::Error::ExpectedFixedLenTuple {
                 expected_len: 2,
-                actual: Value::Tuple(range),
+                actual: Value::List(range),
             });
         }
 

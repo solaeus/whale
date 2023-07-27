@@ -232,7 +232,7 @@ fn test_n_ary_functions() {
         .set_function(
             "count".into(),
             Function::new(|arguments| match arguments {
-                Value::Tuple(tuple) => Ok(Value::from(tuple.len() as IntType)),
+                Value::List(tuple) => Ok(Value::from(tuple.len() as IntType)),
                 Value::Empty => Ok(Value::from(0)),
                 _ => Ok(Value::from(1)),
             }),
@@ -403,7 +403,7 @@ fn test_builtin_functions() {
         eval("contains(1, 2, 3)"),
         Err(EvalexprError::expected_fixed_len_tuple(
             2,
-            Value::Tuple(vec![Value::Int(1), Value::Int(2), Value::Int(3)])
+            Value::List(vec![Value::Int(1), Value::Int(2), Value::Int(3)])
         ))
     );
     assert_eq!(
@@ -425,7 +425,7 @@ fn test_builtin_functions() {
     assert_eq!(
         eval("contains((\"foo\", \"bar\"), (\"buzz\", \"bazz\"))"),
         Err(EvalexprError::type_error(
-            Value::Tuple(vec![
+            Value::List(vec![
                 Value::String("buzz".into()),
                 Value::String("bazz".into())
             ]),
@@ -442,7 +442,7 @@ fn test_builtin_functions() {
         eval("contains_any(1, 2, 3)"),
         Err(EvalexprError::expected_fixed_len_tuple(
             2,
-            Value::Tuple(vec![Value::Int(1), Value::Int(2), Value::Int(3)])
+            Value::List(vec![Value::Int(1), Value::Int(2), Value::Int(3)])
         ))
     );
     assert_eq!(
@@ -476,7 +476,7 @@ fn test_builtin_functions() {
     assert_eq!(
         eval("contains_any((\"foo\", \"bar\"), (\"buzz\", (1, 2, 3)))"),
         Err(EvalexprError::type_error(
-            Value::Tuple(vec![Value::Int(1), Value::Int(2), Value::Int(3)]),
+            Value::List(vec![Value::Int(1), Value::Int(2), Value::Int(3)]),
             vec![
                 ValueType::String,
                 ValueType::Int,
@@ -836,7 +836,7 @@ fn test_shortcut_functions() {
     assert_eq!(
         eval_empty("(,)"),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+            actual: Value::List(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
@@ -848,7 +848,7 @@ fn test_shortcut_functions() {
     assert_eq!(
         eval_empty_with_context("(,)", &context),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+            actual: Value::List(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
@@ -866,7 +866,7 @@ fn test_shortcut_functions() {
     assert_eq!(
         eval_empty_with_context_mut("(,)", &mut context),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+            actual: Value::List(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
@@ -1214,7 +1214,7 @@ fn test_shortcut_functions() {
     assert_eq!(
         build_operator_tree("(,)").unwrap().eval_empty(),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+            actual: Value::List(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
@@ -1238,7 +1238,7 @@ fn test_shortcut_functions() {
             .unwrap()
             .eval_empty_with_context(&context),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+            actual: Value::List(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
@@ -1264,7 +1264,7 @@ fn test_shortcut_functions() {
             .unwrap()
             .eval_empty_with_context_mut(&mut context),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+            actual: Value::List(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
@@ -1711,10 +1711,10 @@ fn test_error_constructors() {
         })
     );
     assert_eq!(
-        Value::Tuple(vec![Value::Int(4), Value::Int(5)]).as_fixed_len_tuple(3),
+        Value::List(vec![Value::Int(4), Value::Int(5)]).as_fixed_len_tuple(3),
         Err(EvalexprError::ExpectedFixedLenTuple {
             expected_len: 3,
-            actual: Value::Tuple(vec![Value::Int(4), Value::Int(5)])
+            actual: Value::List(vec![Value::Int(4), Value::Int(5)])
         })
     );
     assert_eq!(
@@ -1818,7 +1818,7 @@ fn test_value_type() {
     assert_eq!(ValueType::from(&Value::Float(0.0)), ValueType::Float);
     assert_eq!(ValueType::from(&Value::Int(0)), ValueType::Int);
     assert_eq!(ValueType::from(&Value::Boolean(true)), ValueType::Boolean);
-    assert_eq!(ValueType::from(&Value::Tuple(Vec::new())), ValueType::Tuple);
+    assert_eq!(ValueType::from(&Value::List(Vec::new())), ValueType::Tuple);
     assert_eq!(ValueType::from(&Value::Empty), ValueType::Empty);
 
     assert_eq!(
@@ -1832,7 +1832,7 @@ fn test_value_type() {
         ValueType::Boolean
     );
     assert_eq!(
-        ValueType::from(&mut Value::Tuple(Vec::new())),
+        ValueType::from(&mut Value::List(Vec::new())),
         ValueType::Tuple
     );
     assert_eq!(ValueType::from(&mut Value::Empty), ValueType::Empty);
@@ -1841,14 +1841,14 @@ fn test_value_type() {
     assert!(Value::Float(0.0).is_number());
     assert!(Value::Int(0).is_number());
     assert!(!Value::Boolean(true).is_number());
-    assert!(!Value::Tuple(Vec::new()).is_number());
+    assert!(!Value::List(Vec::new()).is_number());
     assert!(!Value::Empty.is_number());
 
     assert!(!Value::String(String::new()).is_empty());
     assert!(!Value::Float(0.0).is_empty());
     assert!(!Value::Int(0).is_empty());
     assert!(!Value::Boolean(true).is_empty());
-    assert!(!Value::Tuple(Vec::new()).is_empty());
+    assert!(!Value::List(Vec::new()).is_empty());
     assert!(Value::Empty.is_empty());
 
     assert_eq!(
@@ -1871,9 +1871,9 @@ fn test_value_type() {
         })
     );
     assert_eq!(
-        Value::Tuple(Vec::new()).as_float(),
+        Value::List(Vec::new()).as_float(),
         Err(EvalexprError::ExpectedFloat {
-            actual: Value::Tuple(Vec::new())
+            actual: Value::List(Vec::new())
         })
     );
     assert_eq!(
@@ -1907,7 +1907,7 @@ fn test_value_type() {
             actual: Value::Boolean(true)
         })
     );
-    assert_eq!(Value::Tuple(Vec::new()).as_tuple(), Ok(Vec::new()));
+    assert_eq!(Value::List(Vec::new()).as_tuple(), Ok(Vec::new()));
     assert_eq!(
         Value::Empty.as_tuple(),
         Err(EvalexprError::ExpectedTuple {
@@ -1940,7 +1940,7 @@ fn test_value_type() {
         })
     );
     assert_eq!(
-        Value::Tuple(Vec::new()).as_fixed_len_tuple(0),
+        Value::List(Vec::new()).as_fixed_len_tuple(0),
         Ok(Vec::new())
     );
     assert_eq!(
@@ -1975,9 +1975,9 @@ fn test_value_type() {
         })
     );
     assert_eq!(
-        Value::Tuple(Vec::new()).as_empty(),
+        Value::List(Vec::new()).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::Tuple(Vec::new())
+            actual: Value::List(Vec::new())
         })
     );
     assert_eq!(Value::Empty.as_empty(), Ok(()));
@@ -2151,7 +2151,7 @@ fn test_try_from() {
         })
     );
 
-    let value = Value::Tuple(vec![Value::Int(1), Value::String("abc".to_string())]);
+    let value = Value::List(vec![Value::Int(1), Value::String("abc".to_string())]);
     assert_eq!(
         String::try_from(value.clone()),
         Err(EvalexprError::ExpectedString {

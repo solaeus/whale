@@ -1,8 +1,4 @@
-use crate::{
-    token::Token,
-    value::{TupleType, EMPTY_VALUE},
-    EmptyType, FloatType, IntType, VariableMap,
-};
+use crate::{token::Token, VariableMap};
 
 use crate::{
     error::{Error, Result},
@@ -362,7 +358,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a float with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float_with_context(&self, context: &VariableMap) -> Result<FloatType> {
+    pub fn eval_float_with_context(&self, context: &VariableMap) -> Result<f64> {
         match self.eval_with_context(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(Error::expected_float(value)),
@@ -373,7 +369,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an integer with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int_with_context(&self, context: &VariableMap) -> Result<IntType> {
+    pub fn eval_int_with_context(&self, context: &VariableMap) -> Result<i64> {
         match self.eval_with_context(context) {
             Ok(Value::Int(int)) => Ok(int),
             Ok(value) => Err(Error::expected_int(value)),
@@ -385,9 +381,9 @@ impl Node {
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_number_with_context(&self, context: &VariableMap) -> Result<FloatType> {
+    pub fn eval_number_with_context(&self, context: &VariableMap) -> Result<f64> {
         match self.eval_with_context(context) {
-            Ok(Value::Int(int)) => Ok(int as FloatType),
+            Ok(Value::Int(int)) => Ok(int as f64),
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(Error::expected_number(value)),
             Err(error) => Err(error),
@@ -408,9 +404,9 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a tuple with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple_with_context(&self, context: &VariableMap) -> Result<TupleType> {
+    pub fn eval_tuple_with_context(&self, context: &VariableMap) -> Result<Vec<Value>> {
         match self.eval_with_context(context) {
-            Ok(Value::Tuple(tuple)) => Ok(tuple),
+            Ok(Value::List(tuple)) => Ok(tuple),
             Ok(value) => Err(Error::expected_tuple(value)),
             Err(error) => Err(error),
         }
@@ -419,9 +415,9 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an empty value with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_empty_with_context(&self, context: &VariableMap) -> Result<EmptyType> {
+    pub fn eval_empty_with_context(&self, context: &VariableMap) -> Result<()> {
         match self.eval_with_context(context) {
-            Ok(Value::Empty) => Ok(EMPTY_VALUE),
+            Ok(Value::Empty) => Ok(()),
             Ok(value) => Err(Error::expected_empty(value)),
             Err(error) => Err(error),
         }
@@ -441,7 +437,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a float with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float_with_context_mut(&self, context: &mut VariableMap) -> Result<FloatType> {
+    pub fn eval_float_with_context_mut(&self, context: &mut VariableMap) -> Result<f64> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(Error::expected_float(value)),
@@ -452,7 +448,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an integer with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int_with_context_mut(&self, context: &mut VariableMap) -> Result<IntType> {
+    pub fn eval_int_with_context_mut(&self, context: &mut VariableMap) -> Result<i64> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Int(int)) => Ok(int),
             Ok(value) => Err(Error::expected_int(value)),
@@ -464,9 +460,9 @@ impl Node {
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_number_with_context_mut(&self, context: &mut VariableMap) -> Result<FloatType> {
+    pub fn eval_number_with_context_mut(&self, context: &mut VariableMap) -> Result<f64> {
         match self.eval_with_context_mut(context) {
-            Ok(Value::Int(int)) => Ok(int as FloatType),
+            Ok(Value::Int(int)) => Ok(int as f64),
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(Error::expected_number(value)),
             Err(error) => Err(error),
@@ -487,9 +483,9 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a tuple with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple_with_context_mut(&self, context: &mut VariableMap) -> Result<TupleType> {
+    pub fn eval_tuple_with_context_mut(&self, context: &mut VariableMap) -> Result<Vec<Value>> {
         match self.eval_with_context_mut(context) {
-            Ok(Value::Tuple(tuple)) => Ok(tuple),
+            Ok(Value::List(tuple)) => Ok(tuple),
             Ok(value) => Err(Error::expected_tuple(value)),
             Err(error) => Err(error),
         }
@@ -498,9 +494,9 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an empty value with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_empty_with_context_mut(&self, context: &mut VariableMap) -> Result<EmptyType> {
+    pub fn eval_empty_with_context_mut(&self, context: &mut VariableMap) -> Result<()> {
         match self.eval_with_context_mut(context) {
-            Ok(Value::Empty) => Ok(EMPTY_VALUE),
+            Ok(Value::Empty) => Ok(()),
             Ok(value) => Err(Error::expected_empty(value)),
             Err(error) => Err(error),
         }
@@ -516,14 +512,14 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float(&self) -> Result<FloatType> {
+    pub fn eval_float(&self) -> Result<f64> {
         self.eval_float_with_context_mut(&mut VariableMap::new(None))
     }
 
     /// Evaluates the operator tree rooted at this node into an integer.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int(&self) -> Result<IntType> {
+    pub fn eval_int(&self) -> Result<i64> {
         self.eval_int_with_context_mut(&mut VariableMap::new(None))
     }
 
@@ -531,7 +527,7 @@ impl Node {
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_number(&self) -> Result<FloatType> {
+    pub fn eval_number(&self) -> Result<f64> {
         self.eval_number_with_context_mut(&mut VariableMap::new(None))
     }
 
@@ -545,14 +541,14 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a tuple.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple(&self) -> Result<TupleType> {
+    pub fn eval_tuple(&self) -> Result<Vec<Value>> {
         self.eval_tuple_with_context_mut(&mut VariableMap::new(None))
     }
 
     /// Evaluates the operator tree rooted at this node into an empty value.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_empty(&self) -> Result<EmptyType> {
+    pub fn eval_empty(&self) -> Result<()> {
         self.eval_empty_with_context_mut(&mut VariableMap::new(None))
     }
 

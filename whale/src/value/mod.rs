@@ -16,21 +16,6 @@ pub mod table;
 pub mod value_type;
 pub mod variable_map;
 
-/// The type used to represent integers in `Value::Int`.
-pub type IntType = i64;
-
-/// The type used to represent floats in `Value::Float`.
-pub type FloatType = f64;
-
-/// The type used to represent tuples in `Value::Tuple`.
-pub type TupleType = Vec<Value>;
-
-/// The type used to represent empty values in `Value::Empty`.
-pub type EmptyType = ();
-
-/// The value of the empty type to be used in rust.
-pub const EMPTY_VALUE: () = ();
-
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
@@ -38,13 +23,13 @@ pub enum Value {
     /// A string value.
     String(String),
     /// A float value.
-    Float(FloatType),
+    Float(f64),
     /// An integer value.
-    Int(IntType),
+    Int(i64),
     /// A boolean value.
     Boolean(bool),
     /// A tuple value.
-    Tuple(TupleType),
+    List(Vec<Value>),
     /// An empty value.
     Empty,
     /// Collection of key-value pairs.
@@ -63,7 +48,7 @@ impl Serialize for Value {
             Value::Float(inner) => serializer.serialize_f64(*inner),
             Value::Int(inner) => serializer.serialize_i64(*inner),
             Value::Boolean(inner) => serializer.serialize_bool(*inner),
-            Value::Tuple(inner) => {
+            Value::List(inner) => {
                 let mut tuple = serializer.serialize_tuple(inner.len())?;
 
                 for value in inner {
@@ -112,7 +97,7 @@ impl Value {
 
     /// Returns true if `self` is a `Value::Tuple`.
     pub fn is_tuple(&self) -> bool {
-        matches!(self, Value::Tuple(_))
+        matches!(self, Value::List(_))
     }
 
     /// Returns true if `self` is a `Value::Empty`.
@@ -132,28 +117,28 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
-    pub fn as_int(&self) -> Result<IntType> {
+    /// Clones the value stored in `self` as `i64`, or returns `Err` if `self` is not a `Value::Int`.
+    pub fn as_int(&self) -> Result<i64> {
         match self {
             Value::Int(i) => Ok(*i),
             value => Err(Error::expected_int(value.clone())),
         }
     }
 
-    /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float`.
-    pub fn as_float(&self) -> Result<FloatType> {
+    /// Clones the value stored in  `self` as `f64`, or returns `Err` if `self` is not a `Value::Float`.
+    pub fn as_float(&self) -> Result<f64> {
         match self {
             Value::Float(f) => Ok(*f),
             value => Err(Error::expected_float(value.clone())),
         }
     }
 
-    /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
-    /// Note that this method silently converts `IntType` to `FloatType`, if `self` is a `Value::Int`.
-    pub fn as_number(&self) -> Result<FloatType> {
+    /// Clones the value stored in  `self` as `f64`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
+    /// Note that this method silently converts `i64` to `f64`, if `self` is a `Value::Int`.
+    pub fn as_number(&self) -> Result<f64> {
         match self {
             Value::Float(f) => Ok(*f),
-            Value::Int(i) => Ok(*i as FloatType),
+            Value::Int(i) => Ok(*i as f64),
             value => Err(Error::expected_number(value.clone())),
         }
     }
@@ -166,18 +151,18 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_tuple(&self) -> Result<TupleType> {
+    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
+    pub fn as_tuple(&self) -> Result<Vec<Value>> {
         match self {
-            Value::Tuple(tuple) => Ok(tuple.clone()),
+            Value::List(tuple) => Ok(tuple.clone()),
             value => Err(Error::expected_tuple(value.clone())),
         }
     }
 
-    /// Clones the value stored in `self` as `TupleType` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
-    pub fn as_fixed_len_tuple(&self, len: usize) -> Result<TupleType> {
+    /// Clones the value stored in `self` as `Vec<Value>` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
+    pub fn as_fixed_len_tuple(&self, len: usize) -> Result<Vec<Value>> {
         match self {
-            Value::Tuple(tuple) => {
+            Value::List(tuple) => {
                 if tuple.len() == len {
                     Ok(tuple.clone())
                 } else {
@@ -188,7 +173,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
+    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
     pub fn as_map(&self) -> Result<VariableMap> {
         match self {
             Value::Map(map) => Ok(map.clone()),
@@ -196,7 +181,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
+    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
     pub fn as_table(&self) -> Result<Table> {
         match self {
             Value::Table(table) => Ok(table.clone()),
@@ -220,7 +205,7 @@ impl Display for Value {
             Value::Float(float) => write!(f, "{}", float),
             Value::Int(int) => write!(f, "{}", int),
             Value::Boolean(boolean) => write!(f, "{}", boolean),
-            Value::Tuple(tuple) => {
+            Value::List(tuple) => {
                 write!(f, "(")?;
                 let mut once = false;
                 for value in tuple {
@@ -252,14 +237,14 @@ impl From<&str> for Value {
     }
 }
 
-impl From<FloatType> for Value {
-    fn from(float: FloatType) -> Self {
+impl From<f64> for Value {
+    fn from(float: f64) -> Self {
         Value::Float(float)
     }
 }
 
-impl From<IntType> for Value {
-    fn from(int: IntType) -> Self {
+impl From<i64> for Value {
+    fn from(int: i64) -> Self {
         Value::Int(int)
     }
 }
@@ -270,9 +255,9 @@ impl From<bool> for Value {
     }
 }
 
-impl From<TupleType> for Value {
-    fn from(tuple: TupleType) -> Self {
-        Value::Tuple(tuple)
+impl From<Vec<Value>> for Value {
+    fn from(tuple: Vec<Value>) -> Self {
+        Value::List(tuple)
     }
 }
 
@@ -300,7 +285,7 @@ impl TryFrom<Value> for String {
     }
 }
 
-impl TryFrom<Value> for FloatType {
+impl TryFrom<Value> for f64 {
     type Error = Error;
 
     fn try_from(value: Value) -> std::result::Result<Self, Self::Error> {
@@ -312,7 +297,7 @@ impl TryFrom<Value> for FloatType {
     }
 }
 
-impl TryFrom<Value> for IntType {
+impl TryFrom<Value> for i64 {
     type Error = Error;
 
     fn try_from(value: Value) -> std::result::Result<Self, Self::Error> {
@@ -336,11 +321,11 @@ impl TryFrom<Value> for bool {
     }
 }
 
-impl TryFrom<Value> for TupleType {
+impl TryFrom<Value> for Vec<Value> {
     type Error = Error;
 
     fn try_from(value: Value) -> std::result::Result<Self, Self::Error> {
-        if let Value::Tuple(value) = value {
+        if let Value::List(value) = value {
             Ok(value)
         } else {
             Err(Error::ExpectedTuple { actual: value })
@@ -362,7 +347,7 @@ impl TryFrom<Value> for () {
 
 #[cfg(test)]
 mod tests {
-    use crate::value::{TupleType, Value};
+    use crate::value::Value;
 
     #[test]
     fn test_value_conversions() {
@@ -373,10 +358,7 @@ mod tests {
         assert_eq!(Value::from(3).as_int(), Ok(3));
         assert_eq!(Value::from(3.3).as_float(), Ok(3.3));
         assert_eq!(Value::from(true).as_boolean(), Ok(true));
-        assert_eq!(
-            Value::from(TupleType::new()).as_tuple(),
-            Ok(TupleType::new())
-        );
+        assert_eq!(Value::from(Vec::new()).as_tuple(), Ok(Vec::new()));
     }
 
     #[test]
@@ -385,6 +367,6 @@ mod tests {
         assert!(Value::from(3).is_int());
         assert!(Value::from(3.3).is_float());
         assert!(Value::from(true).is_boolean());
-        assert!(Value::from(TupleType::new()).is_tuple());
+        assert!(Value::from(Vec::new()).is_tuple());
     }
 }

@@ -419,7 +419,7 @@ impl Operator {
             }
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => Err(Error::ContextNotMutable),
-            Tuple => Ok(Value::Tuple(arguments.into())),
+            Tuple => Ok(Value::List(arguments.into())),
             Chain => {
                 if arguments.is_empty() {
                     return Err(Error::wrong_operator_argument_amount(0, 1));

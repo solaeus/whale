@@ -75,7 +75,7 @@ impl BuiltinFunction for Find {
         let find = table.get_where(&column_name, &expected);
 
         if let Some(row) = find {
-            Ok(Value::Tuple(row.clone()))
+            Ok(Value::List(row.clone()))
         } else {
             Ok(Value::Empty)
         }

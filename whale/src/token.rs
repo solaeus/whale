@@ -1,9 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use crate::{
-    error::{Error, Result},
-    value::{FloatType, IntType},
-};
+use crate::error::{Error, Result};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Token {
@@ -47,8 +44,8 @@ pub enum Token {
 
     // Values, Variables and Functions
     Identifier(String),
-    Float(FloatType),
-    Int(IntType),
+    Float(f64),
+    Int(i64),
     Boolean(bool),
     String(String),
 }
@@ -348,7 +345,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> Result<Vec<Token>> {
                     cutoff = 1;
                     if let Ok(number) = parse_dec_or_hex(&literal) {
                         Some(Token::Int(number))
-                    } else if let Ok(number) = literal.parse::<FloatType>() {
+                    } else if let Ok(number) = literal.parse::<f64>() {
                         Some(Token::Float(number))
                     } else if let Ok(boolean) = literal.parse::<bool>() {
                         Some(Token::Boolean(boolean))
@@ -363,7 +360,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> Result<Vec<Token>> {
                                     || second == PartialToken::Plus =>
                             {
                                 if let Ok(number) =
-                                    format!("{}{}{}", literal, second, third).parse::<FloatType>()
+                                    format!("{}{}{}", literal, second, third).parse::<f64>()
                                 {
                                     cutoff = 3;
                                     Some(Token::Float(number))
@@ -514,11 +511,11 @@ pub(crate) fn tokenize(string: &str) -> Result<Vec<Token>> {
     partial_tokens_to_tokens(&str_to_partial_tokens(string)?)
 }
 
-fn parse_dec_or_hex(literal: &str) -> std::result::Result<IntType, std::num::ParseIntError> {
+fn parse_dec_or_hex(literal: &str) -> std::result::Result<i64, std::num::ParseIntError> {
     if let Some(literal) = literal.strip_prefix("0x") {
-        IntType::from_str_radix(literal, 16)
+        i64::from_str_radix(literal, 16)
     } else {
-        IntType::from_str_radix(literal, 10)
+        i64::from_str_radix(literal, 10)
     }
 }
 

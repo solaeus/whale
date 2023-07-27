@@ -610,18 +610,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2da6da31387c7e4ef160ffab6d5e7f00c42626fe39aea70a7b0f1773f7dd6c1b"
 
 [[package]]
-name = "cli"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "nu-ansi-term",
- "rayon",
- "reedline",
- "whale",
-]
-
-[[package]]
 name = "clipboard-win"
 version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2920,7 +2908,7 @@ dependencies = [
 
 [[package]]
 name = "whale"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "comfy-table",
@@ -2934,6 +2922,18 @@ dependencies = [
  "toml",
  "toml_edit",
  "trash",
+]
+
+[[package]]
+name = "whale_cli"
+version = "0.2.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "nu-ansi-term",
+ "rayon",
+ "reedline",
+ "whale",
 ]
 
 [[package]]

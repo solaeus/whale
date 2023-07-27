@@ -28,7 +28,7 @@ impl BuiltinFunction for Run {
                 results.push(value);
             }
 
-            Ok(Value::Tuple(results))
+            Ok(Value::List(results))
         } else {
             Err(Error::ExpectedString {
                 actual: argument.clone(),

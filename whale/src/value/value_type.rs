@@ -20,7 +20,7 @@ impl From<&Value> for ValueType {
             Value::Float(_) => ValueType::Float,
             Value::Int(_) => ValueType::Int,
             Value::Boolean(_) => ValueType::Boolean,
-            Value::Tuple(_) => ValueType::Tuple,
+            Value::List(_) => ValueType::Tuple,
             Value::Empty => ValueType::Empty,
             Value::Map(_) => ValueType::Map,
             Value::Table { .. } => ValueType::Table,
