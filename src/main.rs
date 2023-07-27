@@ -1,18 +1,14 @@
 //! Command line interface for the whale programming language.
-use std::{
-    fs::read_to_string,
-    ptr::slice_from_raw_parts,
-    time::{Duration, Instant},
-};
+use std::{fs::read_to_string, time::Instant};
 
 use clap::Parser;
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
-    DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Prompt, Reedline,
-    ReedlineEvent, ReedlineMenu, Signal, Suggestion,
+    DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline, ReedlineEvent,
+    ReedlineMenu, Signal, Suggestion,
 };
-use whale::{eval, eval_with_context, FunctionInfo, VariableMap};
+use whale_lib::{eval, eval_with_context, FunctionInfo, VariableMap, BUILTIN_FUNCTIONS};
 
 /// Command-line arguments to be parsed.
 #[derive(Parser, Debug)]
@@ -84,8 +80,8 @@ fn run_shell() {
 struct WhaleCompeleter;
 
 impl Completer for WhaleCompeleter {
-    fn complete(&mut self, line: &str, pos: usize) -> Vec<reedline::Suggestion> {
-        whale::BUILTIN_FUNCTIONS
+    fn complete(&mut self, line: &str, pos: usize) -> Vec<Suggestion> {
+        BUILTIN_FUNCTIONS
             .into_iter()
             .filter_map(|function| {
                 let FunctionInfo {
@@ -171,20 +167,20 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    Whale(whale::Error),
+    Whale(whale_lib::Error),
     Io(std::io::Error),
     NotYetImplemented,
 }
 
-impl From<whale::Error> for Error {
-    fn from(value: whale::Error) -> Self {
+impl From<whale_lib::Error> for Error {
+    fn from(value: whale_lib::Error) -> Self {
         Error::Whale(value)
     }
 }
 
-impl Into<whale::Error> for Error {
-    fn into(self) -> whale::Error {
-        whale::Error::CustomMessage(format!("{:?}", self))
+impl Into<whale_lib::Error> for Error {
+    fn into(self) -> whale_lib::Error {
+        whale_lib::Error::CustomMessage(format!("{:?}", self))
     }
 }
 
