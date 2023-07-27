@@ -6,6 +6,66 @@ use std::{
 use crate::{Error, Result, Value};
 use serde::{Deserialize, Serialize};
 
+impl From<Value> for Table {
+    fn from(value: Value) -> Self {
+        match value {
+            Value::String(string) => {
+                let mut table = Table::new(vec!["string".to_string()]);
+
+                table.insert(vec![Value::String(string)]).unwrap();
+
+                table
+            }
+            Value::Float(float) => {
+                let mut table = Table::new(vec!["float".to_string()]);
+
+                table.insert(vec![Value::Float(float)]).unwrap();
+
+                table
+            }
+            Value::Int(integer) => {
+                let mut table = Table::new(vec!["integer".to_string()]);
+
+                table.insert(vec![Value::Int(integer)]).unwrap();
+
+                table
+            }
+            Value::Boolean(boolean) => {
+                let mut table = Table::new(vec!["boolean".to_string()]);
+
+                table.insert(vec![Value::Boolean(boolean)]).unwrap();
+
+                table
+            }
+            Value::List(list) => {
+                let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
+
+                for (i, value) in list.into_iter().enumerate() {
+                    if let Ok(list) = value.as_list() {
+                        if i == 0 {
+                            let column_names = list
+                                .iter()
+                                .map(|value| value.as_string().unwrap())
+                                .collect::<Vec<String>>();
+
+                            table = Table::new(column_names);
+                        } else {
+                            table.insert(list).unwrap();
+                        }
+                    } else {
+                        table.insert(vec![Value::Int(i as i64), value]).unwrap();
+                    }
+                }
+
+                table
+            }
+            Value::Empty => todo!(),
+            Value::Map(_) => todo!(),
+            Value::Table(_) => todo!(),
+        }
+    }
+}
+
 impl Eq for Table {}
 impl PartialOrd for Table {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

@@ -11,28 +11,7 @@ impl BuiltinFunction for Create {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_list()?;
-        let rows = argument
-            .pop()
-            .unwrap_or_default()
-            .as_list()?
-            .iter()
-            .map(|value| value.as_list().unwrap_or_default())
-            .collect::<Vec<Vec<Value>>>();
-        let column_names = argument
-            .pop()
-            .unwrap_or_default()
-            .as_list()?
-            .iter()
-            .map(|value| value.to_string())
-            .collect();
-        let mut table = Table::new(column_names);
-
-        for row in rows {
-            table.insert(row)?;
-        }
-
-        Ok(Value::Table(table))
+        Ok(Value::Table(Table::from(argument.clone())))
     }
 }
 

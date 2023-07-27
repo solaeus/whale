@@ -1,4 +1,4 @@
 table::create (
 	("name", "age"),
-	whale::repeat("(random::string, random::integer (1, 100))", 10)
+	(random::string, random::integer (1, 100))
 )
