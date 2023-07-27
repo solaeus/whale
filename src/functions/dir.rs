@@ -113,7 +113,7 @@ impl BuiltinFunction for Move {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_tuple()?;
+        let mut argument = argument.as_list()?;
 
         if argument.len() != 2 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -124,7 +124,7 @@ impl BuiltinFunction for Move {
 
         let target_path = argument.pop().unwrap().as_string()?;
         let current_path = argument.pop().unwrap();
-        let file_list = Read.run(&current_path)?.as_tuple()?;
+        let file_list = Read.run(&current_path)?.as_list()?;
 
         for path in file_list {
             let path = PathBuf::from(path.as_string()?);

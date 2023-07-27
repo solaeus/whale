@@ -87,7 +87,7 @@ impl BuiltinFunction for Partition {
         let mut range = argument
             .get_value("range")?
             .unwrap_or(Value::Empty)
-            .as_tuple()?;
+            .as_list()?;
 
         if range.len() != 2 {
             return Err(crate::Error::ExpectedFixedLenTuple {

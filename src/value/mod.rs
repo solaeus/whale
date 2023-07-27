@@ -152,7 +152,7 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_tuple(&self) -> Result<Vec<Value>> {
+    pub fn as_list(&self) -> Result<Vec<Value>> {
         match self {
             Value::List(tuple) => Ok(tuple.clone()),
             value => Err(Error::expected_tuple(value.clone())),
@@ -358,7 +358,7 @@ mod tests {
         assert_eq!(Value::from(3).as_int(), Ok(3));
         assert_eq!(Value::from(3.3).as_float(), Ok(3.3));
         assert_eq!(Value::from(true).as_boolean(), Ok(true));
-        assert_eq!(Value::from(Vec::new()).as_tuple(), Ok(Vec::new()));
+        assert_eq!(Value::from(Vec::new()).as_list(), Ok(Vec::new()));
     }
 
     #[test]

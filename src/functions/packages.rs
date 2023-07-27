@@ -15,7 +15,7 @@ impl BuiltinFunction for CoprRepositories {
     fn run(&self, argument: &Value) -> Result<Value> {
         let repo_list_string = if let Ok(repo) = argument.as_string() {
             repo
-        } else if let Ok(repos) = argument.as_tuple() {
+        } else if let Ok(repos) = argument.as_list() {
             repos
                 .into_iter()
                 .map(|value| value.to_string() + " ")
@@ -49,7 +49,7 @@ impl BuiltinFunction for Install {
     fn run(&self, argument: &Value) -> Result<Value> {
         let package_list_string = if let Ok(package) = argument.as_string() {
             package
-        } else if let Ok(packages) = argument.as_tuple() {
+        } else if let Ok(packages) = argument.as_list() {
             packages
                 .into_iter()
                 .map(|value| value.to_string() + " ")
@@ -87,7 +87,7 @@ impl BuiltinFunction for RpmRepositories {
                 .arg(format!("sudo dnf -y config-manager --add-repo {repo}"))
                 .spawn()?
                 .wait()?;
-        } else if let Ok(repos) = argument.as_tuple() {
+        } else if let Ok(repos) = argument.as_list() {
             for repo in repos {
                 Command::new("fish")
                     .arg("-c")
@@ -118,7 +118,7 @@ impl BuiltinFunction for Uninstall {
     fn run(&self, argument: &Value) -> Result<Value> {
         let package_list_string = if let Ok(package) = argument.as_string() {
             package
-        } else if let Ok(packages) = argument.as_tuple() {
+        } else if let Ok(packages) = argument.as_list() {
             packages
                 .into_iter()
                 .map(|value| value.to_string() + " ")

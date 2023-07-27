@@ -11,18 +11,18 @@ impl BuiltinFunction for Create {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_tuple()?;
+        let mut argument = argument.as_list()?;
         let rows = argument
             .pop()
             .unwrap_or_default()
-            .as_tuple()?
+            .as_list()?
             .iter()
-            .map(|value| value.as_tuple().unwrap_or_default())
+            .map(|value| value.as_list().unwrap_or_default())
             .collect::<Vec<Vec<Value>>>();
         let column_names = argument
             .pop()
             .unwrap_or_default()
-            .as_tuple()?
+            .as_list()?
             .iter()
             .map(|value| value.to_string())
             .collect();
@@ -47,8 +47,8 @@ impl BuiltinFunction for Insert {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_tuple()?;
-        let row = argument.pop().unwrap().as_tuple()?;
+        let mut argument = argument.as_list()?;
+        let row = argument.pop().unwrap().as_list()?;
         let mut table = argument.pop().unwrap().as_table()?;
 
         table.insert(row)?;
@@ -68,7 +68,7 @@ impl BuiltinFunction for Find {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_tuple()?;
+        let mut argument = argument.as_list()?;
         let expected = argument.pop().unwrap();
         let column_name = argument.pop().unwrap().as_string()?;
         let table = argument.pop().unwrap().as_table()?;

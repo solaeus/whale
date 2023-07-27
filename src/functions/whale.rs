@@ -13,7 +13,7 @@ impl BuiltinFunction for Repeat {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_tuple()?;
+        let argument = argument.as_list()?;
         let input_string = argument[0].as_string()?;
         let count = argument[1].as_int()?;
         let mut result_list = Vec::with_capacity(count as usize);
@@ -64,7 +64,7 @@ impl BuiltinFunction for RunFile {
             let file_contents = fs::read_to_string(path)?;
 
             Ok(eval(&file_contents)?)
-        } else if let Ok(paths) = argument.as_tuple() {
+        } else if let Ok(paths) = argument.as_list() {
             let mut results = Vec::new();
 
             for path in paths {

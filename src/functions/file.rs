@@ -18,7 +18,7 @@ impl BuiltinFunction for Convert {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_tuple()?;
+        let mut argument = argument.as_list()?;
 
         if argument.len() != 3 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -78,7 +78,7 @@ impl BuiltinFunction for Write {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let strings = argument.as_tuple()?;
+        let strings = argument.as_list()?;
 
         if strings.len() < 2 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -115,7 +115,7 @@ impl BuiltinFunction for FileAppend {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let strings = argument.as_tuple()?;
+        let strings = argument.as_list()?;
 
         if strings.len() < 2 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -166,7 +166,7 @@ impl BuiltinFunction for Move {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut paths = argument.as_tuple()?;
+        let mut paths = argument.as_list()?;
 
         if paths.len() != 2 {
             return Err(Error::WrongFunctionArgumentAmount {
