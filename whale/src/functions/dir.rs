@@ -1,4 +1,4 @@
-use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
+use crate::{BuiltinFunction, Error, FunctionInfo, Result, Table, Value};
 
 use std::{fs, path::PathBuf};
 
@@ -34,23 +34,34 @@ impl BuiltinFunction for Read {
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
         let dir = fs::read_dir(path)?;
-        let mut file_list = Vec::new();
+        let mut file_table = Table::new(vec![
+            "path".to_string(),
+            "modified".to_string(),
+            "permissions".to_string(),
+        ]);
 
         for entry in dir {
             let entry = entry?;
             let file_type = entry.file_type()?;
-
             let file_name = if file_type.is_dir() {
                 let name = entry.file_name().into_string().unwrap_or_default();
+
                 format!("{name}/")
             } else {
                 entry.file_name().into_string().unwrap_or_default()
             };
+            let metadata = entry.path().metadata()?;
+            let modified = format!("{:?}", metadata.modified());
+            let permisssions = format!("{:?}", metadata.permissions());
 
-            file_list.push(Value::String(file_name));
+            file_table.insert(vec![
+                Value::String(file_name),
+                Value::String(modified),
+                Value::String(permisssions),
+            ])?;
         }
 
-        Ok(Value::Tuple(file_list))
+        Ok(Value::Table(file_table))
     }
 }
 

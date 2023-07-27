@@ -8,8 +8,9 @@ mod packages;
 mod random;
 mod system;
 mod table;
+mod whale;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 29] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 31] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -39,6 +40,8 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 29] = [
     &system::SystemCpu,
     &table::Create,
     &table::Insert,
+    &whale::Run,
+    &whale::Async,
 ];
 
 pub trait BuiltinFunction: Sync + Send {
@@ -49,23 +52,6 @@ pub trait BuiltinFunction: Sync + Send {
 pub struct FunctionInfo<'a> {
     pub identifier: &'a str,
     pub description: &'a str,
-}
-
-pub struct Help;
-
-impl BuiltinFunction for Help {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
-            identifier: "help",
-            description: "Get help using whale.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        argument.as_empty()?;
-        println!("{}", include_str!("../../README.md"));
-        Ok(Value::Empty)
-    }
 }
 
 pub fn call_builtin_function(identifier: &str, argument: &Value) -> Result<Value> {
