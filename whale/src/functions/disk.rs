@@ -2,7 +2,7 @@ use std::process::Command;
 
 use sysinfo::{DiskExt, System, SystemExt};
 
-use crate::{BuiltinFunction, FunctionInfo, Result, Value, VariableMap};
+use crate::{BuiltinFunction, FunctionInfo, Result, Table, Value, VariableMap};
 
 pub struct List;
 
@@ -20,34 +20,39 @@ impl BuiltinFunction for List {
         let mut sys = System::new_all();
         sys.refresh_all();
 
-        let mut disk_list = Vec::new();
+        let mut disk_table = Table::new(vec![
+            "name".to_string(),
+            "kind".to_string(),
+            "file system".to_string(),
+            "mount point".to_string(),
+            "total space".to_string(),
+            "available space".to_string(),
+            "is removable".to_string(),
+        ]);
 
         for disk in sys.disks() {
-            let mut map = VariableMap::new(Some("disks".to_string()));
+            let name = disk.name().to_string_lossy().to_string();
             let kind = disk.kind();
-            map.set_value("kind", Value::String(format!("{kind:?}")))?;
-
-            let name = disk.name();
-            map.set_value("name", Value::String(format!("{name:?}")))?;
-
             let file_system = String::from_utf8_lossy(disk.file_system()).to_string();
-            map.set_value("file_system", Value::String(file_system))?;
-
             let mount_point = disk.mount_point().to_str().unwrap().to_string();
-            map.set_value("mount_point", Value::String(mount_point))?;
-
             let total_space = disk.total_space() as i64;
-            map.set_value("total_space", Value::Int(total_space))?;
-
             let available_space = disk.available_space() as i64;
-            map.set_value("available_space", Value::Int(available_space))?;
+            let is_removable = disk.is_removable();
 
-            map.set_value("is_removable", Value::Boolean(disk.is_removable()))?;
+            let row = vec![
+                Value::String(name),
+                Value::String(format!("{kind:?}")),
+                Value::String(file_system),
+                Value::String(mount_point),
+                Value::Int(total_space),
+                Value::Int(available_space),
+                Value::Boolean(is_removable),
+            ];
 
-            disk_list.push(Value::Map(map));
+            disk_table.insert(row)?;
         }
 
-        Ok(Value::Tuple(disk_list))
+        Ok(Value::Table(disk_table))
     }
 }
 
