@@ -15,15 +15,13 @@ use crate::{call_builtin_function, value::Value, Error, Result};
 /// A context that stores its mappings in hash maps.
 #[derive(Clone, Debug)]
 pub struct VariableMap {
-    parent_name: Option<String>,
     variables: BTreeMap<String, Value>,
 }
 
 impl VariableMap {
     /// Creates a new instace.
-    pub fn new(parent_name: Option<String>) -> Self {
+    pub fn new() -> Self {
         VariableMap {
-            parent_name,
             variables: BTreeMap::new(),
         }
     }
@@ -53,8 +51,8 @@ impl VariableMap {
             if let Some(value) = value {
                 Ok(Some(value.clone()))
             } else {
-                self.call_function(identifier, &Value::Empty)
-                    .map(|value| Some(value))
+                let function_result = self.call_function(identifier, &Value::Empty)?;
+                Ok(Some(function_result))
             }
         }
     }
@@ -89,7 +87,7 @@ impl VariableMap {
                     })
                 }
             } else {
-                let mut new_map = VariableMap::new(Some(map_name.to_string()));
+                let mut new_map = VariableMap::new();
 
                 new_map.set_value(next_identifier, value)?;
 
@@ -182,7 +180,7 @@ impl<'de> Visitor<'de> for VariableMapVisitor {
     where
         M: MapAccess<'de>,
     {
-        let mut map = VariableMap::new(None);
+        let mut map = VariableMap::new();
 
         // While there are entries remaining in the input, add them
         // into our map.

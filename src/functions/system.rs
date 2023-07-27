@@ -15,7 +15,7 @@ impl BuiltinFunction for SystemInfo {
     fn run(&self, argument: &Value) -> crate::Result<Value> {
         argument.as_empty()?;
 
-        let mut map = VariableMap::new(Some("system::info".to_string()));
+        let mut map = VariableMap::new();
 
         map.set_value("hostname", Value::String(hostname()?))?;
 

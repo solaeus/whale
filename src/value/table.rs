@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use crate::{Error, Result, Value};
+use crate::{Error, Result, Value, VariableMap};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -45,12 +45,11 @@ impl Table {
     pub fn get_where(&self, column_name: &str, expected: &Value) -> Option<&Vec<Value>> {
         let column_index = self.get_column_index(column_name)?;
 
-        println!("hi");
         for row in &self.rows {
-            let actual = row.get(column_index).unwrap();
-
-            if actual == expected {
-                return Some(row);
+            if let Some(actual) = row.get(column_index) {
+                if actual == expected {
+                    return Some(row);
+                }
             }
         }
 

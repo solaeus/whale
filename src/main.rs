@@ -41,7 +41,7 @@ fn main() {
 }
 
 fn run_shell() {
-    let mut context = VariableMap::new(None);
+    let mut context = VariableMap::new();
     let mut line_editor = setup_reedline();
     let mut prompt = DefaultPrompt::default();
     prompt.left_prompt = DefaultPromptSegment::WorkingDirectory;

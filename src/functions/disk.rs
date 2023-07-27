@@ -70,23 +70,23 @@ impl BuiltinFunction for Partition {
         let argument = argument.as_map()?;
         let path = argument
             .get_value("path")?
-            .unwrap_or_default()
+            .unwrap_or(Value::Empty)
             .as_string()?;
         let label = argument
             .get_value("label")?
-            .unwrap_or_default()
+            .unwrap_or(Value::Empty)
             .as_string()?;
         let name = argument
             .get_value("name")?
-            .unwrap_or_default()
+            .unwrap_or(Value::Empty)
             .as_string()?;
         let filesystem = argument
             .get_value("filesystem")?
-            .unwrap_or_default()
+            .unwrap_or(Value::Empty)
             .as_string()?;
         let mut range = argument
             .get_value("range")?
-            .unwrap_or_default()
+            .unwrap_or(Value::Empty)
             .as_tuple()?;
 
         if range.len() != 2 {

@@ -341,7 +341,7 @@ impl Node {
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval(&self) -> Result<Value> {
-        self.eval_with_context_mut(&mut VariableMap::new(None))
+        self.eval_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a string with an the given context.
@@ -506,21 +506,21 @@ impl Node {
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_string(&self) -> Result<String> {
-        self.eval_string_with_context_mut(&mut VariableMap::new(None))
+        self.eval_string_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_float(&self) -> Result<f64> {
-        self.eval_float_with_context_mut(&mut VariableMap::new(None))
+        self.eval_float_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into an integer.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int(&self) -> Result<i64> {
-        self.eval_int_with_context_mut(&mut VariableMap::new(None))
+        self.eval_int_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a float.
@@ -528,28 +528,28 @@ impl Node {
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_number(&self) -> Result<f64> {
-        self.eval_number_with_context_mut(&mut VariableMap::new(None))
+        self.eval_number_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a boolean.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_boolean(&self) -> Result<bool> {
-        self.eval_boolean_with_context_mut(&mut VariableMap::new(None))
+        self.eval_boolean_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a tuple.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple(&self) -> Result<Vec<Value>> {
-        self.eval_tuple_with_context_mut(&mut VariableMap::new(None))
+        self.eval_tuple_with_context_mut(&mut VariableMap::new())
     }
 
     /// Evaluates the operator tree rooted at this node into an empty value.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_empty(&self) -> Result<()> {
-        self.eval_empty_with_context_mut(&mut VariableMap::new(None))
+        self.eval_empty_with_context_mut(&mut VariableMap::new())
     }
 
     /// Returns the children of this node as a slice.

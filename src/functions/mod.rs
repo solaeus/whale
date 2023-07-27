@@ -8,13 +8,14 @@ mod packages;
 mod random;
 mod system;
 mod table;
+mod wait;
 mod whale;
 
 /// Master list of all internal functions.
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 35] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 37] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -46,6 +47,8 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 35] = [
     &table::Create,
     &table::Find,
     &table::Insert,
+    &wait::Seconds,
+    &wait::Watch,
     &whale::Async,
     &whale::Repeat,
     &whale::Run,
