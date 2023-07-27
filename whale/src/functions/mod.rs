@@ -10,7 +10,7 @@ mod system;
 mod table;
 mod whale;
 
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 32] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 34] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -41,8 +41,10 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 32] = [
     &table::Create,
     &table::Find,
     &table::Insert,
-    &whale::Run,
     &whale::Async,
+    &whale::Repeat,
+    &whale::Run,
+    &whale::RunFile,
 ];
 
 pub trait BuiltinFunction: Sync + Send {
