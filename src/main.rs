@@ -82,7 +82,7 @@ struct WhaleCompeleter;
 impl Completer for WhaleCompeleter {
     fn complete(&mut self, line: &str, pos: usize) -> Vec<Suggestion> {
         BUILTIN_FUNCTIONS
-            .into_iter()
+            .iter()
             .filter_map(|function| {
                 let FunctionInfo {
                     identifier,

@@ -2,7 +2,7 @@ use std::process::Command;
 
 use sysinfo::{DiskExt, System, SystemExt};
 
-use crate::{BuiltinFunction, FunctionInfo, Result, Table, Value, VariableMap};
+use crate::{BuiltinFunction, FunctionInfo, Result, Table, Value};
 
 pub struct List;
 
