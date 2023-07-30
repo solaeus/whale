@@ -2,11 +2,11 @@ use std::convert::TryInto;
 
 use rand::{random, thread_rng, Rng};
 
-use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
+use crate::{Error, FunctionInfo, Macro, Result, Value};
 
 pub struct RandomInteger;
 
-impl BuiltinFunction for RandomInteger {
+impl Macro for RandomInteger {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "random::integer",
@@ -43,7 +43,7 @@ impl BuiltinFunction for RandomInteger {
 
 pub struct RandomString;
 
-impl BuiltinFunction for RandomString {
+impl Macro for RandomString {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "random::string",
@@ -85,7 +85,7 @@ impl BuiltinFunction for RandomString {
 
 pub struct RandomFloat;
 
-impl BuiltinFunction for RandomFloat {
+impl Macro for RandomFloat {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "random::float",

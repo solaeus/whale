@@ -238,6 +238,12 @@ impl From<io::Error> for Error {
     }
 }
 
+impl From<git2::Error> for Error {
+    fn from(value: git2::Error) -> Self {
+        Error::FunctionFailure(value.to_string())
+    }
+}
+
 impl From<trash::Error> for Error {
     fn from(value: trash::Error) -> Self {
         Error::FunctionFailure(value.to_string())

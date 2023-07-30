@@ -1,10 +1,10 @@
 use std::process::Command;
 
-use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
+use crate::{Error, FunctionInfo, Macro, Result, Value};
 
 pub struct CoprRepositories;
 
-impl BuiltinFunction for CoprRepositories {
+impl Macro for CoprRepositories {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "packages::copr_repositories",
@@ -13,7 +13,7 @@ impl BuiltinFunction for CoprRepositories {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let repo_list_string = if let Ok(repo) = argument.as_string() {
+        let repo_list_string = if let Ok(repo) = argument.as_string().cloned() {
             repo
         } else if let Ok(repos) = argument.as_list() {
             repos
@@ -38,7 +38,7 @@ impl BuiltinFunction for CoprRepositories {
 
 pub struct Install;
 
-impl BuiltinFunction for Install {
+impl Macro for Install {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "packages::install",
@@ -47,7 +47,7 @@ impl BuiltinFunction for Install {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let package_list_string = if let Ok(package) = argument.as_string() {
+        let package_list_string = if let Ok(package) = argument.as_string().cloned() {
             package
         } else if let Ok(packages) = argument.as_list() {
             packages
@@ -72,7 +72,7 @@ impl BuiltinFunction for Install {
 
 pub struct RpmRepositories;
 
-impl BuiltinFunction for RpmRepositories {
+impl Macro for RpmRepositories {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "packages::rpm_repositories",
@@ -107,7 +107,7 @@ impl BuiltinFunction for RpmRepositories {
 
 pub struct Uninstall;
 
-impl BuiltinFunction for Uninstall {
+impl Macro for Uninstall {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "packages::uninstall",
@@ -116,7 +116,7 @@ impl BuiltinFunction for Uninstall {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let package_list_string = if let Ok(package) = argument.as_string() {
+        let package_list_string = if let Ok(package) = argument.as_string().cloned() {
             package
         } else if let Ok(packages) = argument.as_list() {
             packages
@@ -141,7 +141,7 @@ impl BuiltinFunction for Uninstall {
 
 pub struct Upgrade;
 
-impl BuiltinFunction for Upgrade {
+impl Macro for Upgrade {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "packages::upgrade",

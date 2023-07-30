@@ -1,10 +1,12 @@
+use std::fs;
+
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use crate::{Function, FunctionInfo, Macro, Result, Value};
 
 pub struct Repeat;
 
-impl BuiltinFunction for Repeat {
+impl Macro for Repeat {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "whale::repeat",
@@ -28,9 +30,27 @@ impl BuiltinFunction for Repeat {
     }
 }
 
+pub struct Run;
+
+impl Macro for Run {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "whale::run",
+            description: "Run a whale file.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let path = argument.as_string()?;
+        let file_contents = fs::read_to_string(path)?;
+
+        Function::new(file_contents).run()
+    }
+}
+
 pub struct Async;
 
-impl BuiltinFunction for Async {
+impl Macro for Async {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "whale::async",
@@ -48,7 +68,7 @@ impl BuiltinFunction for Async {
         }
 
         functions.par_iter().for_each(|function| {
-            function.run();
+            let _ = function.run();
         });
 
         Ok(Value::Empty)
@@ -57,7 +77,7 @@ impl BuiltinFunction for Async {
 
 pub struct Pipe;
 
-impl BuiltinFunction for Pipe {
+impl Macro for Pipe {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "whale::pipe",

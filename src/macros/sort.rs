@@ -1,8 +1,8 @@
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use crate::{FunctionInfo, Macro, Result, Value};
 
 pub struct Sort;
 
-impl BuiltinFunction for Sort {
+impl Macro for Sort {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "sort",
@@ -11,10 +11,10 @@ impl BuiltinFunction for Sort {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        if let Ok(mut list) = argument.as_list() {
+        if let Ok(mut list) = argument.as_list().cloned() {
             list.sort();
 
-            Ok(Value::List(list))
+            Ok(Value::List(list.clone()))
         } else if let Ok(map) = argument.as_map() {
             Ok(Value::Map(map))
         } else if let Ok(mut table) = argument.as_table() {

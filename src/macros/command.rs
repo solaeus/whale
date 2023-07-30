@@ -1,10 +1,10 @@
 use std::process::Command;
 
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use crate::{FunctionInfo, Macro, Result, Value};
 
 pub struct Sh;
 
-impl BuiltinFunction for Sh {
+impl Macro for Sh {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "command::sh",
@@ -23,7 +23,7 @@ impl BuiltinFunction for Sh {
 
 pub struct Bash;
 
-impl BuiltinFunction for Bash {
+impl Macro for Bash {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "command::bash",
@@ -45,7 +45,7 @@ impl BuiltinFunction for Bash {
 }
 pub struct Fish;
 
-impl BuiltinFunction for Fish {
+impl Macro for Fish {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "command::fish",
@@ -68,7 +68,7 @@ impl BuiltinFunction for Fish {
 
 pub struct Zsh;
 
-impl BuiltinFunction for Zsh {
+impl Macro for Zsh {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "command::zsh",
@@ -91,7 +91,7 @@ impl BuiltinFunction for Zsh {
 
 pub struct Raw;
 
-impl BuiltinFunction for Raw {
+impl Macro for Raw {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "command::raw",

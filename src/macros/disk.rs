@@ -2,11 +2,11 @@ use std::process::Command;
 
 use sysinfo::{DiskExt, System, SystemExt};
 
-use crate::{BuiltinFunction, FunctionInfo, Result, Table, Value};
+use crate::{FunctionInfo, Macro, Result, Table, Value};
 
 pub struct List;
 
-impl BuiltinFunction for List {
+impl Macro for List {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "disk::list",
@@ -58,7 +58,7 @@ impl BuiltinFunction for List {
 
 pub struct Partition;
 
-impl BuiltinFunction for Partition {
+impl Macro for Partition {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "disk::partition",
@@ -71,33 +71,38 @@ impl BuiltinFunction for Partition {
         let path = argument
             .get_value("path")?
             .unwrap_or(Value::Empty)
-            .as_string()?;
+            .as_string()?
+            .clone();
         let label = argument
             .get_value("label")?
             .unwrap_or(Value::Empty)
-            .as_string()?;
+            .as_string()?
+            .clone();
         let name = argument
             .get_value("name")?
             .unwrap_or(Value::Empty)
-            .as_string()?;
+            .as_string()?
+            .clone();
         let filesystem = argument
             .get_value("filesystem")?
             .unwrap_or(Value::Empty)
-            .as_string()?;
-        let mut range = argument
+            .as_string()?
+            .clone();
+        let range = argument
             .get_value("range")?
             .unwrap_or(Value::Empty)
-            .as_list()?;
+            .as_list()?
+            .clone();
 
         if range.len() != 2 {
             return Err(crate::Error::ExpectedFixedLenTuple {
                 expected_len: 2,
-                actual: Value::List(range),
+                actual: Value::List(range.clone()),
             });
         }
 
-        let range_end = range.pop().unwrap_or_default().as_string()?;
-        let range_start = range.pop().unwrap_or_default().as_string()?;
+        let range_start = range[0].as_string()?;
+        let range_end = range[1].as_string()?;
 
         let script = format!(
             "sudo parted {path} mklabel {label} mkpart {name} {filesystem} {range_start} {range_end}"
@@ -109,6 +114,6 @@ impl BuiltinFunction for Partition {
             .spawn()?
             .wait()?;
 
-        Ok(Value::String(path))
+        Ok(Value::Empty)
     }
 }

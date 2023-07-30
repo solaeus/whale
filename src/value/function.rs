@@ -8,6 +8,10 @@ use crate::{eval, Result, Value};
 pub struct Function(String);
 
 impl Function {
+    pub fn new(body: String) -> Self {
+        Function(body)
+    }
+
     pub fn run(&self) -> Result<Value> {
         eval(&self.0)
     }

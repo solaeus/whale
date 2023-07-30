@@ -10,7 +10,7 @@ use serde::{
     Deserialize, Serialize,
 };
 
-use crate::{call_builtin_function, value::Value, Error, Result};
+use crate::{value::Value, Error, Result, Table, MACRO_LIST};
 
 /// A context that stores its mappings in hash maps.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq)]
@@ -27,19 +27,28 @@ impl VariableMap {
     }
 
     pub fn call_function(&self, identifier: &str, argument: &Value) -> Result<Value> {
-        if identifier == "context" {
-            return Ok(Value::Map(self.clone()));
+        for r#macro in MACRO_LIST {
+            if identifier == r#macro.info().identifier {
+                return r#macro.run(argument);
+            }
         }
 
         for (key, value) in &self.variables {
-            if let Value::Function(function) = value {
-                if identifier == key {
-                    return function.run();
+            if identifier == key {
+                return value.as_function()?.run();
+            }
+        }
+
+        let split = identifier.split_once(".");
+        if let Some((identifier, next_identifier)) = split {
+            if let Some(value) = self.variables.get(identifier) {
+                if let Value::Map(map) = value {
+                    map.call_function(next_identifier, argument)?;
                 }
             }
         }
 
-        call_builtin_function(identifier, argument)
+        Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
     }
 
     pub fn get_value(&self, identifier: &str) -> Result<Option<Value>> {
@@ -61,14 +70,9 @@ impl VariableMap {
             let value = self.variables.get(identifier);
 
             if let Some(value) = value {
-                // if let Value::Function(function) = value {
-                //     return Ok(Some(function.run()?));
-                // }
-
                 Ok(Some(value.clone()))
             } else {
-                let function_result = self.call_function(identifier, &Value::Empty)?;
-                Ok(Some(function_result))
+                Ok(None)
             }
         }
     }
@@ -85,11 +89,6 @@ impl VariableMap {
 
     pub fn set_value(&mut self, identifier: &str, value: Value) -> Result<()> {
         let split = identifier.split_once(".");
-        let value = if let Ok(result) = self.call_function(identifier, &value) {
-            result
-        } else {
-            value
-        };
 
         if let Some((map_name, next_identifier)) = split {
             let get_value = self.variables.get_mut(map_name);
@@ -122,14 +121,7 @@ impl VariableMap {
 
 impl Display for VariableMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use comfy_table::presets::UTF8_FULL;
-        use comfy_table::Table as ComfyTable;
-
-        let mut table = ComfyTable::new();
-        table.load_preset(UTF8_FULL);
-
-        table.set_header(self.variables.keys());
-        table.add_row(self.variables.values());
+        let table = Table::from(Value::Map(self.clone()));
 
         write!(f, "{table}")
     }

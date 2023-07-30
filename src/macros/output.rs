@@ -1,8 +1,8 @@
-use crate::{BuiltinFunction, FunctionInfo, Result, Value};
+use crate::{FunctionInfo, Macro, Result, Value};
 
 pub struct Output;
 
-impl BuiltinFunction for Output {
+impl Macro for Output {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "output",

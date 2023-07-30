@@ -5,11 +5,11 @@ use std::{
     process::Command,
 };
 
-use crate::{BuiltinFunction, Error, FunctionInfo, Result, Value};
+use crate::{Error, FunctionInfo, Macro, Result, Value};
 
 pub struct Convert;
 
-impl BuiltinFunction for Convert {
+impl Macro for Convert {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::convert",
@@ -18,7 +18,7 @@ impl BuiltinFunction for Convert {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_list()?;
+        let argument = argument.as_list()?;
 
         if argument.len() != 3 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -27,10 +27,10 @@ impl BuiltinFunction for Convert {
             });
         }
 
-        let (from, to, path) = (
-            argument.pop().unwrap().as_string()?,
-            argument.pop().unwrap().as_string()?,
-            argument.pop().unwrap().as_string()?,
+        let (path, from, to) = (
+            argument[0].as_string()?,
+            argument[1].as_string()?,
+            argument[2].as_string()?,
         );
         let mut file_name = PathBuf::from(&path);
         file_name.set_extension(&to);
@@ -45,7 +45,7 @@ impl BuiltinFunction for Convert {
 
 pub struct Read;
 
-impl BuiltinFunction for Read {
+impl Macro for Read {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::read",
@@ -69,7 +69,7 @@ impl BuiltinFunction for Read {
 
 pub struct Write;
 
-impl BuiltinFunction for Write {
+impl Macro for Write {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::write",
@@ -106,7 +106,7 @@ impl BuiltinFunction for Write {
 
 pub struct FileAppend;
 
-impl BuiltinFunction for FileAppend {
+impl Macro for FileAppend {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::append",
@@ -139,7 +139,7 @@ impl BuiltinFunction for FileAppend {
 
 pub struct Remove;
 
-impl BuiltinFunction for Remove {
+impl Macro for Remove {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::remove",
@@ -157,7 +157,7 @@ impl BuiltinFunction for Remove {
 
 pub struct Move;
 
-impl BuiltinFunction for Move {
+impl Macro for Move {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::move",
@@ -166,7 +166,7 @@ impl BuiltinFunction for Move {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut paths = argument.as_list()?;
+        let paths = argument.as_list()?;
 
         if paths.len() != 2 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -175,8 +175,8 @@ impl BuiltinFunction for Move {
             });
         }
 
-        let to = paths.pop().unwrap().as_string()?;
-        let from = paths.pop().unwrap().as_string()?;
+        let from = paths[0].as_string()?;
+        let to = paths[1].as_string()?;
 
         copy(&from, to).and_then(|_| remove_file(from))?;
 
@@ -186,7 +186,7 @@ impl BuiltinFunction for Move {
 
 pub struct Metadata;
 
-impl BuiltinFunction for Metadata {
+impl Macro for Metadata {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "file::metadata",

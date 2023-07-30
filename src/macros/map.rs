@@ -1,8 +1,8 @@
-use crate::{BuiltinFunction, FunctionInfo, Result, Value, VariableMap};
+use crate::{FunctionInfo, Macro, Result, Value, VariableMap};
 
 pub struct Map;
 
-impl BuiltinFunction for Map {
+impl Macro for Map {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "map",
@@ -14,7 +14,7 @@ impl BuiltinFunction for Map {
         let argument = argument.as_list()?;
         let mut map = VariableMap::new();
 
-        for pair in &argument {
+        for pair in argument {
             let pair = pair.as_list()?;
 
             println!("{pair:?}");
@@ -22,7 +22,7 @@ impl BuiltinFunction for Map {
             if pair.len() != 2 {
                 return Err(crate::Error::ExpectedFixedLenTuple {
                     expected_len: 2,
-                    actual: Value::List(pair),
+                    actual: Value::List(pair.clone()),
                 });
             }
 

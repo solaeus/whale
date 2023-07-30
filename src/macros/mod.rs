@@ -1,24 +1,25 @@
 use crate::{Error, Result, Value};
 
-mod command;
-mod dir;
-mod disk;
-mod file;
-mod map;
-mod output;
-mod packages;
-mod random;
-mod sort;
-mod system;
-mod table;
-mod wait;
-mod whale;
+pub mod command;
+pub mod dir;
+pub mod disk;
+pub mod file;
+pub mod git;
+pub mod map;
+pub mod output;
+pub mod packages;
+pub mod random;
+pub mod sort;
+pub mod system;
+pub mod table;
+pub mod wait;
+pub mod whale;
 
 /// Master list of all internal functions.
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
+pub const MACRO_LIST: [&'static dyn Macro; 41] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -37,6 +38,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
     &file::Read,
     &file::Remove,
     &file::Write,
+    &git::Status,
     &map::Map,
     &output::Output,
     &packages::CoprRepositories,
@@ -58,10 +60,11 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
     &whale::Async,
     &whale::Pipe,
     &whale::Repeat,
+    &whale::Run,
 ];
 
 /// Internal whale function with its business logic and all information.
-pub trait BuiltinFunction: Sync + Send {
+pub trait Macro: Sync + Send {
     fn info(&self) -> FunctionInfo<'static>;
     fn run(&self, argument: &Value) -> Result<Value>;
 }
@@ -78,9 +81,9 @@ pub struct FunctionInfo<'a> {
 /// Searches all functions for a matching identifier and runs the corresponding
 /// function with the given input. Returns the function's output or an error.
 pub fn call_macro(identifier: &str, argument: &Value) -> Result<Value> {
-    for function in BUILTIN_FUNCTIONS {
-        if identifier == function.info().identifier {
-            return function.run(argument);
+    for r#macro in MACRO_LIST {
+        if identifier == r#macro.info().identifier {
+            return r#macro.run(argument);
         }
     }
 
@@ -93,7 +96,7 @@ mod tests {
 
     #[test]
     fn functions_start_with_caps() {
-        for function in BUILTIN_FUNCTIONS {
+        for function in MACRO_LIST {
             assert!(function
                 .info()
                 .identifier

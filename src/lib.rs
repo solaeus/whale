@@ -3,8 +3,8 @@
 
 pub use crate::{
     error::{Error, Result},
-    functions::*,
     interface::*,
+    macros::*,
     operator::Operator,
     token::PartialToken,
     tree::Node,
@@ -14,8 +14,8 @@ pub use crate::{
 };
 
 mod error;
-mod functions;
 mod interface;
+mod macros;
 mod operator;
 mod token;
 mod tree;

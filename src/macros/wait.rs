@@ -1,10 +1,10 @@
 use std::{path::PathBuf, thread::sleep, time::Duration};
 
-use crate::{BuiltinFunction, Result, Value};
+use crate::{Macro, Result, Value};
 
 pub struct Watch;
 
-impl BuiltinFunction for Watch {
+impl Macro for Watch {
     fn info(&self) -> crate::FunctionInfo<'static> {
         crate::FunctionInfo {
             identifier: "wait::watch",
@@ -33,7 +33,7 @@ impl BuiltinFunction for Watch {
 
 pub struct Seconds;
 
-impl BuiltinFunction for Seconds {
+impl Macro for Seconds {
     fn info(&self) -> crate::FunctionInfo<'static> {
         crate::FunctionInfo {
             identifier: "wait::seconds",

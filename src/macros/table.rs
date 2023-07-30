@@ -1,10 +1,8 @@
-use crate::{
-    error::expect_function_argument_amount, BuiltinFunction, FunctionInfo, Result, Table, Value,
-};
+use crate::{error::expect_function_argument_amount, FunctionInfo, Macro, Result, Table, Value};
 
 pub struct Create;
 
-impl BuiltinFunction for Create {
+impl Macro for Create {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "table::create",
@@ -25,7 +23,7 @@ impl BuiltinFunction for Create {
         let mut table = Table::new(column_names);
 
         for row in rows {
-            let row = row.as_list()?;
+            let row = row.as_list()?.clone();
 
             expect_function_argument_amount(row.len(), column_count)?;
 
@@ -38,7 +36,7 @@ impl BuiltinFunction for Create {
 
 pub struct Insert;
 
-impl BuiltinFunction for Insert {
+impl Macro for Insert {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "table::insert",
@@ -52,7 +50,7 @@ impl BuiltinFunction for Insert {
         let mut table = argument[0].as_table()?;
 
         for row in &argument[1..] {
-            let row = row.as_list()?;
+            let row = row.as_list()?.clone();
 
             table.insert(row)?;
         }
@@ -63,7 +61,7 @@ impl BuiltinFunction for Insert {
 
 pub struct Find;
 
-impl BuiltinFunction for Find {
+impl Macro for Find {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "table::find",

@@ -1,10 +1,10 @@
 use sys_info::{self, cpu_num, cpu_speed, hostname};
 
-use crate::{BuiltinFunction, FunctionInfo, Table, Value, VariableMap};
+use crate::{FunctionInfo, Macro, Table, Value, VariableMap};
 
 pub struct SystemInfo;
 
-impl BuiltinFunction for SystemInfo {
+impl Macro for SystemInfo {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "system::info",
@@ -25,7 +25,7 @@ impl BuiltinFunction for SystemInfo {
 
 pub struct SystemCpu;
 
-impl BuiltinFunction for SystemCpu {
+impl Macro for SystemCpu {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "system::cpu",

@@ -1,6 +1,6 @@
 Table::create (
 	("id", "name", "age"),
 	(
-		whale::repeat ("(random::integer, random::string, random::integer (0, 100))", 10)
+		whale::repeat ('(random::integer(), random::string(), random::integer(0, 100))', 10)
 	)
 )

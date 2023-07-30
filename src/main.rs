@@ -1,5 +1,5 @@
 //! Command line interface for the whale programming language.
-use std::{fs::read_to_string, time::Instant};
+use std::fs::read_to_string;
 
 use clap::Parser;
 use nu_ansi_term::{Color, Style};
@@ -8,7 +8,7 @@ use reedline::{
     DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline, ReedlineEvent,
     ReedlineMenu, Signal, Suggestion,
 };
-use whale_lib::{eval, eval_with_context, FunctionInfo, VariableMap, BUILTIN_FUNCTIONS};
+use whale_lib::{eval, eval_with_context, FunctionInfo, VariableMap, MACRO_LIST};
 
 /// Command-line arguments to be parsed.
 #[derive(Parser, Debug)]
@@ -45,23 +45,18 @@ fn run_shell() {
     let mut line_editor = setup_reedline();
     let mut prompt = DefaultPrompt::default();
     prompt.left_prompt = DefaultPromptSegment::WorkingDirectory;
-    prompt.right_prompt = DefaultPromptSegment::Basic(" <- ".to_string());
+    prompt.right_prompt = DefaultPromptSegment::CurrentDateTime;
 
     loop {
         let sig = line_editor.read_line(&prompt);
 
         match sig {
             Ok(Signal::Success(buffer)) => {
-                let start = Instant::now();
                 let eval_result = eval_with_context(&buffer, &mut context);
-                let time = start.elapsed().as_millis();
 
                 match eval_result {
                     Ok(value) => {
-                        if !value.is_empty() {
-                            println!("Execution took {time} milliseconds.\n");
-                            println!("{}", value)
-                        }
+                        println!("{value}");
                     }
                     Err(error) => eprintln!("{}", error),
                 }
@@ -81,7 +76,7 @@ struct WhaleCompeleter;
 
 impl Completer for WhaleCompeleter {
     fn complete(&mut self, line: &str, pos: usize) -> Vec<Suggestion> {
-        BUILTIN_FUNCTIONS
+        MACRO_LIST
             .iter()
             .filter_map(|function| {
                 let FunctionInfo {

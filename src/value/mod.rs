@@ -75,9 +75,9 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
-    pub fn as_string(&self) -> Result<String> {
+    pub fn as_string(&self) -> Result<&String> {
         match self {
-            Value::String(string) => Ok(string.clone()),
+            Value::String(string) => Ok(string),
             value => Err(Error::expected_string(value.clone())),
         }
     }
@@ -117,9 +117,9 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_list(&self) -> Result<Vec<Value>> {
+    pub fn as_list(&self) -> Result<&Vec<Value>> {
         match self {
-            Value::List(tuple) => Ok(tuple.clone()),
+            Value::List(list) => Ok(list),
             value => Err(Error::expected_tuple(value.clone())),
         }
     }

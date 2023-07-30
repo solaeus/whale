@@ -1,10 +1,12 @@
+use crate::{Error, Result, Value};
+
+use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+use comfy_table::{Cell, Color, Table as ComfyTable};
+use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
     fmt::{self, Display, Formatter},
 };
-
-use crate::{Error, Result, Value};
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Table {
@@ -76,13 +78,38 @@ impl Table {
 
 impl Display for Table {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        use comfy_table::presets::UTF8_FULL;
-        use comfy_table::Table as ComfyTable;
-
         let mut table = ComfyTable::new();
-        table.load_preset(UTF8_FULL).set_header(&self.column_names);
+
+        table
+            .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
+            .apply_modifier(UTF8_ROUND_CORNERS)
+            .set_header(&self.column_names)
+            .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
 
         for row in &self.rows {
+            let row = row.iter().map(|value| {
+                let mut cell = Cell::new(value.to_string()).bg(Color::Rgb {
+                    r: 40,
+                    g: 40,
+                    b: 40,
+                });
+
+                if value.is_string() {
+                    cell = cell.fg(Color::Green);
+                }
+                if value.is_integer() {
+                    cell = cell.fg(Color::Blue);
+                }
+                if value.is_boolean() {
+                    cell = cell.fg(Color::Red);
+                }
+                if value.is_function() {
+                    cell = cell.fg(Color::Cyan);
+                }
+
+                cell
+            });
+
             table.add_row(row);
         }
 
@@ -126,7 +153,7 @@ impl From<Value> for Table {
 
                 for (i, value) in list.into_iter().enumerate() {
                     if let Ok(list) = value.as_list() {
-                        table.insert(list).unwrap();
+                        table.insert(list.clone()).unwrap();
                     } else {
                         table.insert(vec![Value::Integer(i as i64), value]).unwrap();
                     }
@@ -147,7 +174,13 @@ impl From<Value> for Table {
                 table
             }
             Value::Table(table) => table,
-            Value::Function(_) => todo!(),
+            Value::Function(function) => {
+                let mut table = Table::new(vec!["function".to_string()]);
+
+                table.insert(vec![Value::Function(function)]).unwrap();
+
+                table
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
-use crate::{BuiltinFunction, Error, FunctionInfo, Result, Table, Value};
+use crate::{Error, FunctionInfo, Macro, Result, Table, Value};
 
 use std::{fs, path::PathBuf};
 
 #[derive(Copy, Clone)]
 pub struct Create;
 
-impl BuiltinFunction for Create {
+impl Macro for Create {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "dir::create",
@@ -21,9 +21,48 @@ impl BuiltinFunction for Create {
     }
 }
 
+fn read_dir(path: &str) -> Result<Value> {
+    let dir = fs::read_dir(path)?;
+    let mut file_table = Table::new(vec![
+        "path".to_string(),
+        "modified".to_string(),
+        "read only".to_string(),
+        "size".to_string(),
+    ]);
+
+    for entry in dir {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let file_name = if file_type.is_dir() {
+            let name = entry.file_name().into_string().unwrap_or_default();
+
+            format!("{name}/")
+        } else {
+            entry.file_name().into_string().unwrap_or_default()
+        };
+        let metadata = entry.path().metadata()?;
+        let modified = if let Ok(modified) = metadata.modified() {
+            modified.elapsed().unwrap().as_secs()
+        } else {
+            u64::MAX
+        };
+        let read_only = format!("{:?}", metadata.permissions().readonly());
+        let size = metadata.len();
+
+        file_table.insert(vec![
+            Value::String(file_name),
+            Value::Integer(modified as i64),
+            Value::String(read_only),
+            Value::Integer(size as i64),
+        ])?;
+    }
+
+    Ok(Value::Table(file_table))
+}
+
 pub struct Read;
 
-impl BuiltinFunction for Read {
+impl Macro for Read {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "dir::read",
@@ -33,48 +72,13 @@ impl BuiltinFunction for Read {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
-        let dir = fs::read_dir(path)?;
-        let mut file_table = Table::new(vec![
-            "path".to_string(),
-            "modified".to_string(),
-            "read only".to_string(),
-            "size".to_string(),
-        ]);
-
-        for entry in dir {
-            let entry = entry?;
-            let file_type = entry.file_type()?;
-            let file_name = if file_type.is_dir() {
-                let name = entry.file_name().into_string().unwrap_or_default();
-
-                format!("{name}/")
-            } else {
-                entry.file_name().into_string().unwrap_or_default()
-            };
-            let metadata = entry.path().metadata()?;
-            let modified = if let Ok(modified) = metadata.modified() {
-                modified.elapsed().unwrap().as_secs()
-            } else {
-                u64::MAX
-            };
-            let read_only = format!("{:?}", metadata.permissions().readonly());
-            let size = metadata.len();
-
-            file_table.insert(vec![
-                Value::String(file_name),
-                Value::Integer(modified as i64),
-                Value::String(read_only),
-                Value::Integer(size as i64),
-            ])?;
-        }
-
-        Ok(Value::Table(file_table))
+        read_dir(path)
     }
 }
 
 pub struct Remove;
 
-impl BuiltinFunction for Remove {
+impl Macro for Remove {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "dir::remove",
@@ -92,7 +96,7 @@ impl BuiltinFunction for Remove {
 
 pub struct Trash;
 
-impl BuiltinFunction for Trash {
+impl Macro for Trash {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "dir::trash",
@@ -111,7 +115,7 @@ impl BuiltinFunction for Trash {
 
 pub struct Move;
 
-impl BuiltinFunction for Move {
+impl Macro for Move {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "dir::move",
@@ -120,7 +124,7 @@ impl BuiltinFunction for Move {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_list()?;
+        let argument = argument.as_list()?;
 
         if argument.len() != 2 {
             return Err(Error::WrongFunctionArgumentAmount {
@@ -129,11 +133,11 @@ impl BuiltinFunction for Move {
             });
         }
 
-        let target_path = argument.pop().unwrap().as_string()?;
-        let current_path = argument.pop().unwrap();
-        let file_list = Read.run(&current_path)?.as_list()?;
+        let current_path = argument[0].as_string()?;
+        let target_path = argument[1].as_string()?;
+        let file_list = read_dir(current_path)?;
 
-        for path in file_list {
+        for path in file_list.as_list()? {
             let path = PathBuf::from(path.as_string()?);
             let new_path = PathBuf::from(&target_path).join(&path);
 
@@ -152,7 +156,7 @@ impl BuiltinFunction for Move {
 
 pub struct Copy;
 
-impl BuiltinFunction for Copy {
+impl Macro for Copy {
     fn info(&self) -> FunctionInfo<'static> {
         todo!()
     }
@@ -164,7 +168,7 @@ impl BuiltinFunction for Copy {
 
 pub struct Metadata;
 
-impl BuiltinFunction for Metadata {
+impl Macro for Metadata {
     fn info(&self) -> FunctionInfo<'static> {
         todo!()
     }
