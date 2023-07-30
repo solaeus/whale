@@ -5,6 +5,7 @@ mod dir;
 mod disk;
 mod file;
 mod map;
+mod output;
 mod packages;
 mod random;
 mod sort;
@@ -17,7 +18,7 @@ mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 40] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -37,6 +38,7 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
     &file::Remove,
     &file::Write,
     &map::Map,
+    &output::Output,
     &packages::CoprRepositories,
     &packages::Install,
     &packages::RpmRepositories,
