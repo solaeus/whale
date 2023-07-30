@@ -65,7 +65,7 @@ impl Macro for Find {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "table::find",
-            description: "Search for a row based on a predicate.",
+            description: "Return the first row that matches a predicate.",
         }
     }
 
@@ -79,7 +79,37 @@ impl Macro for Find {
         let find = table.get_where(&column_name, expected);
 
         if let Some(row) = find {
-            Ok(Value::List(row.clone()))
+            let mut new_table = Table::new(table.column_names().clone());
+            new_table.insert(row.clone()).unwrap();
+
+            Ok(Value::Table(new_table))
+        } else {
+            Ok(Value::Empty)
+        }
+    }
+}
+
+pub struct Filter;
+
+impl Macro for Filter {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "table::filter",
+            description: "Keep rows matching a predicate.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_list()?;
+        expect_function_argument_amount(argument.len(), 3)?;
+
+        let table = argument[0].as_table()?;
+        let column_name = argument[1].as_string()?;
+        let expected = &argument[2];
+        let filtered_table = table.filter(column_name, expected);
+
+        if let Some(table) = filtered_table {
+            Ok(Value::Table(table))
         } else {
             Ok(Value::Empty)
         }

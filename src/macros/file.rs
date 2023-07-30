@@ -95,7 +95,7 @@ impl Macro for Write {
             .open(path)?;
 
         for content in &strings[1..] {
-            let content = content.as_string()?;
+            let content = content.to_string();
 
             file.write_all(content.as_bytes())?;
         }

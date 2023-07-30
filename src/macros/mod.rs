@@ -1,6 +1,8 @@
 use crate::{Error, Result, Value};
 
 pub mod command;
+pub mod count;
+pub mod data;
 pub mod dir;
 pub mod disk;
 pub mod file;
@@ -19,12 +21,14 @@ pub mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 41] = [
+pub const MACRO_LIST: [&'static dyn Macro; 44] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
     &command::Sh,
     &command::Zsh,
+    &count::Count,
+    &data::Csv,
     &dir::Create,
     &dir::Move,
     &dir::Read,
@@ -53,6 +57,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 41] = [
     &system::SystemCpu,
     &system::SystemInfo,
     &table::Create,
+    &table::Filter,
     &table::Find,
     &table::Insert,
     &wait::Seconds,

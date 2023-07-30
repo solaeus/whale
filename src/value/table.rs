@@ -30,6 +30,10 @@ impl Table {
         &self.rows
     }
 
+    pub fn len(&self) -> usize {
+        self.rows.len()
+    }
+
     pub fn sort(&mut self) {
         self.rows.sort();
     }
@@ -63,6 +67,21 @@ impl Table {
         }
 
         None
+    }
+
+    pub fn filter(&self, column_name: &str, expected: &Value) -> Option<Table> {
+        let mut filtered = Table::new(self.column_names.clone());
+        let column_index = self.get_column_index(column_name)?;
+
+        for row in &self.rows {
+            let actual = row.get(column_index).unwrap();
+
+            if actual == expected {
+                let _ = filtered.insert(row.clone());
+            }
+        }
+
+        Some(filtered)
     }
 
     pub fn get_column_index(&self, column_name: &str) -> Option<usize> {

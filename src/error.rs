@@ -232,6 +232,12 @@ pub enum Error {
     CustomMessage(String),
 }
 
+impl From<csv::Error> for Error {
+    fn from(value: csv::Error) -> Self {
+        Error::FunctionFailure(value.to_string())
+    }
+}
+
 impl From<io::Error> for Error {
     fn from(value: std::io::Error) -> Self {
         Error::FunctionFailure(value.to_string())
