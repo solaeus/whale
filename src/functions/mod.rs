@@ -87,3 +87,21 @@ pub fn call_builtin_function(identifier: &str, argument: &Value) -> Result<Value
 
     Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn functions_start_with_caps() {
+        for function in BUILTIN_FUNCTIONS {
+            assert!(function
+                .info()
+                .identifier
+                .chars()
+                .nth(0)
+                .unwrap()
+                .is_uppercase())
+        }
+    }
+}

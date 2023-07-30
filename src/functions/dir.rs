@@ -37,7 +37,8 @@ impl BuiltinFunction for Read {
         let mut file_table = Table::new(vec![
             "path".to_string(),
             "modified".to_string(),
-            "permissions".to_string(),
+            "read only".to_string(),
+            "size".to_string(),
         ]);
 
         for entry in dir {
@@ -51,13 +52,19 @@ impl BuiltinFunction for Read {
                 entry.file_name().into_string().unwrap_or_default()
             };
             let metadata = entry.path().metadata()?;
-            let modified = format!("{:?}", metadata.modified());
-            let permisssions = format!("{:?}", metadata.permissions());
+            let modified = if let Ok(modified) = metadata.modified() {
+                modified.elapsed().unwrap().as_secs()
+            } else {
+                u64::MAX
+            };
+            let read_only = format!("{:?}", metadata.permissions().readonly());
+            let size = metadata.len();
 
             file_table.insert(vec![
                 Value::String(file_name),
-                Value::String(modified),
-                Value::String(permisssions),
+                Value::Integer(modified as i64),
+                Value::String(read_only),
+                Value::Integer(size as i64),
             ])?;
         }
 

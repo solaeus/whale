@@ -7,7 +7,7 @@ pub struct Create;
 impl BuiltinFunction for Create {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "Table::create",
+            identifier: "table::create",
             description: "Define a new table with a list of column names and list of rows.",
         }
     }
@@ -26,7 +26,9 @@ impl BuiltinFunction for Create {
 
         for row in rows {
             let row = row.as_list()?;
+
             expect_function_argument_amount(row.len(), column_count)?;
+
             table.insert(row).unwrap();
         }
 
