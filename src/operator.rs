@@ -199,7 +199,7 @@ impl Operator {
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_add(b);
                     if let Some(result) = result {
-                        Ok(Value::Int(result))
+                        Ok(Value::Integer(result))
                     } else {
                         Err(Error::addition_error(
                             arguments[0].clone(),
@@ -227,7 +227,7 @@ impl Operator {
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_sub(b);
                     if let Some(result) = result {
-                        Ok(Value::Int(result))
+                        Ok(Value::Integer(result))
                     } else {
                         Err(Error::subtraction_error(
                             arguments[0].clone(),
@@ -247,7 +247,7 @@ impl Operator {
                 if let Ok(a) = arguments[0].as_int() {
                     let result = a.checked_neg();
                     if let Some(result) = result {
-                        Ok(Value::Int(result))
+                        Ok(Value::Integer(result))
                     } else {
                         Err(Error::negation_error(arguments[0].clone()))
                     }
@@ -263,7 +263,7 @@ impl Operator {
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_mul(b);
                     if let Some(result) = result {
-                        Ok(Value::Int(result))
+                        Ok(Value::Integer(result))
                     } else {
                         Err(Error::multiplication_error(
                             arguments[0].clone(),
@@ -284,7 +284,7 @@ impl Operator {
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_div(b);
                     if let Some(result) = result {
-                        Ok(Value::Int(result))
+                        Ok(Value::Integer(result))
                     } else {
                         Err(Error::division_error(
                             arguments[0].clone(),
@@ -305,7 +305,7 @@ impl Operator {
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_rem(b);
                     if let Some(result) = result {
-                        Ok(Value::Int(result))
+                        Ok(Value::Integer(result))
                     } else {
                         Err(Error::modulation_error(
                             arguments[0].clone(),

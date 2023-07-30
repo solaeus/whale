@@ -23,10 +23,10 @@ impl From<Value> for Table {
 
                 table
             }
-            Value::Int(integer) => {
+            Value::Integer(integer) => {
                 let mut table = Table::new(vec!["integer".to_string()]);
 
-                table.insert(vec![Value::Int(integer)]).unwrap();
+                table.insert(vec![Value::Integer(integer)]).unwrap();
 
                 table
             }
@@ -53,7 +53,7 @@ impl From<Value> for Table {
                             table.insert(list).unwrap();
                         }
                     } else {
-                        table.insert(vec![Value::Int(i as i64), value]).unwrap();
+                        table.insert(vec![Value::Integer(i as i64), value]).unwrap();
                     }
                 }
 

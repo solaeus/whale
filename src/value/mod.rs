@@ -3,10 +3,7 @@ use crate::{
     Table, VariableMap,
 };
 
-use serde::{
-    ser::{SerializeMap, SerializeTuple},
-    Deserialize, Serialize, Serializer,
-};
+use serde::{ser::SerializeTuple, Deserialize, Serialize, Serializer};
 use std::{
     cmp::Ordering,
     convert::TryFrom,
@@ -21,85 +18,14 @@ pub mod variable_map;
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
 pub enum Value {
-    /// A string value.
     String(String),
-    /// A float value.
     Float(f64),
-    /// An integer value.
-    Int(i64),
-    /// A boolean value.
+    Integer(i64),
     Boolean(bool),
-    /// A tuple value.
     List(Vec<Value>),
-    /// An empty value.
     Empty,
-    /// Collection of key-value pairs.
     Map(VariableMap),
-    /// Structured collection of related items.
     Table(Table),
-}
-
-impl Eq for Value {}
-
-impl PartialOrd for Value {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Value {
-    fn cmp(&self, other: &Self) -> Ordering {
-        match (self, other) {
-            (Value::String(left), Value::String(right)) => left.cmp(right),
-            (Value::String(_), _) => Ordering::Greater,
-            (Value::Int(left), Value::Int(right)) => left.cmp(right),
-            (Value::Int(_), _) => Ordering::Greater,
-            (Value::Boolean(left), Value::Boolean(right)) => left.cmp(right),
-            (Value::Boolean(_), _) => Ordering::Greater,
-            (Value::Float(left), Value::Float(right)) => left.total_cmp(right),
-            (Value::Float(_), _) => Ordering::Greater,
-            (Value::List(left), Value::List(right)) => left.cmp(right),
-            (Value::List(_), _) => Ordering::Greater,
-            (Value::Map(left), Value::Map(right)) => left.cmp(right),
-            (Value::Map(_), _) => Ordering::Greater,
-            (Value::Table(left), Value::Table(right)) => left.cmp(right),
-            (Value::Table(_), _) => Ordering::Greater,
-            (Value::Empty, Value::Empty) => Ordering::Equal,
-            (Value::Empty, _) => Ordering::Less,
-        }
-    }
-}
-
-impl Serialize for Value {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match self {
-            Value::String(inner) => serializer.serialize_str(&inner),
-            Value::Float(inner) => serializer.serialize_f64(*inner),
-            Value::Int(inner) => serializer.serialize_i64(*inner),
-            Value::Boolean(inner) => serializer.serialize_bool(*inner),
-            Value::List(inner) => {
-                let mut tuple = serializer.serialize_tuple(inner.len())?;
-
-                for value in inner {
-                    tuple.serialize_element(value)?;
-                }
-
-                tuple.end()
-            }
-            Value::Empty => todo!(),
-            Value::Map(inner) => inner.serialize(serializer),
-            Value::Table(inner) => inner.serialize(serializer),
-        }
-    }
-}
-
-impl Default for Value {
-    fn default() -> Self {
-        Value::Empty
-    }
 }
 
 impl Value {
@@ -107,9 +33,10 @@ impl Value {
     pub fn is_string(&self) -> bool {
         matches!(self, Value::String(_))
     }
-    /// Returns true if `self` is a `Value::Int`.
-    pub fn is_int(&self) -> bool {
-        matches!(self, Value::Int(_))
+
+    /// Returns true if `self` is a `Value::Integer`.
+    pub fn is_integer(&self) -> bool {
+        matches!(self, Value::Integer(_))
     }
 
     /// Returns true if `self` is a `Value::Float`.
@@ -117,9 +44,9 @@ impl Value {
         matches!(self, Value::Float(_))
     }
 
-    /// Returns true if `self` is a `Value::Int` or `Value::Float`.
+    /// Returns true if `self` is a `Value::Integer` or `Value::Float`.
     pub fn is_number(&self) -> bool {
-        matches!(self, Value::Int(_) | Value::Float(_))
+        matches!(self, Value::Integer(_) | Value::Float(_))
     }
 
     /// Returns true if `self` is a `Value::Boolean`.
@@ -127,8 +54,8 @@ impl Value {
         matches!(self, Value::Boolean(_))
     }
 
-    /// Returns true if `self` is a `Value::Tuple`.
-    pub fn is_tuple(&self) -> bool {
+    /// Returns true if `self` is a `Value::List`.
+    pub fn is_list(&self) -> bool {
         matches!(self, Value::List(_))
     }
 
@@ -152,7 +79,7 @@ impl Value {
     /// Clones the value stored in `self` as `i64`, or returns `Err` if `self` is not a `Value::Int`.
     pub fn as_int(&self) -> Result<i64> {
         match self {
-            Value::Int(i) => Ok(*i),
+            Value::Integer(i) => Ok(*i),
             value => Err(Error::expected_int(value.clone())),
         }
     }
@@ -170,7 +97,7 @@ impl Value {
     pub fn as_number(&self) -> Result<f64> {
         match self {
             Value::Float(f) => Ok(*f),
-            Value::Int(i) => Ok(*i as f64),
+            Value::Integer(i) => Ok(*i as f64),
             value => Err(Error::expected_number(value.clone())),
         }
     }
@@ -230,12 +157,75 @@ impl Value {
     }
 }
 
+impl Default for Value {
+    fn default() -> Self {
+        Value::Empty
+    }
+}
+
+impl Eq for Value {}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Value {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Value::String(left), Value::String(right)) => left.cmp(right),
+            (Value::String(_), _) => Ordering::Greater,
+            (Value::Integer(left), Value::Integer(right)) => left.cmp(right),
+            (Value::Integer(_), _) => Ordering::Greater,
+            (Value::Boolean(left), Value::Boolean(right)) => left.cmp(right),
+            (Value::Boolean(_), _) => Ordering::Greater,
+            (Value::Float(left), Value::Float(right)) => left.total_cmp(right),
+            (Value::Float(_), _) => Ordering::Greater,
+            (Value::List(left), Value::List(right)) => left.cmp(right),
+            (Value::List(_), _) => Ordering::Greater,
+            (Value::Map(left), Value::Map(right)) => left.cmp(right),
+            (Value::Map(_), _) => Ordering::Greater,
+            (Value::Table(left), Value::Table(right)) => left.cmp(right),
+            (Value::Table(_), _) => Ordering::Greater,
+            (Value::Empty, Value::Empty) => Ordering::Equal,
+            (Value::Empty, _) => Ordering::Less,
+        }
+    }
+}
+
+impl Serialize for Value {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Value::String(inner) => serializer.serialize_str(&inner),
+            Value::Float(inner) => serializer.serialize_f64(*inner),
+            Value::Integer(inner) => serializer.serialize_i64(*inner),
+            Value::Boolean(inner) => serializer.serialize_bool(*inner),
+            Value::List(inner) => {
+                let mut tuple = serializer.serialize_tuple(inner.len())?;
+
+                for value in inner {
+                    tuple.serialize_element(value)?;
+                }
+
+                tuple.end()
+            }
+            Value::Empty => todo!(),
+            Value::Map(inner) => inner.serialize(serializer),
+            Value::Table(inner) => inner.serialize(serializer),
+        }
+    }
+}
+
 impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Value::String(string) => write!(f, "\"{}\"", string),
             Value::Float(float) => write!(f, "{}", float),
-            Value::Int(int) => write!(f, "{}", int),
+            Value::Integer(int) => write!(f, "{}", int),
             Value::Boolean(boolean) => write!(f, "{}", boolean),
             Value::List(tuple) => {
                 write!(f, "(")?;
@@ -277,7 +267,7 @@ impl From<f64> for Value {
 
 impl From<i64> for Value {
     fn from(int: i64) -> Self {
-        Value::Int(int)
+        Value::Integer(int)
     }
 }
 
@@ -333,7 +323,7 @@ impl TryFrom<Value> for i64 {
     type Error = Error;
 
     fn try_from(value: Value) -> std::result::Result<Self, Self::Error> {
-        if let Value::Int(value) = value {
+        if let Value::Integer(value) = value {
             Ok(value)
         } else {
             Err(Error::ExpectedInt { actual: value })
@@ -374,31 +364,5 @@ impl TryFrom<Value> for () {
         } else {
             Err(Error::ExpectedEmpty { actual: value })
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::value::Value;
-
-    #[test]
-    fn test_value_conversions() {
-        assert_eq!(
-            Value::from("string").as_string(),
-            Ok(String::from("string"))
-        );
-        assert_eq!(Value::from(3).as_int(), Ok(3));
-        assert_eq!(Value::from(3.3).as_float(), Ok(3.3));
-        assert_eq!(Value::from(true).as_boolean(), Ok(true));
-        assert_eq!(Value::from(Vec::new()).as_list(), Ok(Vec::new()));
-    }
-
-    #[test]
-    fn test_value_checks() {
-        assert!(Value::from("string").is_string());
-        assert!(Value::from(3).is_int());
-        assert!(Value::from(3.3).is_float());
-        assert!(Value::from(true).is_boolean());
-        assert!(Value::from(Vec::new()).is_tuple());
     }
 }

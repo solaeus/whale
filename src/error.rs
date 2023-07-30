@@ -322,6 +322,7 @@ impl Error {
     }
 
     /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
+    #[allow(unused)]
     pub(crate) fn expected_type(expected: &Value, actual: Value) -> Self {
         match ValueType::from(expected) {
             ValueType::String => Self::expected_string(actual),
@@ -399,7 +400,7 @@ pub fn expect_function_argument_amount(actual: usize, expected: usize) -> Result
 /// Returns `Ok(())` if the given value is a string or a numeric
 pub fn expect_number_or_string(actual: &Value) -> Result<()> {
     match actual {
-        Value::String(_) | Value::Float(_) | Value::Int(_) => Ok(()),
+        Value::String(_) | Value::Float(_) | Value::Integer(_) => Ok(()),
         _ => Err(Error::expected_number_or_string(actual.clone())),
     }
 }
@@ -544,9 +545,9 @@ mod tests {
     #[test]
     fn trivial_coverage_tests() {
         assert_eq!(
-            Error::type_error(Value::Int(3), vec![ValueType::String]),
+            Error::type_error(Value::Integer(3), vec![ValueType::String]),
             Error::TypeError {
-                actual: Value::Int(3),
+                actual: Value::Integer(3),
                 expected: vec![ValueType::String]
             }
         );

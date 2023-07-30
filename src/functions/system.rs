@@ -40,7 +40,7 @@ impl BuiltinFunction for SystemCpu {
         let count = cpu_num().unwrap_or_default() as i64;
         let speed = cpu_speed().unwrap_or_default() as i64;
 
-        table.insert(vec![Value::Int(count), Value::Int(speed)])?;
+        table.insert(vec![Value::Integer(count), Value::Integer(speed)])?;
 
         Ok(Value::Table(table))
     }

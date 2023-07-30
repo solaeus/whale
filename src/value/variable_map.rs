@@ -159,19 +159,15 @@ impl<'de> Visitor<'de> for VariableMapVisitor {
         formatter.write_str("VariableMap of key-value pairs.")
     }
 
-    // Deserialize MyMap from an abstract "map" provided by the
-    // Deserializer. The MapAccess input is a callback provided by
-    // the Deserializer to let us see each entry in the map.
     fn visit_map<M>(self, mut access: M) -> std::result::Result<VariableMap, M::Error>
     where
         M: MapAccess<'de>,
     {
         let mut map = VariableMap::new();
 
-        // While there are entries remaining in the input, add them
-        // into our map.
         while let Some((key, value)) = access.next_entry()? {
-            map.set_value(key, value);
+            map.set_value(key, value)
+                .expect("Failed to deserialize VariableMap. This is a no-op.");
         }
 
         Ok(map)

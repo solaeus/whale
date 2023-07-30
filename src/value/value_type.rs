@@ -18,7 +18,7 @@ impl From<&Value> for ValueType {
         match value {
             Value::String(_) => ValueType::String,
             Value::Float(_) => ValueType::Float,
-            Value::Int(_) => ValueType::Int,
+            Value::Integer(_) => ValueType::Int,
             Value::Boolean(_) => ValueType::Boolean,
             Value::List(_) => ValueType::Tuple,
             Value::Empty => ValueType::Empty,

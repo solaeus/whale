@@ -44,8 +44,8 @@ impl BuiltinFunction for List {
                 Value::String(format!("{kind:?}")),
                 Value::String(file_system),
                 Value::String(mount_point),
-                Value::Int(total_space),
-                Value::Int(available_space),
+                Value::Integer(total_space),
+                Value::Integer(available_space),
                 Value::Boolean(is_removable),
             ];
 

@@ -371,7 +371,7 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int_with_context(&self, context: &VariableMap) -> Result<i64> {
         match self.eval_with_context(context) {
-            Ok(Value::Int(int)) => Ok(int),
+            Ok(Value::Integer(int)) => Ok(int),
             Ok(value) => Err(Error::expected_int(value)),
             Err(error) => Err(error),
         }
@@ -383,7 +383,7 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_number_with_context(&self, context: &VariableMap) -> Result<f64> {
         match self.eval_with_context(context) {
-            Ok(Value::Int(int)) => Ok(int as f64),
+            Ok(Value::Integer(int)) => Ok(int as f64),
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(Error::expected_number(value)),
             Err(error) => Err(error),
@@ -450,7 +450,7 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int_with_context_mut(&self, context: &mut VariableMap) -> Result<i64> {
         match self.eval_with_context_mut(context) {
-            Ok(Value::Int(int)) => Ok(int),
+            Ok(Value::Integer(int)) => Ok(int),
             Ok(value) => Err(Error::expected_int(value)),
             Err(error) => Err(error),
         }
@@ -462,7 +462,7 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_number_with_context_mut(&self, context: &mut VariableMap) -> Result<f64> {
         match self.eval_with_context_mut(context) {
-            Ok(Value::Int(int)) => Ok(int as f64),
+            Ok(Value::Integer(int)) => Ok(int as f64),
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(Error::expected_number(value)),
             Err(error) => Err(error),
@@ -823,7 +823,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node> {
                 result
             }
             Token::Float(float) => Some(Node::new(Operator::value(Value::Float(float)))),
-            Token::Int(int) => Some(Node::new(Operator::value(Value::Int(int)))),
+            Token::Int(int) => Some(Node::new(Operator::value(Value::Integer(int)))),
             Token::Boolean(boolean) => Some(Node::new(Operator::value(Value::Boolean(boolean)))),
             Token::String(string) => Some(Node::new(Operator::value(Value::String(string)))),
         };

@@ -27,7 +27,7 @@ impl BuiltinFunction for Watch {
             }
         };
 
-        Ok(Value::Int(wait_time))
+        Ok(Value::Integer(wait_time))
     }
 }
 

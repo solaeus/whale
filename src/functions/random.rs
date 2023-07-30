@@ -16,10 +16,10 @@ impl BuiltinFunction for RandomInteger {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         match argument {
-            Value::Int(max) => {
+            Value::Integer(max) => {
                 let integer = rand::thread_rng().gen_range(0..*max);
 
-                Ok(Value::Int(integer))
+                Ok(Value::Integer(integer))
             }
             Value::List(min_max) => {
                 if min_max.len() != 2 {
@@ -33,9 +33,9 @@ impl BuiltinFunction for RandomInteger {
                 let max = min_max.get(1).unwrap().as_int()? + 1;
                 let integer = rand::thread_rng().gen_range(min..max);
 
-                Ok(Value::Int(integer))
+                Ok(Value::Integer(integer))
             }
-            Value::Empty => Ok(crate::Value::Int(random())),
+            Value::Empty => Ok(crate::Value::Integer(random())),
             _ => todo!(),
         }
     }
@@ -53,7 +53,7 @@ impl BuiltinFunction for RandomString {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         match argument {
-            Value::Int(length) => {
+            Value::Integer(length) => {
                 let length: usize = length.unsigned_abs().try_into().unwrap_or(0);
                 let mut random = String::with_capacity(length);
 

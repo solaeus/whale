@@ -1,4 +1,6 @@
-use crate::{BuiltinFunction, FunctionInfo, Result, Table, Value};
+use crate::{
+    error::expect_function_argument_amount, BuiltinFunction, FunctionInfo, Result, Table, Value,
+};
 
 pub struct Create;
 
@@ -26,9 +28,11 @@ impl BuiltinFunction for Insert {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_list()?;
-        let row = argument.pop().unwrap().as_list()?;
-        let mut table = argument.pop().unwrap().as_table()?;
+        let argument = argument.as_list()?;
+        expect_function_argument_amount(argument.len(), 2)?;
+
+        let mut table = argument[0].as_table()?;
+        let row = argument[1].as_list()?;
 
         table.insert(row)?;
 
@@ -47,11 +51,13 @@ impl BuiltinFunction for Find {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let mut argument = argument.as_list()?;
-        let expected = argument.pop().unwrap();
-        let column_name = argument.pop().unwrap().as_string()?;
-        let table = argument.pop().unwrap().as_table()?;
-        let find = table.get_where(&column_name, &expected);
+        let argument = argument.as_list()?;
+        expect_function_argument_amount(argument.len(), 3)?;
+
+        let table = argument[0].as_table()?;
+        let column_name = argument[1].as_string()?;
+        let expected = &argument[2];
+        let find = table.get_where(&column_name, expected);
 
         if let Some(row) = find {
             Ok(Value::List(row.clone()))

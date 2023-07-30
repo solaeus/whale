@@ -39,13 +39,9 @@ impl BuiltinFunction for Run {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        if let Ok(input) = argument.as_string() {
-            Ok(eval(&input)?)
-        } else {
-            Err(Error::ExpectedString {
-                actual: argument.clone(),
-            })
-        }
+        let input = argument.as_string()?;
+
+        Ok(eval(&input)?)
     }
 }
 
