@@ -18,7 +18,7 @@ mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 40] = [
+pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 39] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -56,9 +56,8 @@ pub const BUILTIN_FUNCTIONS: [&'static dyn BuiltinFunction; 40] = [
     &wait::Seconds,
     &wait::Watch,
     &whale::Async,
+    &whale::Pipe,
     &whale::Repeat,
-    &whale::Run,
-    &whale::RunFile,
 ];
 
 /// Internal whale function with its business logic and all information.

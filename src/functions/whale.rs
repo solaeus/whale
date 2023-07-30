@@ -1,6 +1,6 @@
-use std::fs;
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{eval, BuiltinFunction, Error, FunctionInfo, Result, Value};
+use crate::{BuiltinFunction, FunctionInfo, Result, Value};
 
 pub struct Repeat;
 
@@ -8,75 +8,23 @@ impl BuiltinFunction for Repeat {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "whale::repeat",
-            description: "Run a whale string the given number of times.",
+            description: "Run a function the given number of times.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        let input_string = argument[0].as_string()?;
+        let function = argument[0].as_function()?;
         let count = argument[1].as_int()?;
         let mut result_list = Vec::with_capacity(count as usize);
 
         for _ in 0..count {
-            let result = eval(&input_string)?;
+            let result = function.run()?;
 
             result_list.push(result);
         }
 
         Ok(Value::List(result_list))
-    }
-}
-
-pub struct Run;
-
-impl BuiltinFunction for Run {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
-            identifier: "whale::run",
-            description: "Run a whale string.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let input = argument.as_string()?;
-
-        Ok(eval(&input)?)
-    }
-}
-
-pub struct RunFile;
-
-impl BuiltinFunction for RunFile {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
-            identifier: "whale::run_file",
-            description: "Run one or more whale files.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        if let Ok(path) = argument.as_string() {
-            let file_contents = fs::read_to_string(path)?;
-
-            Ok(eval(&file_contents)?)
-        } else if let Ok(paths) = argument.as_list() {
-            let mut results = Vec::new();
-
-            for path in paths {
-                let path = path.as_string()?;
-                let file_content = fs::read_to_string(path)?;
-                let value = eval(&file_content)?;
-
-                results.push(value);
-            }
-
-            Ok(Value::List(results))
-        } else {
-            Err(Error::ExpectedString {
-                actual: argument.clone(),
-            })
-        }
     }
 }
 
@@ -86,13 +34,47 @@ impl BuiltinFunction for Async {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
             identifier: "whale::async",
-            description: "Run whale files simultaneously.",
+            description: "Run functions in parallel.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_string()?;
+        let argument_list = argument.as_list()?;
+        let mut functions = Vec::new();
 
-        Ok(eval(&argument)?)
+        for value in argument_list {
+            let function = value.as_function()?;
+            functions.push(function);
+        }
+
+        functions.par_iter().for_each(|function| {
+            function.run();
+        });
+
+        Ok(Value::Empty)
+    }
+}
+
+pub struct Pipe;
+
+impl BuiltinFunction for Pipe {
+    fn info(&self) -> FunctionInfo<'static> {
+        FunctionInfo {
+            identifier: "whale::pipe",
+            description: "Process a value with a list of functions.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument_list = argument.as_list()?;
+        let input = &argument_list[0];
+        let pipe = &argument_list[1..];
+        let mut accumulator = input.clone();
+
+        for value in pipe {
+            accumulator = value.as_function()?.run()?;
+        }
+
+        Ok(accumulator)
     }
 }

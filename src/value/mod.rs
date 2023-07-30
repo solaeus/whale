@@ -1,6 +1,6 @@
 use crate::{
     error::{Error, Result},
-    Table, VariableMap,
+    Function, Table, VariableMap,
 };
 
 use serde::{ser::SerializeTuple, Deserialize, Serialize, Serializer};
@@ -10,6 +10,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
+pub mod function;
 pub mod table;
 pub mod value_type;
 pub mod variable_map;
@@ -26,6 +27,7 @@ pub enum Value {
     Empty,
     Map(VariableMap),
     Table(Table),
+    Function(Function),
 }
 
 impl Value {
@@ -65,6 +67,10 @@ impl Value {
     }
 
     pub fn is_map(&self) -> bool {
+        matches!(self, Value::Map(_))
+    }
+
+    pub fn is_function(&self) -> bool {
         matches!(self, Value::Map(_))
     }
 
@@ -119,7 +125,7 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `Vec<Value>` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
-    pub fn as_fixed_len_tuple(&self, len: usize) -> Result<Vec<Value>> {
+    pub fn as_fixed_len_list(&self, len: usize) -> Result<Vec<Value>> {
         match self {
             Value::List(tuple) => {
                 if tuple.len() == len {
@@ -145,6 +151,14 @@ impl Value {
         match self {
             Value::Table(table) => Ok(table.clone()),
             value => Err(Error::expected_table(value.clone())),
+        }
+    }
+
+    /// Returns `()`, or returns`Err` if `self` is not a `Value::Tuple`.
+    pub fn as_function(&self) -> Result<Function> {
+        match self {
+            Value::Function(function) => Ok(function.clone()),
+            value => Err(Error::expected_function(value.clone())),
         }
     }
 
@@ -188,6 +202,8 @@ impl Ord for Value {
             (Value::Map(_), _) => Ordering::Greater,
             (Value::Table(left), Value::Table(right)) => left.cmp(right),
             (Value::Table(_), _) => Ordering::Greater,
+            (Value::Function(left), Value::Function(right)) => left.cmp(right),
+            (Value::Function(_), _) => Ordering::Greater,
             (Value::Empty, Value::Empty) => Ordering::Equal,
             (Value::Empty, _) => Ordering::Less,
         }
@@ -216,6 +232,7 @@ impl Serialize for Value {
             Value::Empty => todo!(),
             Value::Map(inner) => inner.serialize(serializer),
             Value::Table(inner) => inner.serialize(serializer),
+            Value::Function(inner) => inner.serialize(serializer),
         }
     }
 }
@@ -223,7 +240,7 @@ impl Serialize for Value {
 impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            Value::String(string) => write!(f, "\"{}\"", string),
+            Value::String(string) => write!(f, "\"{string}\""),
             Value::Float(float) => write!(f, "{}", float),
             Value::Integer(int) => write!(f, "{}", int),
             Value::Boolean(boolean) => write!(f, "{}", boolean),
@@ -243,6 +260,7 @@ impl Display for Value {
             Value::Empty => write!(f, "()"),
             Value::Map(map) => write!(f, "{}", map),
             Value::Table(table) => table.fmt(f),
+            Value::Function(string) => write!(f, "'{string}'"),
         }
     }
 }

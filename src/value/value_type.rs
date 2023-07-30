@@ -11,6 +11,7 @@ pub enum ValueType {
     Empty,
     Map,
     Table,
+    Function,
 }
 
 impl From<&Value> for ValueType {
@@ -24,6 +25,7 @@ impl From<&Value> for ValueType {
             Value::Empty => ValueType::Empty,
             Value::Map(_) => ValueType::Map,
             Value::Table { .. } => ValueType::Table,
+            Value::Function(_) => ValueType::Function,
         }
     }
 }

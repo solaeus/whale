@@ -147,6 +147,7 @@ impl From<Value> for Table {
                 table
             }
             Value::Table(table) => table,
+            Value::Function(_) => todo!(),
         }
     }
 }

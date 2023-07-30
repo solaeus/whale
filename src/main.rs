@@ -89,12 +89,17 @@ impl Completer for WhaleCompeleter {
                     description,
                 } = function.info();
 
-                if identifier.starts_with(line) {
+                let current_word = line.split(" ").last().unwrap();
+
+                if identifier.starts_with(current_word) {
                     Some(Suggestion {
                         value: identifier.to_string(),
                         description: Some(description.to_string()),
                         extra: None,
-                        span: reedline::Span { start: 0, end: pos },
+                        span: reedline::Span {
+                            start: pos - current_word.len(),
+                            end: line.len(),
+                        },
                         append_whitespace: true,
                     })
                 } else {
@@ -111,7 +116,7 @@ fn setup_reedline() -> Reedline {
     let completion_menu = Box::new(
         ColumnarMenu::default()
             .with_name("completion_menu")
-            .with_columns(2)
+            .with_columns(3)
             .with_text_style(Style {
                 is_dimmed: false,
                 foreground: Some(Color::White),
@@ -145,6 +150,11 @@ fn setup_reedline() -> Reedline {
             ReedlineEvent::Menu("completion_menu".to_string()),
             ReedlineEvent::MenuPrevious,
         ]),
+    );
+    keybindings.add_binding(
+        KeyModifiers::SHIFT,
+        KeyCode::Enter,
+        ReedlineEvent::SubmitOrNewline,
     );
 
     let edit_mode = Box::new(Emacs::new(keybindings));

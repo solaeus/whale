@@ -48,6 +48,7 @@ pub enum Token {
     Int(i64),
     Boolean(bool),
     String(String),
+    Function(String),
 }
 
 /// A partial token is an input character whose meaning depends on the characters around it.
@@ -160,6 +161,7 @@ impl Token {
             Token::Int(_) => true,
             Token::Boolean(_) => true,
             Token::String(_) => true,
+            Token::Function(_) => true,
         }
     }
 
@@ -204,6 +206,7 @@ impl Token {
             Token::Int(_) => true,
             Token::Boolean(_) => true,
             Token::String(_) => true,
+            Token::Function(_) => true,
         }
     }
 
@@ -255,6 +258,20 @@ fn parse_string_literal<Iter: Iterator<Item = char>>(mut iter: &mut Iter) -> Res
     Ok(PartialToken::Token(Token::String(result)))
 }
 
+fn parse_function<Iter: Iterator<Item = char>>(mut iter: &mut Iter) -> Result<PartialToken> {
+    let mut result = String::new();
+
+    while let Some(c) = iter.next() {
+        match c {
+            '\'' => break,
+            '\\' => result.push(parse_escape_sequence(&mut iter)?),
+            c => result.push(c),
+        }
+    }
+
+    Ok(PartialToken::Token(Token::Function(result)))
+}
+
 /// Converts a string to a vector of partial tokens.
 fn str_to_partial_tokens(string: &str) -> Result<Vec<PartialToken>> {
     let mut result = Vec::new();
@@ -263,6 +280,8 @@ fn str_to_partial_tokens(string: &str) -> Result<Vec<PartialToken>> {
     while let Some(c) = iter.next() {
         if c == '"' {
             result.push(parse_string_literal(&mut iter)?);
+        } else if c == '\'' {
+            result.push(parse_function(&mut iter)?)
         } else {
             let partial_token = char_to_partial_token(c);
 
@@ -480,6 +499,7 @@ impl Display for Token {
             Int(int) => int.fmt(f),
             Boolean(boolean) => boolean.fmt(f),
             String(string) => fmt::Debug::fmt(string, f),
+            Function(string) => write!(f, "'{string}'"),
         }
     }
 }

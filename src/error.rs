@@ -101,6 +101,12 @@ pub enum Error {
         actual: Value,
     },
 
+    /// A map value was expected.
+    ExpectedFunction {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// Tried to append a child to a leaf node.
     /// Leaf nodes cannot have children.
     AppendedToLeafNode,
@@ -321,6 +327,11 @@ impl Error {
         Error::ExpectedTable { actual }
     }
 
+    /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
+    pub fn expected_function(actual: Value) -> Self {
+        Error::ExpectedFunction { actual }
+    }
+
     /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
     #[allow(unused)]
     pub(crate) fn expected_type(expected: &Value, actual: Value) -> Self {
@@ -333,6 +344,7 @@ impl Error {
             ValueType::Empty => Self::expected_empty(actual),
             ValueType::Map => Self::expected_map(actual),
             ValueType::Table => Self::expected_table(actual),
+            ValueType::Function => todo!(),
         }
     }
 
@@ -451,6 +463,9 @@ impl fmt::Display for Error {
             ExpectedEmpty { actual } => write!(f, "Expected a Value::Empty, but got {:?}.", actual),
             ExpectedMap { actual } => write!(f, "Expected a Value::Map, but got {:?}.", actual),
             ExpectedTable { actual } => write!(f, "Expected a Value::Table, but got {:?}.", actual),
+            ExpectedFunction { actual } => {
+                write!(f, "Expected Value::Function, but got {:?}.", actual)
+            }
             AppendedToLeafNode => write!(f, "Tried to append a node to a leaf node."),
             PrecedenceViolation => write!(
                 f,

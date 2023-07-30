@@ -31,6 +31,14 @@ impl VariableMap {
             return Ok(Value::Map(self.clone()));
         }
 
+        for (key, value) in &self.variables {
+            if let Value::Function(function) = value {
+                if identifier == key {
+                    return function.run();
+                }
+            }
+        }
+
         call_builtin_function(identifier, argument)
     }
 
@@ -53,6 +61,10 @@ impl VariableMap {
             let value = self.variables.get(identifier);
 
             if let Some(value) = value {
+                // if let Value::Function(function) = value {
+                //     return Ok(Some(function.run()?));
+                // }
+
                 Ok(Some(value.clone()))
             } else {
                 let function_result = self.call_function(identifier, &Value::Empty)?;

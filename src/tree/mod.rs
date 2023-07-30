@@ -1,3 +1,4 @@
+use crate::Function;
 use crate::{token::Token, VariableMap};
 
 use crate::{
@@ -826,6 +827,9 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node> {
             Token::Int(int) => Some(Node::new(Operator::value(Value::Integer(int)))),
             Token::Boolean(boolean) => Some(Node::new(Operator::value(Value::Boolean(boolean)))),
             Token::String(string) => Some(Node::new(Operator::value(Value::String(string)))),
+            Token::Function(string) => Some(Node::new(Operator::value(Value::Function(
+                Function::from(string),
+            )))),
         };
 
         if let Some(mut node) = node {

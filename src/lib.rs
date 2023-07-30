@@ -8,7 +8,9 @@ pub use crate::{
     operator::Operator,
     token::PartialToken,
     tree::Node,
-    value::{table::Table, value_type::ValueType, variable_map::VariableMap, Value},
+    value::{
+        function::Function, table::Table, value_type::ValueType, variable_map::VariableMap, Value,
+    },
 };
 
 mod error;
