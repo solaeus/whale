@@ -7,13 +7,30 @@ pub struct Create;
 impl BuiltinFunction for Create {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "table::create",
-            description: "Define a new table.",
+            identifier: "Table::create",
+            description: "Define a new table with a list of column names and list of rows.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        Ok(Value::Table(Table::from(argument.clone())))
+        let argument = argument.as_list()?;
+
+        let column_names = argument[0]
+            .as_list()?
+            .into_iter()
+            .map(|value| value.to_string())
+            .collect::<Vec<String>>();
+        let column_count = column_names.len();
+        let rows = argument[1].as_list()?;
+        let mut table = Table::new(column_names);
+
+        for row in rows {
+            let row = row.as_list()?;
+            expect_function_argument_amount(row.len(), column_count)?;
+            table.insert(row).unwrap();
+        }
+
+        Ok(Value::Table(table))
     }
 }
 
@@ -29,12 +46,14 @@ impl BuiltinFunction for Insert {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        expect_function_argument_amount(argument.len(), 2)?;
 
         let mut table = argument[0].as_table()?;
-        let row = argument[1].as_list()?;
 
-        table.insert(row)?;
+        for row in &argument[1..] {
+            let row = row.as_list()?;
+
+            table.insert(row)?;
+        }
 
         Ok(Value::Table(table))
     }

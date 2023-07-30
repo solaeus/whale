@@ -42,16 +42,7 @@ impl From<Value> for Table {
 
                 for (i, value) in list.into_iter().enumerate() {
                     if let Ok(list) = value.as_list() {
-                        if i == 0 {
-                            let column_names = list
-                                .iter()
-                                .map(|value| value.as_string().unwrap())
-                                .collect::<Vec<String>>();
-
-                            table = Table::new(column_names);
-                        } else {
-                            table.insert(list).unwrap();
-                        }
+                        table.insert(list).unwrap();
                     } else {
                         table.insert(vec![Value::Integer(i as i64), value]).unwrap();
                     }
@@ -59,8 +50,18 @@ impl From<Value> for Table {
 
                 table
             }
-            Value::Empty => todo!(),
-            Value::Map(_) => todo!(),
+            Value::Empty => Table::new(Vec::with_capacity(0)),
+            Value::Map(map) => {
+                let keys = map.inner().keys().cloned().collect();
+                let values = map.inner().values().cloned().collect();
+                let mut table = Table::new(keys);
+
+                table
+                    .insert(values)
+                    .expect("Failed to create Table from Map. This is a no-op.");
+
+                table
+            }
             Value::Table(_) => todo!(),
         }
     }

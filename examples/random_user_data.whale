@@ -1,4 +1,10 @@
-table::create (
-	("name", "age"),
-	(random::string, random::integer (1, 100))
+Table::create (
+	("id", "name", "age"),
+	(
+		(random::integer, random::string, random::integer (0, 100)),
+		(random::integer, random::string, random::integer (0, 100)),
+		(random::integer, random::string, random::integer (0, 100)),
+		(random::integer, random::string, random::integer (0, 100)),
+		(random::integer, random::string, random::integer (0, 100))
+	)
 )
