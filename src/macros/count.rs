@@ -1,10 +1,10 @@
-use crate::{FunctionInfo, Macro, Result, Value};
+use crate::{Macro, MacroInfo, Result, Value};
 
 pub struct Count;
 
 impl Macro for Count {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "count",
             description: "Return the number of items in a collection.",
         }

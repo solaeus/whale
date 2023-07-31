@@ -6,8 +6,10 @@ pub mod data;
 pub mod dir;
 pub mod disk;
 pub mod file;
+pub mod find;
 pub mod git;
 pub mod map;
+pub mod network;
 pub mod output;
 pub mod packages;
 pub mod random;
@@ -21,14 +23,16 @@ pub mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 44] = [
+pub const MACRO_LIST: [&'static dyn Macro; 47] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
     &command::Sh,
     &command::Zsh,
     &count::Count,
-    &data::Csv,
+    &data::Get,
+    &data::ToCsv,
+    &data::FromJson,
     &dir::Create,
     &dir::Move,
     &dir::Read,
@@ -44,6 +48,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 44] = [
     &file::Write,
     &git::Status,
     &map::Map,
+    &network::Download,
     &output::Output,
     &packages::CoprRepositories,
     &packages::Install,
@@ -70,12 +75,12 @@ pub const MACRO_LIST: [&'static dyn Macro; 44] = [
 
 /// Internal whale function with its business logic and all information.
 pub trait Macro: Sync + Send {
-    fn info(&self) -> FunctionInfo<'static>;
+    fn info(&self) -> MacroInfo<'static>;
     fn run(&self, argument: &Value) -> Result<Value>;
 }
 
 /// Information needed for each function.
-pub struct FunctionInfo<'a> {
+pub struct MacroInfo<'a> {
     /// Text pattern that triggers this function.
     pub identifier: &'a str,
 

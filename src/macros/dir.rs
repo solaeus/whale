@@ -1,4 +1,4 @@
-use crate::{Error, FunctionInfo, Macro, Result, Table, Value};
+use crate::{Error, Macro, MacroInfo, Result, Table, Value};
 
 use std::{fs, path::PathBuf};
 
@@ -6,8 +6,8 @@ use std::{fs, path::PathBuf};
 pub struct Create;
 
 impl Macro for Create {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "dir::create",
             description: "Create one or more directories.",
         }
@@ -63,8 +63,8 @@ fn read_dir(path: &str) -> Result<Value> {
 pub struct Read;
 
 impl Macro for Read {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "dir::read",
             description: "Read the content of a directory.",
         }
@@ -79,8 +79,8 @@ impl Macro for Read {
 pub struct Remove;
 
 impl Macro for Remove {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "dir::remove",
             description: "Remove directories.",
         }
@@ -97,8 +97,8 @@ impl Macro for Remove {
 pub struct Trash;
 
 impl Macro for Trash {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "dir::trash",
             description: "Move a directory to the trash.",
         }
@@ -116,8 +116,8 @@ impl Macro for Trash {
 pub struct Move;
 
 impl Macro for Move {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "dir::move",
             description: "Move a directory to a new path.",
         }
@@ -157,7 +157,7 @@ impl Macro for Move {
 pub struct Copy;
 
 impl Macro for Copy {
-    fn info(&self) -> FunctionInfo<'static> {
+    fn info(&self) -> MacroInfo<'static> {
         todo!()
     }
 
@@ -169,7 +169,7 @@ impl Macro for Copy {
 pub struct Metadata;
 
 impl Macro for Metadata {
-    fn info(&self) -> FunctionInfo<'static> {
+    fn info(&self) -> MacroInfo<'static> {
         todo!()
     }
 

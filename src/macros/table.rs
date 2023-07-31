@@ -1,10 +1,10 @@
-use crate::{error::expect_function_argument_amount, FunctionInfo, Macro, Result, Table, Value};
+use crate::{error::expect_function_argument_amount, Macro, MacroInfo, Result, Table, Value};
 
 pub struct Create;
 
 impl Macro for Create {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "table::create",
             description: "Define a new table with a list of column names and list of rows.",
         }
@@ -37,8 +37,8 @@ impl Macro for Create {
 pub struct Insert;
 
 impl Macro for Insert {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "table::insert",
             description: "Add a new row to a table.",
         }
@@ -62,8 +62,8 @@ impl Macro for Insert {
 pub struct Find;
 
 impl Macro for Find {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "table::find",
             description: "Return the first row that matches a predicate.",
         }
@@ -92,8 +92,8 @@ impl Macro for Find {
 pub struct Filter;
 
 impl Macro for Filter {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "table::filter",
             description: "Keep rows matching a predicate.",
         }

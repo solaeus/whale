@@ -1,7 +1,6 @@
 use crate::{Error, Result, Value};
 
-use comfy_table::modifiers::UTF8_ROUND_CORNERS;
-use comfy_table::{Cell, Color, Table as ComfyTable};
+use comfy_table::{Cell, Color, ContentArrangement, Table as ComfyTable};
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
@@ -101,6 +100,7 @@ impl Display for Table {
 
         table
             .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
+            .set_content_arrangement(ContentArrangement::Dynamic)
             .set_header(&self.column_names);
 
         for row in &self.rows {
@@ -134,34 +134,36 @@ impl Display for Table {
     }
 }
 
-impl From<Value> for Table {
-    fn from(value: Value) -> Self {
+impl From<&Value> for Table {
+    fn from(value: &Value) -> Self {
         match value {
             Value::String(string) => {
                 let mut table = Table::new(vec!["string".to_string()]);
 
-                table.insert(vec![Value::String(string)]).unwrap();
+                table
+                    .insert(vec![Value::String(string.to_string())])
+                    .unwrap();
 
                 table
             }
             Value::Float(float) => {
                 let mut table = Table::new(vec!["float".to_string()]);
 
-                table.insert(vec![Value::Float(float)]).unwrap();
+                table.insert(vec![Value::Float(*float)]).unwrap();
 
                 table
             }
             Value::Integer(integer) => {
                 let mut table = Table::new(vec!["integer".to_string()]);
 
-                table.insert(vec![Value::Integer(integer)]).unwrap();
+                table.insert(vec![Value::Integer(*integer)]).unwrap();
 
                 table
             }
             Value::Boolean(boolean) => {
                 let mut table = Table::new(vec!["boolean".to_string()]);
 
-                table.insert(vec![Value::Boolean(boolean)]).unwrap();
+                table.insert(vec![Value::Boolean(*boolean)]).unwrap();
 
                 table
             }
@@ -172,7 +174,9 @@ impl From<Value> for Table {
                     if let Ok(list) = value.as_list() {
                         table.insert(list.clone()).unwrap();
                     } else {
-                        table.insert(vec![Value::Integer(i as i64), value]).unwrap();
+                        table
+                            .insert(vec![Value::Integer(i as i64), value.clone()])
+                            .unwrap();
                     }
                 }
 
@@ -190,11 +194,13 @@ impl From<Value> for Table {
 
                 table
             }
-            Value::Table(table) => table,
+            Value::Table(table) => table.clone(),
             Value::Function(function) => {
                 let mut table = Table::new(vec!["function".to_string()]);
 
-                table.insert(vec![Value::Function(function)]).unwrap();
+                table
+                    .insert(vec![Value::Function(function.clone())])
+                    .unwrap();
 
                 table
             }

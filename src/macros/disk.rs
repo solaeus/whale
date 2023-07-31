@@ -2,13 +2,13 @@ use std::process::Command;
 
 use sysinfo::{DiskExt, System, SystemExt};
 
-use crate::{FunctionInfo, Macro, Result, Table, Value};
+use crate::{Macro, MacroInfo, Result, Table, Value};
 
 pub struct List;
 
 impl Macro for List {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "disk::list",
             description: "List all block devices.",
         }
@@ -59,8 +59,8 @@ impl Macro for List {
 pub struct Partition;
 
 impl Macro for Partition {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "disk::partition",
             description: "Partition a disk, clearing its content.",
         }

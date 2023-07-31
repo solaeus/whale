@@ -8,7 +8,7 @@ use reedline::{
     DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline, ReedlineEvent,
     ReedlineMenu, Signal, Suggestion,
 };
-use whale_lib::{eval, eval_with_context, FunctionInfo, VariableMap, MACRO_LIST};
+use whale_lib::{eval, eval_with_context, MacroInfo, VariableMap, MACRO_LIST};
 
 /// Command-line arguments to be parsed.
 #[derive(Parser, Debug)]
@@ -81,7 +81,7 @@ impl Completer for WhaleCompeleter {
         MACRO_LIST
             .iter()
             .filter_map(|function| {
-                let FunctionInfo {
+                let MacroInfo {
                     identifier,
                     description,
                 } = function.info();

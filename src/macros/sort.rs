@@ -1,10 +1,10 @@
-use crate::{FunctionInfo, Macro, Result, Value};
+use crate::{Macro, MacroInfo, Result, Value};
 
 pub struct Sort;
 
 impl Macro for Sort {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "sort",
             description: "Apply default ordering.",
         }

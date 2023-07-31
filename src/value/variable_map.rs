@@ -1,16 +1,16 @@
+use comfy_table::{ContentArrangement, Table as ComfyTable};
+use serde::{
+    de::{MapAccess, Visitor},
+    ser::SerializeMap,
+    Deserialize, Serialize,
+};
 use std::{
     collections::BTreeMap,
     fmt::{self, Display, Formatter},
     marker::PhantomData,
 };
 
-use serde::{
-    de::{MapAccess, Visitor},
-    ser::SerializeMap,
-    Deserialize, Serialize,
-};
-
-use crate::{value::Value, Error, Result, Table, MACRO_LIST};
+use crate::{value::Value, Error, Result, MACRO_LIST};
 
 /// A context that stores its mappings in hash maps.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq)]
@@ -115,10 +115,16 @@ impl VariableMap {
 }
 
 impl Display for VariableMap {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let table = Table::from(Value::Map(self.clone()));
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut comfy_table = ComfyTable::new();
 
-        write!(f, "{table}")
+        comfy_table
+            .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
+            .set_content_arrangement(ContentArrangement::Dynamic)
+            .set_header(self.variables.keys())
+            .add_row(self.variables.values());
+
+        write!(f, "{comfy_table}")
     }
 }
 
@@ -150,10 +156,8 @@ impl VariableMapVisitor {
 }
 
 impl<'de> Visitor<'de> for VariableMapVisitor {
-    // The type that our Visitor is going to produce.
     type Value = VariableMap;
 
-    // Format a message stating what data this Visitor expects to receive.
     fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
         formatter.write_str("VariableMap of key-value pairs.")
     }

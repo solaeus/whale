@@ -5,13 +5,13 @@ use std::{
     process::Command,
 };
 
-use crate::{Error, FunctionInfo, Macro, Result, Value};
+use crate::{Error, Macro, MacroInfo, Result, Value};
 
 pub struct Convert;
 
 impl Macro for Convert {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::convert",
             description: "Convert a file's contents to a format and set the extension.",
         }
@@ -46,8 +46,8 @@ impl Macro for Convert {
 pub struct Read;
 
 impl Macro for Read {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::read",
             description: "Read file contents.",
         }
@@ -70,8 +70,8 @@ impl Macro for Read {
 pub struct Write;
 
 impl Macro for Write {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::write",
             description: "Write data to a file.",
         }
@@ -107,8 +107,8 @@ impl Macro for Write {
 pub struct FileAppend;
 
 impl Macro for FileAppend {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::append",
             description: "Append data to a file.",
         }
@@ -140,8 +140,8 @@ impl Macro for FileAppend {
 pub struct Remove;
 
 impl Macro for Remove {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::remove",
             description: "Remove files.",
         }
@@ -158,8 +158,8 @@ impl Macro for Remove {
 pub struct Move;
 
 impl Macro for Move {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::move",
             description: "Move a file to a new location.",
         }
@@ -187,8 +187,8 @@ impl Macro for Move {
 pub struct Metadata;
 
 impl Macro for Metadata {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "file::metadata",
             description: "Get meteadata for files.",
         }

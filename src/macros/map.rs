@@ -1,10 +1,10 @@
-use crate::{FunctionInfo, Macro, Result, Value, VariableMap};
+use crate::{Macro, MacroInfo, Result, Value, VariableMap};
 
 pub struct Map;
 
 impl Macro for Map {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "map",
             description: "Create a map from a list of key-value pairs.",
         }

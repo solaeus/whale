@@ -1,17 +1,16 @@
 use crate::{Macro, MacroInfo, Result, Value};
 
-pub struct Output;
+pub struct Find;
 
-impl Macro for Output {
+impl Macro for Find {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "output",
-            description: "Print a value.",
+            identifier: "find",
+            description: "Search for a value in a collection of values.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        println!("{argument}");
-        Ok(Value::Empty)
+        todo!()
     }
 }

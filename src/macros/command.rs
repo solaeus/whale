@@ -1,12 +1,12 @@
 use std::process::Command;
 
-use crate::{FunctionInfo, Macro, Result, Value};
+use crate::{Macro, MacroInfo, Result, Value};
 
 pub struct Sh;
 
 impl Macro for Sh {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "command::sh",
             description: "Pass input to the Bourne Shell.",
         }
@@ -24,8 +24,8 @@ impl Macro for Sh {
 pub struct Bash;
 
 impl Macro for Bash {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "command::bash",
             description: "Pass input to the Bourne Again Shell.",
         }
@@ -46,8 +46,8 @@ impl Macro for Bash {
 pub struct Fish;
 
 impl Macro for Fish {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "command::fish",
             description: "Pass input to the fish shell.",
         }
@@ -69,8 +69,8 @@ impl Macro for Fish {
 pub struct Zsh;
 
 impl Macro for Zsh {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "command::zsh",
             description: "Pass input to the Z shell.",
         }
@@ -92,8 +92,8 @@ impl Macro for Zsh {
 pub struct Raw;
 
 impl Macro for Raw {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "command::raw",
             description: "Run input as a command without a shell",
         }

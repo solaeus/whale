@@ -1,12 +1,12 @@
 use sys_info::{self, cpu_num, cpu_speed, hostname};
 
-use crate::{FunctionInfo, Macro, Table, Value, VariableMap};
+use crate::{Macro, MacroInfo, Table, Value, VariableMap};
 
 pub struct SystemInfo;
 
 impl Macro for SystemInfo {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "system::info",
             description: "Get information on the system.",
         }
@@ -26,8 +26,8 @@ impl Macro for SystemInfo {
 pub struct SystemCpu;
 
 impl Macro for SystemCpu {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "system::cpu",
             description: "Get information on the system's CPU.",
         }

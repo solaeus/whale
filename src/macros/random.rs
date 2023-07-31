@@ -2,13 +2,13 @@ use std::convert::TryInto;
 
 use rand::{random, thread_rng, Rng};
 
-use crate::{Error, FunctionInfo, Macro, Result, Value};
+use crate::{Error, Macro, MacroInfo, Result, Value};
 
 pub struct RandomInteger;
 
 impl Macro for RandomInteger {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "random::integer",
             description: "Create a random integer.",
         }
@@ -44,8 +44,8 @@ impl Macro for RandomInteger {
 pub struct RandomString;
 
 impl Macro for RandomString {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "random::string",
             description: "Generate a random string.",
         }
@@ -86,8 +86,8 @@ impl Macro for RandomString {
 pub struct RandomFloat;
 
 impl Macro for RandomFloat {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "random::float",
             description: "Generate a random floating point value between 0 and 1.",
         }

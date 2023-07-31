@@ -1,12 +1,12 @@
-use crate::{FunctionInfo, Macro, Result, Table, Value};
+use crate::{Macro, MacroInfo, Result, Table, Value};
 
 use git2::Repository;
 
 pub struct Status;
 
 impl Macro for Status {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "git::status",
             description: "Get the repository status for the current directory.",
         }

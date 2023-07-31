@@ -1,14 +1,14 @@
-use std::fs;
+use std::{fs, time::Instant};
 
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{Function, FunctionInfo, Macro, Result, Value};
+use crate::{Function, Macro, MacroInfo, Result, Value, VariableMap};
 
 pub struct Repeat;
 
 impl Macro for Repeat {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "repeat",
             description: "Run a function the given number of times.",
         }
@@ -33,8 +33,8 @@ impl Macro for Repeat {
 pub struct Run;
 
 impl Macro for Run {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "run",
             description: "Run a whale file.",
         }
@@ -51,8 +51,8 @@ impl Macro for Run {
 pub struct Async;
 
 impl Macro for Async {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "async",
             description: "Run functions in parallel.",
         }
@@ -67,19 +67,35 @@ impl Macro for Async {
             functions.push(function);
         }
 
-        functions.par_iter().for_each(|function| {
-            let _ = function.run();
-        });
+        let start = Instant::now();
+        let results = functions
+            .par_iter()
+            .map(|function| function.run())
+            .map(|result| {
+                let elapsed = Value::Integer(start.elapsed().as_millis() as i64);
+                let mut map = VariableMap::new();
 
-        Ok(Value::Empty)
+                match result {
+                    Ok(value) => {
+                        let _ = map.set_value("output", value);
+                        let _ = map.set_value("time", elapsed);
+
+                        Value::Map(map)
+                    }
+                    Err(error) => Value::String(error.to_string()),
+                }
+            })
+            .collect();
+
+        Ok(Value::List(results))
     }
 }
 
 pub struct Pipe;
 
 impl Macro for Pipe {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "pipe",
             description: "Process a value with a list of functions.",
         }

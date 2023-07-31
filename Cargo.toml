@@ -34,3 +34,4 @@ clap = { version = "4.3.19", features = ["derive"] }
 nu-ansi-term = "0.49.0"
 git2 = "0.17.2"
 csv = "1.2.2"
+json = "0.12.4"

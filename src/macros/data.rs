@@ -1,12 +1,41 @@
-use crate::{FunctionInfo, Macro, Result, Value};
+use std::convert::TryFrom;
+
+use crate::{Macro, MacroInfo, Result, Value};
 
 use csv;
+use json::JsonValue;
 
-pub struct Csv;
+pub struct Get;
 
-impl Macro for Csv {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+impl Macro for Get {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "get",
+            description: "Extract a value from a collection.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_list()?;
+        let collection = &argument[0];
+        let index = &argument[1];
+
+        if let Ok(list) = collection.as_list() {
+            let index = index.as_int()?;
+            let value = list.get(index as usize).unwrap_or(&Value::Empty);
+
+            Ok(value.clone())
+        } else {
+            Ok(Value::Empty)
+        }
+    }
+}
+
+pub struct ToCsv;
+
+impl Macro for ToCsv {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "data::to_csv",
             description: "Convert a value to a string of comma-separated values.",
         }
@@ -56,5 +85,24 @@ impl Macro for Csv {
         Ok(Value::String(
             String::from_utf8_lossy(writer.get_ref()).to_string(),
         ))
+    }
+}
+
+pub struct FromJson;
+
+impl Macro for FromJson {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "data::from_json",
+            description: "Convert JSON to a whale table.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_string()?;
+        let json: JsonValue = json::parse(argument)?;
+        let value = Value::try_from(json)?;
+
+        Ok(value)
     }
 }

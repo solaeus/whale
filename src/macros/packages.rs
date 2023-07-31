@@ -1,12 +1,12 @@
 use std::process::Command;
 
-use crate::{Error, FunctionInfo, Macro, Result, Value};
+use crate::{Error, Macro, MacroInfo, Result, Value};
 
 pub struct CoprRepositories;
 
 impl Macro for CoprRepositories {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "packages::copr_repositories",
             description: "Enable one or more COPR repositories.",
         }
@@ -39,8 +39,8 @@ impl Macro for CoprRepositories {
 pub struct Install;
 
 impl Macro for Install {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "packages::install",
             description: "Install one or more packages.",
         }
@@ -73,8 +73,8 @@ impl Macro for Install {
 pub struct RpmRepositories;
 
 impl Macro for RpmRepositories {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "packages::rpm_repositories",
             description: "Enable one or more RPM repositories.",
         }
@@ -108,8 +108,8 @@ impl Macro for RpmRepositories {
 pub struct Uninstall;
 
 impl Macro for Uninstall {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "packages::uninstall",
             description: "Uninstall one or more packages.",
         }
@@ -142,8 +142,8 @@ impl Macro for Uninstall {
 pub struct Upgrade;
 
 impl Macro for Upgrade {
-    fn info(&self) -> FunctionInfo<'static> {
-        FunctionInfo {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
             identifier: "packages::upgrade",
             description: "Upgrade all installed packages.",
         }

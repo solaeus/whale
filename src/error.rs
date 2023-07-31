@@ -1,6 +1,7 @@
-use std::{fmt, io};
-
 use crate::{operator::Operator, token::PartialToken, value::value_type::ValueType, value::Value};
+
+use json;
+use std::{fmt, io};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -234,6 +235,12 @@ pub enum Error {
 
 impl From<csv::Error> for Error {
     fn from(value: csv::Error) -> Self {
+        Error::FunctionFailure(value.to_string())
+    }
+}
+
+impl From<json::Error> for Error {
+    fn from(value: json::Error) -> Self {
         Error::FunctionFailure(value.to_string())
     }
 }

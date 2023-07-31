@@ -5,8 +5,8 @@ use crate::{Macro, Result, Value};
 pub struct Watch;
 
 impl Macro for Watch {
-    fn info(&self) -> crate::FunctionInfo<'static> {
-        crate::FunctionInfo {
+    fn info(&self) -> crate::MacroInfo<'static> {
+        crate::MacroInfo {
             identifier: "wait::watch",
             description: "Wait until a file changes.",
         }
@@ -34,8 +34,8 @@ impl Macro for Watch {
 pub struct Seconds;
 
 impl Macro for Seconds {
-    fn info(&self) -> crate::FunctionInfo<'static> {
-        crate::FunctionInfo {
+    fn info(&self) -> crate::MacroInfo<'static> {
+        crate::MacroInfo {
             identifier: "wait::seconds",
             description: "Wait for the given number of seconds.",
         }

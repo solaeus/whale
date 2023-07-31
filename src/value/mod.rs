@@ -3,6 +3,8 @@ use crate::{
     Function, Table, VariableMap,
 };
 
+use comfy_table::{ContentArrangement, Table as ComfyTable};
+use json::JsonValue;
 use serde::{ser::SerializeTuple, Deserialize, Serialize, Serializer};
 use std::{
     cmp::Ordering,
@@ -244,18 +246,16 @@ impl Display for Value {
             Value::Float(float) => write!(f, "{}", float),
             Value::Integer(int) => write!(f, "{}", int),
             Value::Boolean(boolean) => write!(f, "{}", boolean),
-            Value::List(tuple) => {
-                write!(f, "(")?;
-                let mut once = false;
-                for value in tuple {
-                    if once {
-                        write!(f, ", ")?;
-                    } else {
-                        once = true;
-                    }
-                    value.fmt(f)?;
-                }
-                write!(f, ")")
+            Value::List(list) => {
+                let mut comfy_table = ComfyTable::new();
+
+                comfy_table
+                    .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
+                    .set_content_arrangement(ContentArrangement::Dynamic)
+                    .set_header(0..list.len())
+                    .add_row(list);
+
+                write!(f, "{comfy_table}")
             }
             Value::Empty => write!(f, "()"),
             Value::Map(map) => write!(f, "{}", map),
@@ -310,6 +310,82 @@ impl From<Value> for Result<Value> {
 impl From<()> for Value {
     fn from(_: ()) -> Self {
         Value::Empty
+    }
+}
+
+impl TryFrom<JsonValue> for Value {
+    type Error = Error;
+
+    fn try_from(json_value: JsonValue) -> Result<Self> {
+        use JsonValue::*;
+
+        match json_value {
+            Null => Ok(Value::Empty),
+            Short(short) => Ok(Value::String(short.to_string())),
+            String(string) => Ok(Value::String(string)),
+            Number(number) => Ok(Value::Float(f64::from(number))),
+            Boolean(boolean) => Ok(Value::Boolean(boolean)),
+            Object(object) => {
+                let mut map = VariableMap::new();
+
+                for (key, node_value) in object.iter() {
+                    let value = Value::try_from(node_value)?;
+
+                    map.set_value(key, value)?;
+                }
+
+                Ok(Value::Map(map))
+            }
+            Array(array) => {
+                let mut list = Vec::new();
+
+                for json_value in array {
+                    let value = Value::try_from(json_value)?;
+
+                    list.push(value);
+                }
+
+                Ok(Value::List(list))
+            }
+        }
+    }
+}
+
+impl TryFrom<&JsonValue> for Value {
+    type Error = Error;
+
+    fn try_from(json_value: &JsonValue) -> Result<Self> {
+        use JsonValue::*;
+
+        match json_value {
+            Null => Ok(Value::Empty),
+            Short(short) => Ok(Value::String(short.to_string())),
+            String(string) => Ok(Value::String(string.clone())),
+            Number(number) => Ok(Value::Float(f64::from(*number))),
+            Boolean(boolean) => Ok(Value::Boolean(*boolean)),
+            Object(object) => {
+                let mut map = VariableMap::new();
+
+                for (key, node_value) in object.iter() {
+                    let value = Value::try_from(node_value)?;
+
+                    map.set_value(key, value)?;
+                }
+
+                Ok(Value::Map(map))
+            }
+            Array(array) => {
+                let mut list = Vec::new();
+
+                for json_value in array {
+                    let value = Value::try_from(json_value)?;
+
+                    list.push(value);
+                }
+
+                Ok(Value::List(list))
+            }
+        }
     }
 }
 
