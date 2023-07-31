@@ -56,7 +56,9 @@ fn run_shell() {
 
                 match eval_result {
                     Ok(value) => {
-                        println!("{value}");
+                        if !value.is_empty() {
+                            println!("{value}");
+                        }
                     }
                     Err(error) => eprintln!("{}", error),
                 }
@@ -111,7 +113,7 @@ fn setup_reedline() -> Reedline {
     let completion_menu = Box::new(
         ColumnarMenu::default()
             .with_name("completion_menu")
-            .with_columns(3)
+            .with_columns(2)
             .with_text_style(Style {
                 is_dimmed: false,
                 foreground: Some(Color::White),

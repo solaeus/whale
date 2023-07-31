@@ -1,6 +1,5 @@
-Table::create (
+user = '(random::integer(), random::string(), random::integer(0, 100))';
+table::create(
 	("id", "name", "age"),
-	(
-		whale::repeat ('(random::integer(), random::string(), random::integer(0, 100))', 10)
-	)
+	(repeat(user, 10))
 )

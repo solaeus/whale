@@ -27,26 +27,21 @@ impl VariableMap {
     }
 
     pub fn call_function(&self, identifier: &str, argument: &Value) -> Result<Value> {
-        for r#macro in MACRO_LIST {
-            if identifier == r#macro.info().identifier {
-                return r#macro.run(argument);
+        for macro_item in MACRO_LIST {
+            if identifier == macro_item.info().identifier {
+                return macro_item.run(argument);
             }
         }
 
         for (key, value) in &self.variables {
             if identifier == key {
-                return value.as_function()?.run();
-            }
-        }
-
-        let split = identifier.split_once(".");
-        if let Some((identifier, next_identifier)) = split {
-            if let Some(value) = self.variables.get(identifier) {
-                if let Value::Map(map) = value {
-                    map.call_function(next_identifier, argument)?;
+                if let Ok(function) = value.as_function() {
+                    return function.run();
                 }
             }
         }
+
+        println!("FAILED TO GET FUNCTION {identifier}");
 
         Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
     }

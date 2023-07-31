@@ -5,9 +5,3 @@ a = "foo";
 b = "bar";
 c = "foobar";
 d = ("abc", "123", "xyz");
-e.foo = "hello";
-e.bar = "hiya";
-e.raboof.xyz = 777;
-
-
-

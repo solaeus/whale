@@ -101,9 +101,7 @@ impl Display for Table {
 
         table
             .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
-            .apply_modifier(UTF8_ROUND_CORNERS)
-            .set_header(&self.column_names)
-            .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
+            .set_header(&self.column_names);
 
         for row in &self.rows {
             let row = row.iter().map(|value| {

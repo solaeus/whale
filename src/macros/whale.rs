@@ -9,7 +9,7 @@ pub struct Repeat;
 impl Macro for Repeat {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "whale::repeat",
+            identifier: "repeat",
             description: "Run a function the given number of times.",
         }
     }
@@ -35,7 +35,7 @@ pub struct Run;
 impl Macro for Run {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "whale::run",
+            identifier: "run",
             description: "Run a whale file.",
         }
     }
@@ -53,7 +53,7 @@ pub struct Async;
 impl Macro for Async {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "whale::async",
+            identifier: "async",
             description: "Run functions in parallel.",
         }
     }
@@ -80,7 +80,7 @@ pub struct Pipe;
 impl Macro for Pipe {
     fn info(&self) -> FunctionInfo<'static> {
         FunctionInfo {
-            identifier: "whale::pipe",
+            identifier: "pipe",
             description: "Process a value with a list of functions.",
         }
     }
