@@ -54,6 +54,33 @@ impl Table {
         self.rows.get(index)
     }
 
+    pub fn select(&self, column_names: &[String]) -> Table {
+        let matching_column_names = column_names
+            .into_iter()
+            .filter(|name| self.column_names.contains(name))
+            .cloned()
+            .collect::<Vec<String>>();
+        let matching_column_indexes = matching_column_names
+            .iter()
+            .filter_map(|name| self.get_column_index(name))
+            .collect::<Vec<usize>>();
+        let mut new_table = Table::new(matching_column_names);
+
+        for row in &self.rows {
+            let mut new_row = Vec::new();
+
+            for (i, value) in row.into_iter().enumerate() {
+                if matching_column_indexes.contains(&i) {
+                    new_row.push(value.clone());
+                }
+            }
+
+            new_table.insert(new_row).unwrap();
+        }
+
+        new_table
+    }
+
     pub fn get_where(&self, column_name: &str, expected: &Value) -> Option<&Vec<Value>> {
         let column_index = self.get_column_index(column_name)?;
 
@@ -128,6 +155,10 @@ impl Display for Table {
             });
 
             table.add_row(row);
+        }
+
+        if self.column_names.is_empty() {
+            table.set_header(&["empty"]);
         }
 
         write!(f, "{table}")

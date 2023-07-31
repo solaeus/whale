@@ -23,7 +23,7 @@ pub mod whale;
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 47] = [
+pub const MACRO_LIST: [&'static dyn Macro; 48] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -63,8 +63,9 @@ pub const MACRO_LIST: [&'static dyn Macro; 47] = [
     &system::SystemInfo,
     &table::Create,
     &table::Filter,
-    &table::Find,
+    &table::FindRow,
     &table::Insert,
+    &table::Select,
     &wait::Seconds,
     &wait::Watch,
     &whale::Async,

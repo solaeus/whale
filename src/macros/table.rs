@@ -59,12 +59,12 @@ impl Macro for Insert {
     }
 }
 
-pub struct Find;
+pub struct FindRow;
 
-impl Macro for Find {
+impl Macro for FindRow {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "table::find",
+            identifier: "table::find_row",
             description: "Return the first row that matches a predicate.",
         }
     }
@@ -77,15 +77,39 @@ impl Macro for Find {
         let column_name = argument[1].as_string()?;
         let expected = &argument[2];
         let find = table.get_where(&column_name, expected);
+        let mut new_table = Table::new(table.column_names().clone());
 
         if let Some(row) = find {
-            let mut new_table = Table::new(table.column_names().clone());
             new_table.insert(row.clone()).unwrap();
-
-            Ok(Value::Table(new_table))
-        } else {
-            Ok(Value::Empty)
         }
+
+        Ok(Value::Table(new_table))
+    }
+}
+
+pub struct Select;
+
+impl Macro for Select {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "table::select",
+            description: "Return a table with the selected columns.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_list()?;
+        expect_function_argument_amount(argument.len(), 2)?;
+
+        let table = argument[0].as_table()?;
+        let column_names = argument[1]
+            .as_list()?
+            .iter()
+            .map(|value| value.to_string())
+            .collect::<Vec<String>>();
+        let selected = table.select(&column_names);
+
+        Ok(Value::Table(selected))
     }
 }
 
