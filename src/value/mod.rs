@@ -149,9 +149,9 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_table(&self) -> Result<Table> {
+    pub fn as_table(&self) -> Result<&Table> {
         match self {
-            Value::Table(table) => Ok(table.clone()),
+            Value::Table(table) => Ok(table),
             value => Err(Error::expected_table(value.clone())),
         }
     }

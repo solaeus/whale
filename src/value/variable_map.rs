@@ -41,7 +41,7 @@ impl VariableMap {
             }
         }
 
-        let split = identifier.split_once("::");
+        let split = identifier.split_once(":");
 
         if let Some((variable_identifier, function_identifier)) = split {
             if let Some(value) = self.variables.get(variable_identifier) {
@@ -49,8 +49,6 @@ impl VariableMap {
                 return self.call_function(function_identifier, &list);
             }
         }
-
-        println!("FAILED TO GET FUNCTION {identifier}");
 
         Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
     }

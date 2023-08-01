@@ -50,6 +50,12 @@ impl Table {
         Ok(())
     }
 
+    pub fn remove(&mut self, index: usize) -> Result<()> {
+        self.rows.remove(index);
+
+        Ok(())
+    }
+
     pub fn get(&self, index: usize) -> Option<&Vec<Value>> {
         self.rows.get(index)
     }

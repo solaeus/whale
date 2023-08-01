@@ -17,7 +17,7 @@ impl Macro for Sort {
             Ok(Value::List(list.clone()))
         } else if let Ok(map) = argument.as_map() {
             Ok(Value::Map(map))
-        } else if let Ok(mut table) = argument.as_table() {
+        } else if let Ok(mut table) = argument.as_table().cloned() {
             table.sort();
 
             Ok(Value::Table(table))

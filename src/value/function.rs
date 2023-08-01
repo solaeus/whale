@@ -2,7 +2,7 @@ use std::fmt::{self, Display, Formatter};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{eval, Result, Value};
+use crate::{eval, eval_with_context, Result, Value, VariableMap};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Function(String);
@@ -14,6 +14,10 @@ impl Function {
 
     pub fn run(&self) -> Result<Value> {
         eval(&self.0)
+    }
+
+    pub fn run_with_context(&self, context: &mut VariableMap) -> Result<Value> {
+        eval_with_context(&self.0, context)
     }
 }
 

@@ -1,4 +1,6 @@
-use crate::{error::expect_function_argument_amount, Macro, MacroInfo, Result, Table, Value};
+use crate::{
+    error::expect_function_argument_amount, Macro, MacroInfo, Result, Table, Value, VariableMap,
+};
 
 pub struct Create;
 
@@ -47,7 +49,7 @@ impl Macro for Insert {
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
 
-        let mut table = argument[0].as_table()?;
+        let mut table = argument[0].as_table()?.clone();
 
         for row in &argument[1..] {
             let row = row.as_list()?.clone();
@@ -113,29 +115,38 @@ impl Macro for Select {
     }
 }
 
-pub struct Filter;
+pub struct Where;
 
-impl Macro for Filter {
+impl Macro for Where {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "table::filter",
+            identifier: "where",
             description: "Keep rows matching a predicate.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        expect_function_argument_amount(argument.len(), 3)?;
+        expect_function_argument_amount(argument.len(), 2)?;
 
         let table = argument[0].as_table()?;
-        let column_name = argument[1].as_string()?;
-        let expected = &argument[2];
-        let filtered_table = table.filter(column_name, expected);
+        let function = argument[1].as_function()?;
+        let mut context = VariableMap::new();
+        let mut new_table = Table::new(table.column_names().clone());
 
-        if let Some(table) = filtered_table {
-            Ok(Value::Table(table))
-        } else {
-            Ok(Value::Empty)
+        for row in table.rows() {
+            for (column_index, cell) in row.into_iter().enumerate() {
+                let column_name = table.column_names().get(column_index).unwrap();
+
+                context.set_value(column_name, cell.clone())?;
+            }
+            let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
+
+            if keep_row {
+                new_table.insert(row.clone())?;
+            }
         }
+
+        Ok(Value::Table(new_table))
     }
 }
