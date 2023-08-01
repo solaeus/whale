@@ -103,7 +103,7 @@ impl Macro for FromJson {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "from_json",
-            description: "Convert JSON to a whale table.",
+            description: "Convert JSON to a whale value.",
         }
     }
 
