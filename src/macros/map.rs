@@ -6,32 +6,39 @@ impl Macro for Map {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "map",
-            description: "Create a map from a list of key-value pairs.",
+            description: "Change each value with a function.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        let mut map = VariableMap::new();
+        let value = &argument[0];
+        let function = argument[1].as_function()?;
 
-        for pair in argument {
-            let pair = pair.as_list()?;
+        match value {
+            Value::String(_string) => todo!(),
+            Value::Float(_) => todo!(),
+            Value::Integer(_) => todo!(),
+            Value::Boolean(_) => todo!(),
+            Value::List(list) => {
+                let mut mapped_list = Vec::with_capacity(list.len());
 
-            println!("{pair:?}");
+                for value in list {
+                    let mut context = VariableMap::new();
 
-            if pair.len() != 2 {
-                return Err(crate::Error::ExpectedFixedLenTuple {
-                    expected_len: 2,
-                    actual: Value::List(pair.clone()),
-                });
+                    context.set_value("input", value.clone())?;
+
+                    let mapped_value = function.run_with_context(&mut context)?;
+
+                    mapped_list.push(mapped_value);
+                }
+
+                Ok(Value::List(mapped_list))
             }
-
-            let key = pair[0].as_string()?;
-            let value = pair[1].clone();
-
-            map.set_value(&key, value)?;
+            Value::Empty => todo!(),
+            Value::Map(_map) => todo!(),
+            Value::Table(_) => todo!(),
+            Value::Function(_) => todo!(),
         }
-
-        Ok(Value::Map(map))
     }
 }
