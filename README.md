@@ -24,95 +24,7 @@ wait watch "foo.whale";
 output "The time is " + date::time;
 ```
 
-## Feautures
-
-- Data-oriented language based on expressions and variable assignment
-- Declarative syntax
-- Small and easy to learn
-- Manage immutable operating systems
-- Extensive features for containerized workflows
-
-## Motivation
-
-Using the command line is like speaking a language: you learn idioms and develop
-preferences based on how you use it. The hard part is knowing *how* to say
-what you want. Let's say we want to partition a hard drive. We need to know
-the device path, label type, partition name, filesystem type and byte range.
-With whale, we simply describe the desired state in a file and let one of the
-language's functions do the rest.
-
-```rust
-path = "/dev/sda";
-label = "gpt";
-name = "partition1";
-filesystem = "ext4";
-range = ("1Mib", "8MiB");
-```
-
-Then run the function with the name of the file.
-
-```rust
-disk::partition "my_partition.whale"
-```
-
-Here's the same code using a conventional shell with GNU's parted.
-
-```sh
-parted /dev/sda mklabel gpt mkpart partition1 ext4 1MiB 8MiB 
-```
-
-It fits nicely on one line, but after a few months you may want to make a change
-and you will wish it was more explicit. The traditional Unix command has only
-values, but whale has key-value pairs. The names of the keys are easier to
-remember than how to order the information.
-
-## Implementation
-
-Whale serves its use cases in the easiest and most obvious way possible. It
-implements solutions with the same philosophy: the `disk::partition` function
-uses GNU's parted, acting as a simple API layer when possible. Whale always uses
-[fish] as a shell when running commands. This is because other shells do not
-support user-modified commands in non-interactive mode.
-
-Whale is highly focused on serving users of immutable operating systems and
-containerized workflows. While it works an any system, it has advanced features
-such as layering packages on the base OS and package management inside the
-container.
-
-Whale is a hard fork of [evalexpr]. Thanks to the creator and contributors of
-that project.
-
 ## Usage
-
-Whale has variables that hold data and functions that use data. If we declare
-a [toolbox] container as a variable, whale can use the data to create the
-container from scratch. Maintaining the container is as easy as maintaining that
-file. We can also write this in the whale shell instead of a file.
-
-```rust
-name = "toolbox:" + time::date;
-image = "fedora-toolbox:38";
-copr = ("varlad/helix");
-packages = ("fzf", "helix", "ripgrep");
-```
-
-Whale is based on **expressions**, so `"toolbox:" + time::date` will evaluate to
-`toolbox:<today's date>`. When passed to the `output` function, the above file
-looks like this.
-
-```txt
-(
-  copr = "varlad/helix";
-  image = "fedora-toolbox:38"; 
-  name = "toolbox:2023-07-03"; 
-  packages = ("fzf", "helix", "ripgrep");
-)
-```
-
-When passed to the `toolbox::build` function, whale will create a new toolbox
-container based on our declaration. Whale is easier to read, write and maintain
-than a shell script. Unlike a scripting language, the language itself handles
-most of the business logic while our code focuses on the data.
 
 ### Variables
 
@@ -122,30 +34,97 @@ some examples of variables in whale.
 
 ```ruby
 x = 1;
-y = "hello";
+y = "hello, it is " + now().time;
 z = "42.42";
 
 list = (3, 2, x);
 big_list = (x, y, z, list);
-
-map.text = "nested value"
-map.list = big_list;
-nested.maps.work.too = "!"
 ```
 
-### Functions
+### Macros
 
-Whale has lots of functions. Some of them can reconfigure your whole system
-while others are simple tools. They may accept different inputs, or none at all.
-Functions in the `random` module can all run without input, but the `integer`
-function can optionally take two numbers as a range or a single number as the
-highest allowable result.
+Macros are whale's built-in tools. Some of them can reconfigure your whole
+system while others are do very little. They may accept different inputs, or
+none at all. Functions in the `random` module can all run without input, but the
+`integer` function can optionally take two numbers as a range or a single number
+as the highest allowable result.
 
-```ruby
-coin_flip = random::boolean;
-number = random::integer;
-die_roll = random::integer(1, 6);
+```whale
+coin_flip = random_boolean();
+number = random_integer();
+die_roll = random_integer(1, 6);
 ```
+
+### Expressions, declarations and pipes
+
+Whale has flexible syntax. The following block will print the same thing five
+times.
+
+```whale
+output "hiya";
+output("hiya");
+"hiya":output;
+
+message = "hiya";
+output message;
+message:output;
+```
+
+Whale supports pipe-like syntax through expression evaluation.
+
+```
+"https://api.sampleapis.com/futurama/characters":download:from_json:get 4
+```
+
+This can be useful when working on the command line but to make a script easier
+to read, we can also declare variables.
+
+```
+endpoint = "https://api.sampleapis.com/futurama/characters";
+json = endpoint:download;
+data = json:from_json;
+data:get 4
+```
+
+You can use all of this together to write short, elegant scripts.
+
+```
+characters = download "https://api.sampleapis.com/futurama/characters";
+characters:from_json:get 4
+```
+
+### Maps
+
+Maps are flexible collections with arbitrary key-value pairs, similar to JSON
+objects.
+
+```
+info.message = "FOOBAR";
+info.time = now().timestamp;
+
+info:write "info.txt";
+```
+
+### Tables
+
+Tables are strict collections, each row must have a value for each column. Empty
+cells must be explicitly set to an empty value. Querying a table is similar to
+SQL.
+
+```
+animals.all = create_table (
+  ("name", "species", "age"),
+  (
+    ("rover", "cat", 14),
+    ("spot", "snake", 9),
+    ("bob", "giraffe", 2),
+  )
+);
+
+animals.by_name = animals:sort_by "name";
+animals.oldest = animals:select_where 'species > 5';
+```
+
 
 [evalexpr]: https://github.com/ISibboI/evalexpr
 [toolbox]: https://containertoolbx.org

@@ -10,7 +10,7 @@ impl Macro for Find {
         }
     }
 
-    fn run(&self, argument: &Value) -> Result<Value> {
+    fn run(&self, _argument: &Value) -> Result<Value> {
         todo!()
     }
 }

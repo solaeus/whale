@@ -1,0 +1,4 @@
+raw_data = network::download "https://api.sampleapis.com/futurama/cast";
+data = data::from_json raw_data;
+first = get(data, 4);
+first.name

@@ -24,10 +24,19 @@ impl Macro for Get {
             let index = index.as_int()?;
             let value = list.get(index as usize).unwrap_or(&Value::Empty);
 
-            Ok(value.clone())
-        } else {
-            Ok(Value::Empty)
+            return Ok(value.clone());
         }
+
+        if let Ok(table) = collection.as_table() {
+            let index = index.as_int()?;
+            let get_row = table.get(index as usize);
+
+            if let Some(row) = get_row {
+                return Ok(Value::List(row.clone()));
+            }
+        }
+
+        Ok(Value::Empty)
     }
 }
 
@@ -36,7 +45,7 @@ pub struct ToCsv;
 impl Macro for ToCsv {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "data::to_csv",
+            identifier: "to_csv",
             description: "Convert a value to a string of comma-separated values.",
         }
     }
@@ -93,7 +102,7 @@ pub struct FromJson;
 impl Macro for FromJson {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "data::from_json",
+            identifier: "from_json",
             description: "Convert JSON to a whale table.",
         }
     }
