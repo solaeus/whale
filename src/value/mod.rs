@@ -17,53 +17,51 @@ pub mod table;
 pub mod value_type;
 pub mod variable_map;
 
-/// The value type used by the parser.
-/// Values can be of different subtypes that are the variants of this enum.
+/// Whale value representation.
+///
+/// Every whale variable has a key and a Value. Variables are represented by
+/// storing them in a VariableMap. This means the map of variables is itself a
+/// value that can be treated as any other.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
+#[derive(Default)]
 pub enum Value {
     String(String),
     Float(f64),
     Integer(i64),
     Boolean(bool),
     List(Vec<Value>),
-    Empty,
     Map(VariableMap),
     Table(Table),
     Function(Function),
+    #[default]
+    Empty,
 }
 
 impl Value {
-    /// Returns true if `self` is a `Value::String`.
     pub fn is_string(&self) -> bool {
         matches!(self, Value::String(_))
     }
 
-    /// Returns true if `self` is a `Value::Integer`.
     pub fn is_integer(&self) -> bool {
         matches!(self, Value::Integer(_))
     }
 
-    /// Returns true if `self` is a `Value::Float`.
     pub fn is_float(&self) -> bool {
         matches!(self, Value::Float(_))
     }
 
-    /// Returns true if `self` is a `Value::Integer` or `Value::Float`.
     pub fn is_number(&self) -> bool {
         matches!(self, Value::Integer(_) | Value::Float(_))
     }
 
-    /// Returns true if `self` is a `Value::Boolean`.
     pub fn is_boolean(&self) -> bool {
         matches!(self, Value::Boolean(_))
     }
 
-    /// Returns true if `self` is a `Value::List`.
     pub fn is_list(&self) -> bool {
         matches!(self, Value::List(_))
     }
 
-    /// Returns true if `self` is a `Value::Empty`.
     pub fn is_empty(&self) -> bool {
         matches!(self, Value::Empty)
     }
@@ -76,7 +74,7 @@ impl Value {
         matches!(self, Value::Map(_))
     }
 
-    /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
+    /// Borrows the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
     pub fn as_string(&self) -> Result<&String> {
         match self {
             Value::String(string) => Ok(string),
@@ -84,7 +82,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `i64`, or returns `Err` if `self` is not a `Value::Int`.
+    /// Copies the value stored in `self` as `i64`, or returns `Err` if `self` is not a `Value::Int`.
     pub fn as_int(&self) -> Result<i64> {
         match self {
             Value::Integer(i) => Ok(*i),
@@ -92,7 +90,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in  `self` as `f64`, or returns `Err` if `self` is not a `Value::Float`.
+    /// Copies the value stored in  `self` as `f64`, or returns `Err` if `self` is not a `Value::Float`.
     pub fn as_float(&self) -> Result<f64> {
         match self {
             Value::Float(f) => Ok(*f),
@@ -100,7 +98,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in  `self` as `f64`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
+    /// Copies the value stored in  `self` as `f64`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
     /// Note that this method silently converts `i64` to `f64`, if `self` is a `Value::Int`.
     pub fn as_number(&self) -> Result<f64> {
         match self {
@@ -110,7 +108,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
+    /// Copies the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
     pub fn as_boolean(&self) -> Result<bool> {
         match self {
             Value::Boolean(boolean) => Ok(*boolean),
@@ -118,7 +116,7 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
+    /// Borrows the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
     pub fn as_list(&self) -> Result<&Vec<Value>> {
         match self {
             Value::List(list) => Ok(list),
@@ -126,12 +124,12 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `Vec<Value>` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
-    pub fn as_fixed_len_list(&self, len: usize) -> Result<Vec<Value>> {
+    /// Borrows the value stored in `self` as `Vec<Value>` or returns `Err` if `self` is not a `Value::Map` of the required length.
+    pub fn as_fixed_len_list(&self, len: usize) -> Result<&Vec<Value>> {
         match self {
             Value::List(tuple) => {
                 if tuple.len() == len {
-                    Ok(tuple.clone())
+                    Ok(tuple)
                 } else {
                     Err(Error::expected_fixed_len_tuple(len, self.clone()))
                 }
@@ -140,15 +138,15 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_map(&self) -> Result<VariableMap> {
+    /// Borrows the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Map`.
+    pub fn as_map(&self) -> Result<&VariableMap> {
         match self {
-            Value::Map(map) => Ok(map.clone()),
+            Value::Map(map) => Ok(map),
             value => Err(Error::expected_map(value.clone())),
         }
     }
 
-    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
+    /// Borrows the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Table`.
     pub fn as_table(&self) -> Result<&Table> {
         match self {
             Value::Table(table) => Ok(table),
@@ -156,7 +154,8 @@ impl Value {
         }
     }
 
-    /// Returns `()`, or returns`Err` if `self` is not a `Value::Tuple`.
+    /// Borrows the value stored in `self` as `Function`, or returns `Err` if
+    /// `self` is not a `Value::Function`.
     pub fn as_function(&self) -> Result<Function> {
         match self {
             Value::Function(function) => Ok(function.clone()),
@@ -173,11 +172,7 @@ impl Value {
     }
 }
 
-impl Default for Value {
-    fn default() -> Self {
-        Value::Empty
-    }
-}
+
 
 impl Eq for Value {}
 
@@ -218,7 +213,7 @@ impl Serialize for Value {
         S: Serializer,
     {
         match self {
-            Value::String(inner) => serializer.serialize_str(&inner),
+            Value::String(inner) => serializer.serialize_str(inner),
             Value::Float(inner) => serializer.serialize_f64(*inner),
             Value::Integer(inner) => serializer.serialize_i64(*inner),
             Value::Boolean(inner) => serializer.serialize_bool(*inner),

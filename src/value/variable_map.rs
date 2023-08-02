@@ -84,18 +84,8 @@ impl VariableMap {
         }
     }
 
-    /// Returns a reference to the inner BTreeMap.
-    pub fn inner(&self) -> &BTreeMap<String, Value> {
-        &self.variables
-    }
-
-    /// Returns the number of stored variables.
-    pub fn len(&self) -> usize {
-        self.variables.len()
-    }
-
     pub fn set_value(&mut self, identifier: &str, value: Value) -> Result<()> {
-        let split = identifier.split_once(".");
+        let split = identifier.split_once('.');
 
         if let Some((map_name, next_identifier)) = split {
             let get_value = self.variables.get_mut(map_name);
@@ -123,6 +113,27 @@ impl VariableMap {
 
             Ok(())
         }
+    }
+
+    /// Returns a reference to the inner BTreeMap.
+    pub fn inner(&self) -> &BTreeMap<String, Value> {
+        &self.variables
+    }
+
+    /// Returns the number of stored variables.
+    pub fn len(&self) -> usize {
+        self.variables.len()
+    }
+
+    /// Returns true if the length is zero.
+    pub fn is_empty(&self) -> bool {
+        self.variables.is_empty()
+    }
+}
+
+impl Default for VariableMap {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

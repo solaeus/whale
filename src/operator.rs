@@ -193,8 +193,8 @@ impl Operator {
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
                     let mut result = String::with_capacity(a.len() + b.len());
-                    result.push_str(&a);
-                    result.push_str(&b);
+                    result.push_str(a);
+                    result.push_str(b);
                     Ok(Value::String(result))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_add(b);
@@ -441,7 +441,7 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
                 if let Some(value) = context.get_value(identifier)? {
-                    Ok(value.clone())
+                    Ok(value)
                 } else {
                     Err(Error::VariableIdentifierNotFound(identifier.clone()))
                 }
@@ -467,7 +467,7 @@ impl Operator {
             Assign => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let target = arguments[0].as_string()?;
-                context.set_value(&target, arguments[1].clone())?;
+                context.set_value(target, arguments[1].clone())?;
 
                 Ok(Value::Empty)
             }
@@ -496,7 +496,7 @@ impl Operator {
                         self
                     ),
                 }?;
-                context.set_value(&target, result)?;
+                context.set_value(target, result)?;
 
                 Ok(Value::Empty)
             }

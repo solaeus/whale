@@ -33,6 +33,10 @@ impl Table {
         self.rows.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.rows.is_empty()
+    }
+
     pub fn sort(&mut self) {
         self.rows.sort();
     }
@@ -70,7 +74,7 @@ impl Table {
         for row in &self.rows {
             let mut new_row = Vec::new();
 
-            for (i, value) in row.into_iter().enumerate() {
+            for (i, value) in row.iter().enumerate() {
                 if matching_column_indexes.contains(&i) {
                     new_row.push(value.clone());
                 }
@@ -113,7 +117,7 @@ impl Table {
 
     pub fn get_column_index(&self, column_name: &str) -> Option<usize> {
         let column_names = &self.column_names;
-        for (i, column) in column_names.into_iter().enumerate() {
+        for (i, column) in column_names.iter().enumerate() {
             if column == column_name {
                 return Some(i);
             }
@@ -159,7 +163,7 @@ impl Display for Table {
         }
 
         if self.column_names.is_empty() {
-            table.set_header(&["empty"]);
+            table.set_header(["empty"]);
         }
 
         write!(f, "{table}")
@@ -202,7 +206,7 @@ impl From<&Value> for Table {
             Value::List(list) => {
                 let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
 
-                for (i, value) in list.into_iter().enumerate() {
+                for (i, value) in list.iter().enumerate() {
                     if let Ok(list) = value.as_list() {
                         table.insert(list.clone()).unwrap();
                     } else {

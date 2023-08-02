@@ -1,3 +1,24 @@
+/// This module contains whale's built-in macro system. Every macro is listed
+/// alphabetically. Use [call_macro] to check an identifier against every macro.
+///
+/// ## Writing macros
+///
+/// - snake case identifier, this is enforced by a test
+/// - the type name should be the identifier in upper camel case
+/// - always verify user input, this creates helpful errors
+/// - the description should be brief, it will display in the shell
+/// - maintain alphabetical order
+///
+/// ## Usage
+///
+/// Macros can be used in Rust by passing a Value to the run method.
+///
+/// ```
+/// let value = Value::List(vec![1, 2,3]);
+/// let count = Count.run(value).as_string().unwrap();
+///
+/// assert_eq!(count, 3);
+/// ```
 use std::{
     convert::{TryFrom, TryInto},
     fs::{self, OpenOptions},
@@ -20,10 +41,10 @@ use crate::{
     VariableMap,
 };
 
-/// Master list of all internal functions.
+/// Master list of all macros.
 ///
-/// This list is used to match identifiers with functions and to provide info
-/// to the shell.
+/// This list is used to match identifiers with macros and to provide info to
+/// the shell.
 pub const MACRO_LIST: [&'static dyn Macro; 46] = [
     &Async,
     &Bash,
@@ -86,6 +107,18 @@ pub struct MacroInfo<'a> {
 
     /// User-facing information about how the function works.
     pub description: &'a str,
+}
+
+/// Searches all functions for a matching identifier and runs the corresponding
+/// function with the given input. Returns the function's output or an error.
+pub fn call_macro(identifier: &str, argument: &Value) -> Result<Value> {
+    for r#macro in MACRO_LIST {
+        if identifier == r#macro.info().identifier {
+            return r#macro.run(argument);
+        }
+    }
+
+    Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
 }
 
 pub struct Repeat;
@@ -262,7 +295,7 @@ impl Macro for Create {
 
         let column_names = argument[0]
             .as_list()?
-            .into_iter()
+            .iter()
             .map(|value| value.to_string())
             .collect::<Vec<String>>();
         let column_count = column_names.len();
@@ -388,7 +421,7 @@ impl Macro for Where {
             let mut new_table = Table::new(table.column_names().clone());
 
             for row in table.rows() {
-                for (column_index, cell) in row.into_iter().enumerate() {
+                for (column_index, cell) in row.iter().enumerate() {
                     let column_name = table.column_names().get(column_index).unwrap();
 
                     context.set_value(column_name, cell.clone())?;
@@ -468,8 +501,8 @@ impl Macro for Sort {
         if let Ok(mut list) = argument.as_list().cloned() {
             list.sort();
 
-            Ok(Value::List(list.clone()))
-        } else if let Ok(map) = argument.as_map() {
+            Ok(Value::List(list))
+        } else if let Ok(map) = argument.as_map().cloned() {
             Ok(Value::Map(map))
         } else if let Ok(mut table) = argument.as_table().cloned() {
             table.sort();
@@ -594,7 +627,7 @@ impl Macro for CoprRepositories {
             repo
         } else if let Ok(repos) = argument.as_list() {
             repos
-                .into_iter()
+                .iter()
                 .map(|value| value.to_string() + " ")
                 .collect()
         } else {
@@ -628,7 +661,7 @@ impl Macro for Install {
             package
         } else if let Ok(packages) = argument.as_list() {
             packages
-                .into_iter()
+                .iter()
                 .map(|value| value.to_string() + " ")
                 .collect()
         } else {
@@ -697,7 +730,7 @@ impl Macro for Uninstall {
             package
         } else if let Ok(packages) = argument.as_list() {
             packages
-                .into_iter()
+                .iter()
                 .map(|value| value.to_string() + " ")
                 .collect()
         } else {
@@ -978,7 +1011,7 @@ impl Macro for DirTrash {
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
 
-        trash::delete(&path)?;
+        trash::delete(path)?;
 
         Ok(Value::Empty)
     }
@@ -1013,7 +1046,7 @@ impl Macro for DirMove {
             let new_path = PathBuf::from(&target_path).join(&path);
 
             if path.is_file() {
-                fs::copy(&path, &target_path)?;
+                fs::copy(&path, target_path)?;
             }
 
             if path.is_symlink() && path.symlink_metadata()?.is_file() {
@@ -1051,7 +1084,7 @@ impl Macro for DocumentConvert {
             argument[2].as_string()?,
         );
         let mut file_name = PathBuf::from(&path);
-        file_name.set_extension(&to);
+        file_name.set_extension(to);
         let new_file_name = file_name.to_str().unwrap();
         let script = format!("pandoc --from {from} --to {to} --output {new_file_name} {path}");
 
@@ -1078,7 +1111,7 @@ impl Macro for FileRead {
         OpenOptions::new()
             .read(true)
             .create(false)
-            .open(&path)?
+            .open(path)?
             .read_to_string(&mut contents)?;
 
         Ok(Value::String(contents))
@@ -1196,7 +1229,7 @@ impl Macro for Move {
         let from = paths[0].as_string()?;
         let to = paths[1].as_string()?;
 
-        fs::copy(&from, to).and_then(|_| fs::remove_file(from))?;
+        fs::copy(from, to).and_then(|_| fs::remove_file(from))?;
 
         Ok(Value::Empty)
     }
@@ -1313,7 +1346,7 @@ impl Macro for Partition {
         if range.len() != 2 {
             return Err(crate::Error::ExpectedFixedLenTuple {
                 expected_len: 2,
-                actual: Value::List(range.clone()),
+                actual: Value::List(range),
             });
         }
 
@@ -1347,7 +1380,7 @@ impl Macro for Trash {
     fn run(&self, argument: &Value) -> Result<Value> {
         let path = argument.as_string()?;
 
-        trash::delete(&path)?;
+        trash::delete(path)?;
 
         Ok(Value::Empty)
     }
@@ -1436,7 +1469,7 @@ impl Macro for ToCsv {
 
         match argument {
             Value::String(string) => {
-                writer.write_record(&[string])?;
+                writer.write_record([string])?;
             }
             Value::Float(float) => {
                 writer.write_record(&[float.to_string()])?;
@@ -1631,18 +1664,6 @@ impl Macro for Raw {
     }
 }
 
-/// Searches all functions for a matching identifier and runs the corresponding
-/// function with the given input. Returns the function's output or an error.
-pub fn call_macro(identifier: &str, argument: &Value) -> Result<Value> {
-    for r#macro in MACRO_LIST {
-        if identifier == r#macro.info().identifier {
-            return r#macro.run(argument);
-        }
-    }
-
-    Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1652,10 +1673,10 @@ mod tests {
         for function in MACRO_LIST {
             let identifier = function.info().identifier;
             assert_eq!(identifier.to_lowercase(), identifier);
-            assert!(!identifier.contains(" "));
-            assert!(!identifier.contains(":"));
-            assert!(!identifier.contains("."));
-            assert!(!identifier.contains("-"));
+            assert!(!identifier.contains(' '));
+            assert!(!identifier.contains(':'));
+            assert!(!identifier.contains('.'));
+            assert!(!identifier.contains('-'));
         }
     }
 }

@@ -43,9 +43,10 @@ fn main() {
 fn run_shell() {
     let mut context = VariableMap::new();
     let mut line_editor = setup_reedline();
-    let mut prompt = DefaultPrompt::default();
-    prompt.left_prompt = DefaultPromptSegment::WorkingDirectory;
-    prompt.right_prompt = DefaultPromptSegment::CurrentDateTime;
+    let prompt = DefaultPrompt {
+        left_prompt: DefaultPromptSegment::WorkingDirectory,
+        right_prompt: DefaultPromptSegment::CurrentDateTime,
+    };
 
     loop {
         let sig = line_editor.read_line(&prompt);
@@ -86,7 +87,7 @@ impl Completer for WhaleCompeleter {
                     description,
                 } = function.info();
 
-                let current_word = line.split(" ").last().unwrap();
+                let current_word = line.split(' ').last().unwrap();
 
                 if identifier.starts_with(current_word) {
                     Some(Suggestion {
@@ -165,7 +166,7 @@ fn setup_reedline() -> Reedline {
         .with_menu(ReedlineMenu::EngineCompleter(completion_menu))
         .with_edit_mode(edit_mode)
         .with_history(history)
-        .with_hinter(Box::new(DefaultHinter::default()))
+        .with_hinter(Box::<DefaultHinter>::default())
         .with_partial_completions(true)
         .with_quick_completions(true)
 }
@@ -182,12 +183,6 @@ pub enum Error {
 impl From<whale_lib::Error> for Error {
     fn from(value: whale_lib::Error) -> Self {
         Error::Whale(value)
-    }
-}
-
-impl Into<whale_lib::Error> for Error {
-    fn into(self) -> whale_lib::Error {
-        whale_lib::Error::CustomMessage(format!("{:?}", self))
     }
 }
 

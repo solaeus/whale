@@ -537,9 +537,9 @@ pub(crate) fn tokenize(string: &str) -> Result<Vec<Token>> {
 
 fn parse_dec_or_hex(literal: &str) -> std::result::Result<i64, std::num::ParseIntError> {
     if let Some(literal) = literal.strip_prefix("0x") {
-        i64::from_str_radix(literal, 16)
+        literal.parse()
     } else {
-        i64::from_str_radix(literal, 10)
+        literal.parse()
     }
 }
 
