@@ -1,13 +1,12 @@
 //! Command line interface for the whale programming language.
-use std::fs::read_to_string;
-
 use clap::Parser;
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
-    DefaultPromptSegment, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline, ReedlineEvent,
-    ReedlineMenu, Signal, Suggestion,
+    DefaultPromptSegment, EditCommand, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline,
+    ReedlineEvent, ReedlineMenu, Signal, Suggestion,
 };
+use std::fs::read_to_string;
 use whale_lib::{eval, eval_with_context, MacroInfo, VariableMap, MACRO_LIST};
 
 /// Command-line arguments to be parsed.
@@ -61,7 +60,7 @@ fn run_shell() {
                             println!("{value}");
                         }
                     }
-                    Err(error) => eprintln!("{}", error),
+                    Err(error) => eprintln!("{error}"),
                 }
             }
             Ok(Signal::CtrlD) | Ok(Signal::CtrlC) => {
@@ -86,12 +85,12 @@ impl Completer for WhaleCompeleter {
                     identifier,
                     description,
                 } = function.info();
-
+                let display = "🗀 | ".to_string() + identifier;
                 let current_word = line.split(' ').last().unwrap();
 
                 if identifier.starts_with(current_word) {
                     Some(Suggestion {
-                        value: identifier.to_string(),
+                        value: display,
                         description: Some(description.to_string()),
                         extra: None,
                         span: reedline::Span {
@@ -116,8 +115,8 @@ fn setup_reedline() -> Reedline {
             .with_name("completion_menu")
             .with_columns(2)
             .with_text_style(Style {
-                is_dimmed: false,
                 foreground: Some(Color::White),
+                is_dimmed: false,
                 ..Default::default()
             })
             .with_description_text_style(Style {
@@ -150,23 +149,29 @@ fn setup_reedline() -> Reedline {
         ]),
     );
     keybindings.add_binding(
-        KeyModifiers::SHIFT,
+        KeyModifiers::ALT,
         KeyCode::Enter,
-        ReedlineEvent::SubmitOrNewline,
+        ReedlineEvent::Edit(vec![EditCommand::InsertNewline]),
     );
 
     let edit_mode = Box::new(Emacs::new(keybindings));
     let history = Box::new(
         FileBackedHistory::with_file(100, "target/history.txt".into())
-            .expect("Error configuring history with file."),
+            .expect("Error configuring shell history file."),
     );
+    let mut hinter = DefaultHinter::default();
+
+    hinter = hinter.with_style(Style {
+        foreground: Some(Color::Yellow),
+        ..Default::default()
+    });
 
     Reedline::create()
         .with_completer(completer)
         .with_menu(ReedlineMenu::EngineCompleter(completion_menu))
         .with_edit_mode(edit_mode)
         .with_history(history)
-        .with_hinter(Box::<DefaultHinter>::default())
+        .with_hinter(Box::new(hinter))
         .with_partial_completions(true)
         .with_quick_completions(true)
 }

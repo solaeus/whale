@@ -2,8 +2,7 @@ use crate::{
     operator::Operator, token::PartialToken, value::value_type::ValueType, value::Value, Node,
 };
 
-
-use std::{fmt, io};
+use std::{fmt, io, time::SystemTimeError};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -265,14 +264,20 @@ impl From<git2::Error> for Error {
     }
 }
 
-impl From<trash::Error> for Error {
-    fn from(value: trash::Error) -> Self {
+impl From<sys_info::Error> for Error {
+    fn from(value: sys_info::Error) -> Self {
         Error::FunctionFailure(value.to_string())
     }
 }
 
-impl From<sys_info::Error> for Error {
-    fn from(value: sys_info::Error) -> Self {
+impl From<SystemTimeError> for Error {
+    fn from(value: SystemTimeError) -> Self {
+        Error::FunctionFailure(value.to_string())
+    }
+}
+
+impl From<trash::Error> for Error {
+    fn from(value: trash::Error) -> Self {
         Error::FunctionFailure(value.to_string())
     }
 }

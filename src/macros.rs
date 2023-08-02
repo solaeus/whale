@@ -52,7 +52,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 46] = [
     &Count,
     &Create,
     &DirCreate,
-    &DirRead,
+    &ReadDir,
     &Download,
     &FileAppend,
     &FileRead,
@@ -62,10 +62,10 @@ pub const MACRO_LIST: [&'static dyn Macro; 46] = [
     &Get,
     &Insert,
     &Install,
-    &List,
+    &ListDisks,
     &Map,
-    &Metadata,
-    &Move,
+    &FileMetadata,
+    &MoveFile,
     &Output,
     &Partition,
     &Pipe,
@@ -73,8 +73,8 @@ pub const MACRO_LIST: [&'static dyn Macro; 46] = [
     &RandomInteger,
     &RandomString,
     &Raw,
-    &Remove,
-    &Remove,
+    &RemoveFile,
+    &RemoveFile,
     &Repeat,
     &RpmRepositories,
     &Run,
@@ -626,10 +626,7 @@ impl Macro for CoprRepositories {
         let repo_list_string = if let Ok(repo) = argument.as_string().cloned() {
             repo
         } else if let Ok(repos) = argument.as_list() {
-            repos
-                .iter()
-                .map(|value| value.to_string() + " ")
-                .collect()
+            repos.iter().map(|value| value.to_string() + " ").collect()
         } else {
             return Err(crate::Error::ExpectedString {
                 actual: argument.clone(),
@@ -925,48 +922,9 @@ impl Macro for DirCreate {
     }
 }
 
-fn read_dir(path: &str) -> Result<Value> {
-    let dir = fs::read_dir(path)?;
-    let mut file_table = Table::new(vec![
-        "path".to_string(),
-        "modified".to_string(),
-        "read only".to_string(),
-        "size".to_string(),
-    ]);
+pub struct ReadDir;
 
-    for entry in dir {
-        let entry = entry?;
-        let file_type = entry.file_type()?;
-        let file_name = if file_type.is_dir() {
-            let name = entry.file_name().into_string().unwrap_or_default();
-
-            format!("{name}/")
-        } else {
-            entry.file_name().into_string().unwrap_or_default()
-        };
-        let metadata = entry.path().metadata()?;
-        let modified = if let Ok(modified) = metadata.modified() {
-            modified.elapsed().unwrap().as_secs()
-        } else {
-            u64::MAX
-        };
-        let read_only = format!("{:?}", metadata.permissions().readonly());
-        let size = metadata.len();
-
-        file_table.insert(vec![
-            Value::String(file_name),
-            Value::Integer(modified as i64),
-            Value::String(read_only),
-            Value::Integer(size as i64),
-        ])?;
-    }
-
-    Ok(Value::Table(file_table))
-}
-
-pub struct DirRead;
-
-impl Macro for DirRead {
+impl Macro for ReadDir {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "read_dir",
@@ -975,8 +933,54 @@ impl Macro for DirRead {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let path = argument.as_string()?;
-        read_dir(path)
+        let path = if let Ok(path) = argument.as_string() {
+            path
+        } else if argument.is_empty() {
+            "."
+        } else {
+            return Err(Error::ExpectedValueType {
+                expected: &[ValueType::Empty, ValueType::String],
+                actual: argument.clone(),
+            });
+        };
+        let dir = fs::read_dir(path)?;
+        let mut file_table = Table::new(vec![
+            "path".to_string(),
+            "size".to_string(),
+            "created".to_string(),
+            "accessed".to_string(),
+            "modified".to_string(),
+            "read only".to_string(),
+        ]);
+
+        for entry in dir {
+            let entry = entry?;
+            let file_type = entry.file_type()?;
+            let file_name = if file_type.is_dir() {
+                let name = entry.file_name().into_string().unwrap_or_default();
+
+                format!("{name}/")
+            } else {
+                entry.file_name().into_string().unwrap_or_default()
+            };
+            let metadata = entry.path().metadata()?;
+            let created = metadata.accessed()?.elapsed()?.as_secs() / 60;
+            let accessed = metadata.accessed()?.elapsed()?.as_secs() / 60;
+            let modified = metadata.modified()?.elapsed()?.as_secs() / 60;
+            let read_only = metadata.permissions().readonly();
+            let size = metadata.len();
+
+            file_table.insert(vec![
+                Value::String(file_name),
+                Value::Integer(size as i64),
+                Value::Integer(created as i64),
+                Value::Integer(accessed as i64),
+                Value::Integer(modified as i64),
+                Value::Boolean(read_only),
+            ])?;
+        }
+
+        Ok(Value::Table(file_table))
     }
 }
 
@@ -1039,7 +1043,7 @@ impl Macro for DirMove {
 
         let current_path = argument[0].as_string()?;
         let target_path = argument[1].as_string()?;
-        let file_list = read_dir(current_path)?;
+        let file_list = ReadDir.run(&Value::String(current_path.clone()))?;
 
         for path in file_list.as_list()? {
             let path = PathBuf::from(path.as_string()?);
@@ -1188,13 +1192,13 @@ impl Macro for FileAppend {
     }
 }
 
-pub struct Remove;
+pub struct RemoveFile;
 
-impl Macro for Remove {
+impl Macro for RemoveFile {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "remove_file",
-            description: "Permanentl remove on or more files.",
+            description: "Permanently remove one or more files.",
         }
     }
 
@@ -1206,9 +1210,9 @@ impl Macro for Remove {
     }
 }
 
-pub struct Move;
+pub struct MoveFile;
 
-impl Macro for Move {
+impl Macro for MoveFile {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "move_file",
@@ -1235,9 +1239,9 @@ impl Macro for Move {
     }
 }
 
-pub struct Metadata;
+pub struct FileMetadata;
 
-impl Macro for Metadata {
+impl Macro for FileMetadata {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "file_metadata",
@@ -1253,9 +1257,9 @@ impl Macro for Metadata {
     }
 }
 
-pub struct List;
+pub struct ListDisks;
 
-impl Macro for List {
+impl Macro for ListDisks {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "list_disks",
@@ -1383,30 +1387,6 @@ impl Macro for Trash {
         trash::delete(path)?;
 
         Ok(Value::Empty)
-    }
-}
-
-pub struct FileCopy;
-
-impl Macro for FileCopy {
-    fn info(&self) -> MacroInfo<'static> {
-        todo!()
-    }
-
-    fn run(&self, _argument: &Value) -> Result<Value> {
-        todo!()
-    }
-}
-
-pub struct FileMetadata;
-
-impl Macro for FileMetadata {
-    fn info(&self) -> MacroInfo<'static> {
-        todo!()
-    }
-
-    fn run(&self, _argument: &Value) -> Result<Value> {
-        todo!()
     }
 }
 
@@ -1540,7 +1520,7 @@ impl Macro for Count {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "count",
-            description: "Return the number of items in a collection.",
+            description: "Return the number of items in a value.",
         }
     }
 
@@ -1672,7 +1652,10 @@ mod tests {
     fn macro_formatting() {
         for function in MACRO_LIST {
             let identifier = function.info().identifier;
+
             assert_eq!(identifier.to_lowercase(), identifier);
+            assert!(identifier.is_ascii());
+            assert!(!identifier.is_empty());
             assert!(!identifier.contains(' '));
             assert!(!identifier.contains(':'));
             assert!(!identifier.contains('.'));
