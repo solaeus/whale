@@ -41,12 +41,23 @@ impl VariableMap {
             }
         }
 
-        let split = identifier.split_once(':');
+        let mut split = identifier.split(':').rev();
 
-        if let Some((variable_identifier, function_identifier)) = split {
-            if let Some(value) = self.variables.get(variable_identifier) {
+        if let (Some(function_identifier), Some(variable_identifier)) = (split.next(), split.next())
+        {
+            if function_identifier.contains(':') {
+                return self.call_function(function_identifier, argument);
+            }
+
+            if variable_identifier.split_once('.').is_some() {
+                let value = self.get_value(variable_identifier)?.unwrap_or(Value::Empty);
+
+                return self.call_function(function_identifier, &value);
+            }
+
+            if let Some(value) = self.get_value(variable_identifier)? {
                 if argument.is_empty() {
-                    return self.call_function(function_identifier, value);
+                    return self.call_function(function_identifier, &value);
                 }
 
                 let list = Value::List(vec![value.clone(), argument.clone()]);
