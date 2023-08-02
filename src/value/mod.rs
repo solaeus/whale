@@ -22,8 +22,7 @@ pub mod variable_map;
 /// Every whale variable has a key and a Value. Variables are represented by
 /// storing them in a VariableMap. This means the map of variables is itself a
 /// value that can be treated as any other.
-#[derive(Clone, Debug, PartialEq, Deserialize)]
-#[derive(Default)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Default)]
 pub enum Value {
     String(String),
     Float(f64),
@@ -172,8 +171,6 @@ impl Value {
     }
 }
 
-
-
 impl Eq for Value {}
 
 impl PartialOrd for Value {
@@ -247,7 +244,6 @@ impl Display for Value {
                 comfy_table
                     .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
                     .set_content_arrangement(ContentArrangement::Dynamic)
-                    .set_header(0..list.len())
                     .add_row(list);
 
                 write!(f, "{comfy_table}")

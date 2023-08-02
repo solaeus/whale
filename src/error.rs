@@ -433,7 +433,7 @@ pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) ->
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub fn expect_function_argument_amount(actual: usize, expected: usize) -> Result<()> {
+pub fn expect_function_argument_length(actual: usize, expected: usize) -> Result<()> {
     if actual == expected {
         Ok(())
     } else {

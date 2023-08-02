@@ -37,7 +37,7 @@ use sys_info::{cpu_num, cpu_speed, hostname};
 use sysinfo::{DiskExt, System, SystemExt};
 
 use crate::{
-    error::expect_function_argument_amount, Error, Function, Result, Table, Value, ValueType,
+    error::expect_function_argument_length, Error, Function, Result, Table, Value, ValueType,
     VariableMap,
 };
 
@@ -305,7 +305,7 @@ impl Macro for Create {
         for row in rows {
             let row = row.as_list()?.clone();
 
-            expect_function_argument_amount(row.len(), column_count)?;
+            expect_function_argument_length(row.len(), column_count)?;
 
             table.insert(row).unwrap();
         }
@@ -345,16 +345,16 @@ impl Macro for Select {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "select",
-            description: "Return a table with the selected columns.",
+            description: "Return a map with the selected columns.",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        expect_function_argument_amount(argument.len(), 2)?;
+        expect_function_argument_length(argument.len(), 2)?;
 
-        let table = argument[0].as_table()?;
         let columns = argument[1].as_list()?;
+        let map = argument[0].as_map()?;
         let mut column_names = Vec::new();
 
         for column in columns {
@@ -363,9 +363,15 @@ impl Macro for Select {
             column_names.push(name.clone());
         }
 
-        let selected = table.select(&column_names);
+        let mut selected = VariableMap::new();
 
-        Ok(Value::Table(selected))
+        for (key, value) in map.inner() {
+            if column_names.contains(key) {
+                selected.set_value(key, value.clone())?;
+            }
+        }
+
+        Ok(Value::Map(selected))
     }
 }
 
@@ -381,7 +387,7 @@ impl Macro for ForEach {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        expect_function_argument_amount(argument.len(), 2)?;
+        expect_function_argument_length(argument.len(), 2)?;
 
         let table = argument[0].as_table()?;
         let columns = argument[1].as_list()?;
@@ -411,7 +417,7 @@ impl Macro for Where {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument_list = argument.as_list()?;
-        expect_function_argument_amount(argument_list.len(), 2)?;
+        expect_function_argument_length(argument_list.len(), 2)?;
 
         let collection = &argument_list[0];
         let function = argument_list[1].as_function()?;
