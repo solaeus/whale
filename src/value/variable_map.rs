@@ -60,7 +60,7 @@ impl VariableMap {
                     return self.call_function(function_identifier, &value);
                 }
 
-                let list = Value::List(vec![value.clone(), argument.clone()]);
+                let list = Value::List(vec![value, argument.clone()]);
 
                 return self.call_function(function_identifier, &list);
             }
