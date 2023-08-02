@@ -7,7 +7,7 @@ use reedline::{
     ReedlineEvent, ReedlineMenu, Signal, Suggestion,
 };
 use std::fs::read_to_string;
-use whale_lib::{eval, eval_with_context, MacroInfo, VariableMap, MACRO_LIST};
+use whale_lib::{eval, eval_with_context, Macro, MacroInfo, VariableMap, MACRO_LIST};
 
 /// Command-line arguments to be parsed.
 #[derive(Parser, Debug)]
@@ -74,31 +74,75 @@ fn run_shell() {
     }
 }
 
-struct WhaleCompeleter;
+struct WhaleCompeleter {
+    operators: Vec<&'static str>,
+    macro_list: Vec<&'static dyn Macro>,
+    suggestions: Vec<Suggestion>,
+}
+
+impl WhaleCompeleter {
+    pub fn new() -> Self {
+        WhaleCompeleter {
+            operators: Vec::new(),
+            macro_list: Vec::new(),
+            suggestions: Vec::new(),
+        }
+    }
+
+    pub fn set_macro_list(&mut self, macro_list: Vec<&'static dyn Macro>) -> &mut Self {
+        self.macro_list = macro_list;
+        self
+    }
+
+    pub fn set_operators(&mut self, operators: Vec<&'static str>) -> &mut Self {
+        self.operators = operators;
+        self
+    }
+
+    pub fn set_suggestions(&mut self) -> &mut Self {
+        let macros = self.macro_list.iter().map(|function| {
+            let MacroInfo {
+                identifier,
+                description,
+            } = function.info();
+
+            let value = identifier.to_string() + "()";
+
+            Suggestion {
+                value,
+                description: Some(description.to_string()),
+                extra: None,
+                span: reedline::Span { start: 0, end: 0 },
+                append_whitespace: true,
+            }
+        });
+        let operators = self.operators.iter().map(|operator| Suggestion {
+            value: operator.to_string(),
+            ..Default::default()
+        });
+
+        self.suggestions = macros.chain(operators).collect();
+
+        self
+    }
+}
 
 impl Completer for WhaleCompeleter {
     fn complete(&mut self, line: &str, pos: usize) -> Vec<Suggestion> {
-        MACRO_LIST
-            .iter()
-            .filter_map(|function| {
-                let MacroInfo {
-                    identifier,
-                    description,
-                } = function.info();
-                let display = "🗀 | ".to_string() + identifier;
-                let current_word = line.split(' ').last().unwrap();
+        let suggestions = self.suggestions.clone();
 
-                if identifier.starts_with(current_word) {
-                    Some(Suggestion {
-                        value: display,
-                        description: Some(description.to_string()),
-                        extra: None,
-                        span: reedline::Span {
-                            start: pos - current_word.len(),
-                            end: line.len(),
-                        },
-                        append_whitespace: true,
-                    })
+        suggestions
+            .into_iter()
+            .filter_map(|mut suggestion| {
+                let split = line.split(' ');
+                let current_word = split.last().unwrap_or("");
+
+                if suggestion.value.starts_with(current_word) {
+                    suggestion.span = reedline::Span {
+                        start: pos - current_word.len(),
+                        end: line.len(),
+                    };
+                    Some(suggestion)
                 } else {
                     None
                 }
@@ -108,7 +152,12 @@ impl Completer for WhaleCompeleter {
 }
 
 fn setup_reedline() -> Reedline {
-    let completer = Box::new(WhaleCompeleter);
+    let mut completer = Box::new(WhaleCompeleter::new());
+
+    completer
+        .set_macro_list(MACRO_LIST.to_vec())
+        .set_operators(vec!["::"])
+        .set_suggestions();
 
     let completion_menu = Box::new(
         ColumnarMenu::default()

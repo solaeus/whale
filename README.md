@@ -5,22 +5,22 @@ installing packages, managing disks and getting system information. Whale comes
 with a command-line tool and an interactive shell that provides a live REPL with
 syntax completion and history.
 
-The most basic whale program:
+A basic whale program:
 
 ```whale
 output "Hello world!"
 ```
 
-Run two files at the same time:
+Whale can do two things at the same time:
 
 ```whale
-whale::async ("foo.whale", "bar.whale")
+async ( '"will this one finish first?"', '"or will this one?"' )
 ```
 
 Wait for a file to change, then print the time:
 
 ```whale
-wait watch "foo.whale";
+watch "foo.whale";
 output "The time is " + date::time;
 ```
 
@@ -108,7 +108,6 @@ animals:insert(("eliza", "ostrich", 2), ("pat", "white rhino", 7));
 
 animals.by_name = animals:sort_by "name";
 animals.oldest = animals:select_where("species", 'age > 5');
-
 ```
 
 ### Expressions, assignment and pipes
