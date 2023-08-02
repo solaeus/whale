@@ -41,6 +41,7 @@ pub enum Token {
     // Special
     Comma,
     Semicolon,
+    Yield(String, String),
 
     // Values, Variables and Functions
     Identifier(String),
@@ -145,6 +146,7 @@ impl Token {
 
             Token::Comma => false,
             Token::Semicolon => false,
+            Token::Yield(_, _) => false,
 
             Token::Assign => false,
             Token::PlusAssign => false,
@@ -190,6 +192,7 @@ impl Token {
 
             Token::Comma => false,
             Token::Semicolon => false,
+            Token::Yield(_, _) => false,
 
             Token::Assign => false,
             Token::PlusAssign => false,
@@ -500,6 +503,7 @@ impl Display for Token {
             Boolean(boolean) => boolean.fmt(f),
             String(string) => fmt::Debug::fmt(string, f),
             Function(string) => write!(f, "'{string}'"),
+            Yield(_, _) => todo!(),
         }
     }
 }

@@ -61,16 +61,11 @@ impl Table {
     }
 
     pub fn select(&self, column_names: &[String]) -> Table {
-        let matching_column_names = column_names
-            .into_iter()
-            .filter(|name| self.column_names.contains(name))
-            .cloned()
-            .collect::<Vec<String>>();
-        let matching_column_indexes = matching_column_names
+        let matching_column_indexes = column_names
             .iter()
             .filter_map(|name| self.get_column_index(name))
             .collect::<Vec<usize>>();
-        let mut new_table = Table::new(matching_column_names);
+        let mut new_table = Table::new(column_names.to_vec());
 
         for row in &self.rows {
             let mut new_row = Vec::new();

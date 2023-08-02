@@ -43,5 +43,18 @@ pub fn eval(string: &str) -> Result<Value> {
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_with_context(string: &str, context: &mut VariableMap) -> Result<Value> {
-    tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval_with_context_mut(context)
+    let split = string.split_once("::");
+
+    if let Some((left, right)) = split {
+        let left_result = tree::tokens_to_operator_tree(token::tokenize(left)?)?
+            .eval_with_context_mut(context)?;
+
+        context.set_value("input", left_result)?;
+
+        let right_result = eval_with_context(right, context)?;
+
+        Ok(right_result)
+    } else {
+        tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval_with_context_mut(context)
+    }
 }

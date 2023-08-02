@@ -1,4 +1,6 @@
-use crate::{operator::Operator, token::PartialToken, value::value_type::ValueType, value::Value};
+use crate::{
+    operator::Operator, token::PartialToken, value::value_type::ValueType, value::Value, Node,
+};
 
 use json;
 use std::{fmt, io};
@@ -8,6 +10,12 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
 pub enum Error {
+    /// Actual value's type does not match one of the expected types
+    ExpectedValueType {
+        expected: &'static [ValueType],
+        actual: Value,
+    },
+
     /// A row was inserted with a wrong amount of arguments.
     WrongColumnAmount {
         /// The expected amount of arguments.
@@ -110,7 +118,7 @@ pub enum Error {
 
     /// Tried to append a child to a leaf node.
     /// Leaf nodes cannot have children.
-    AppendedToLeafNode,
+    AppendedToLeafNode(Node),
 
     /// Tried to append a child to a node such that the precedence of the child is not higher.
     /// This error should never occur.
@@ -359,7 +367,7 @@ impl Error {
             ValueType::Int => Self::expected_int(actual),
             ValueType::Float => Self::expected_float(actual),
             ValueType::Boolean => Self::expected_boolean(actual),
-            ValueType::Tuple => Self::expected_tuple(actual),
+            ValueType::List => Self::expected_tuple(actual),
             ValueType::Empty => Self::expected_empty(actual),
             ValueType::Map => Self::expected_map(actual),
             ValueType::Table => Self::expected_table(actual),
@@ -442,6 +450,10 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use crate::Error::*;
         match self {
+            ExpectedValueType { expected, actual } => write!(
+                f,
+                "Expected one of the following types: {expected:?} but found {actual}."
+            ),
             WrongOperatorArgumentAmount { expected, actual } => write!(
                 f,
                 "An operator expected {} arguments, but got {}.",
@@ -485,7 +497,7 @@ impl fmt::Display for Error {
             ExpectedFunction { actual } => {
                 write!(f, "Expected Value::Function, but got {:?}.", actual)
             }
-            AppendedToLeafNode => write!(f, "Tried to append a node to a leaf node."),
+            AppendedToLeafNode(node) => write!(f, "Syntax error at \"{node}\"."),
             PrecedenceViolation => write!(
                 f,
                 "Tried to append a node to another node with higher precedence."

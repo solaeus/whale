@@ -16,61 +16,61 @@ use sys_info::{cpu_num, cpu_speed, hostname};
 use sysinfo::{DiskExt, System, SystemExt};
 
 use crate::{
-    error::expect_function_argument_amount, Error, Function, Result, Table, Value, VariableMap,
+    error::expect_function_argument_amount, Error, Function, Result, Table, Value, ValueType,
+    VariableMap,
 };
 
 /// Master list of all internal functions.
 ///
 /// This list is used to match identifiers with functions and to provide info
 /// to the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 47] = [
+pub const MACRO_LIST: [&'static dyn Macro; 46] = [
+    &Async,
     &Bash,
-    &Fish,
-    &Raw,
-    &Sh,
-    &Zsh,
-    &Count,
-    &Get,
-    &ToCsv,
-    &FromJson,
-    &DirCreate,
-    &Move,
-    &FileRead,
-    &Remove,
-    &Trash,
-    &List,
-    &Partition,
-    &FileAppend,
-    &Metadata,
-    &DirRead,
-    &Remove,
-    &FileWrite,
-    &Status,
-    &Map,
-    &Download,
-    &Output,
     &CoprRepositories,
+    &Count,
+    &Create,
+    &DirCreate,
+    &DirRead,
+    &Download,
+    &FileAppend,
+    &FileRead,
+    &FileWrite,
+    &Fish,
+    &FromJson,
+    &Get,
+    &Insert,
     &Install,
-    &RpmRepositories,
-    &Uninstall,
-    &Upgrade,
+    &List,
+    &Map,
+    &Metadata,
+    &Move,
+    &Output,
+    &Partition,
+    &Pipe,
     &RandomFloat,
     &RandomInteger,
     &RandomString,
+    &Raw,
+    &Remove,
+    &Remove,
+    &Repeat,
+    &RpmRepositories,
+    &Run,
+    &Seconds,
+    &Select,
+    &Sh,
     &Sort,
+    &Status,
     &SystemCpu,
     &SystemInfo,
-    &Create,
-    &FindRow,
-    &Insert,
-    &Select,
-    &Where,
-    &Seconds,
+    &ToCsv,
+    &Trash,
+    &Uninstall,
+    &Upgrade,
     &Watch,
-    &Async,
-    &Pipe,
-    &Repeat,
-    &Run,
+    &Where,
+    &Zsh,
 ];
 
 /// Internal whale function with its business logic and all information.
@@ -204,7 +204,7 @@ pub struct Watch;
 impl Macro for Watch {
     fn info(&self) -> crate::MacroInfo<'static> {
         crate::MacroInfo {
-            identifier: "wait::watch",
+            identifier: "watch",
             description: "Wait until a file changes.",
         }
     }
@@ -233,7 +233,7 @@ pub struct Seconds;
 impl Macro for Seconds {
     fn info(&self) -> crate::MacroInfo<'static> {
         crate::MacroInfo {
-            identifier: "wait::seconds",
+            identifier: "wait",
             description: "Wait for the given number of seconds.",
         }
     }
@@ -252,7 +252,7 @@ pub struct Create;
 impl Macro for Create {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "table::create",
+            identifier: "create_table",
             description: "Define a new table with a list of column names and list of rows.",
         }
     }
@@ -286,7 +286,7 @@ pub struct Insert;
 impl Macro for Insert {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "table::insert",
+            identifier: "insert",
             description: "Add a new row to a table.",
         }
     }
@@ -306,40 +306,12 @@ impl Macro for Insert {
     }
 }
 
-pub struct FindRow;
-
-impl Macro for FindRow {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "table::find_row",
-            description: "Return the first row that matches a predicate.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-        expect_function_argument_amount(argument.len(), 3)?;
-
-        let table = argument[0].as_table()?;
-        let column_name = argument[1].as_string()?;
-        let expected = &argument[2];
-        let find = table.get_where(&column_name, expected);
-        let mut new_table = Table::new(table.column_names().clone());
-
-        if let Some(row) = find {
-            new_table.insert(row.clone()).unwrap();
-        }
-
-        Ok(Value::Table(new_table))
-    }
-}
-
 pub struct Select;
 
 impl Macro for Select {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "table::select",
+            identifier: "select",
             description: "Return a table with the selected columns.",
         }
     }
@@ -349,11 +321,45 @@ impl Macro for Select {
         expect_function_argument_amount(argument.len(), 2)?;
 
         let table = argument[0].as_table()?;
-        let column_names = argument[1]
-            .as_list()?
-            .iter()
-            .map(|value| value.to_string())
-            .collect::<Vec<String>>();
+        let columns = argument[1].as_list()?;
+        let mut column_names = Vec::new();
+
+        for column in columns {
+            let name = column.as_string()?;
+
+            column_names.push(name.clone());
+        }
+
+        let selected = table.select(&column_names);
+
+        Ok(Value::Table(selected))
+    }
+}
+
+pub struct ForEach;
+
+impl Macro for ForEach {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "for_each",
+            description: "Run an operation on every item in a collection.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_list()?;
+        expect_function_argument_amount(argument.len(), 2)?;
+
+        let table = argument[0].as_table()?;
+        let columns = argument[1].as_list()?;
+        let mut column_names = Vec::new();
+
+        for column in columns {
+            let name = column.as_string()?;
+
+            column_names.push(name.clone());
+        }
+
         let selected = table.select(&column_names);
 
         Ok(Value::Table(selected))
@@ -371,28 +377,36 @@ impl Macro for Where {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-        expect_function_argument_amount(argument.len(), 2)?;
+        let argument_list = argument.as_list()?;
+        expect_function_argument_amount(argument_list.len(), 2)?;
 
-        let table = argument[0].as_table()?;
-        let function = argument[1].as_function()?;
-        let mut context = VariableMap::new();
-        let mut new_table = Table::new(table.column_names().clone());
+        let collection = &argument_list[0];
+        let function = argument_list[1].as_function()?;
 
-        for row in table.rows() {
-            for (column_index, cell) in row.into_iter().enumerate() {
-                let column_name = table.column_names().get(column_index).unwrap();
+        if let Ok(table) = collection.as_table() {
+            let mut context = VariableMap::new();
+            let mut new_table = Table::new(table.column_names().clone());
 
-                context.set_value(column_name, cell.clone())?;
+            for row in table.rows() {
+                for (column_index, cell) in row.into_iter().enumerate() {
+                    let column_name = table.column_names().get(column_index).unwrap();
+
+                    context.set_value(column_name, cell.clone())?;
+                }
+                let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
+
+                if keep_row {
+                    new_table.insert(row.clone())?;
+                }
             }
-            let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
 
-            if keep_row {
-                new_table.insert(row.clone())?;
-            }
+            return Ok(Value::Table(new_table));
         }
 
-        Ok(Value::Table(new_table))
+        Err(Error::ExpectedValueType {
+            expected: &[ValueType::List, ValueType::Table],
+            actual: collection.clone(),
+        })
     }
 }
 
@@ -401,7 +415,7 @@ pub struct SystemInfo;
 impl Macro for SystemInfo {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "system::info",
+            identifier: "system_info",
             description: "Get information on the system.",
         }
     }
@@ -422,7 +436,7 @@ pub struct SystemCpu;
 impl Macro for SystemCpu {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "system::cpu",
+            identifier: "system_cpu",
             description: "Get information on the system's CPU.",
         }
     }
@@ -474,7 +488,7 @@ pub struct RandomInteger;
 impl Macro for RandomInteger {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "random::integer",
+            identifier: "random_integer",
             description: "Create a random integer.",
         }
     }
@@ -511,7 +525,7 @@ pub struct RandomString;
 impl Macro for RandomString {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "random::string",
+            identifier: "random_string",
             description: "Generate a random string.",
         }
     }
@@ -553,7 +567,7 @@ pub struct RandomFloat;
 impl Macro for RandomFloat {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "random::float",
+            identifier: "random_float",
             description: "Generate a random floating point value between 0 and 1.",
         }
     }
@@ -570,7 +584,7 @@ pub struct CoprRepositories;
 impl Macro for CoprRepositories {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "packages::copr_repositories",
+            identifier: "enable_copr_repository",
             description: "Enable one or more COPR repositories.",
         }
     }
@@ -604,7 +618,7 @@ pub struct Install;
 impl Macro for Install {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "packages::install",
+            identifier: "install_package",
             description: "Install one or more packages.",
         }
     }
@@ -638,7 +652,7 @@ pub struct RpmRepositories;
 impl Macro for RpmRepositories {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "packages::rpm_repositories",
+            identifier: "enable_rpm_repositories",
             description: "Enable one or more RPM repositories.",
         }
     }
@@ -673,7 +687,7 @@ pub struct Uninstall;
 impl Macro for Uninstall {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "packages::uninstall",
+            identifier: "uninstall_package",
             description: "Uninstall one or more packages.",
         }
     }
@@ -707,7 +721,7 @@ pub struct Upgrade;
 impl Macro for Upgrade {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "packages::upgrade",
+            identifier: "upgrade_packages",
             description: "Upgrade all installed packages.",
         }
     }
@@ -744,7 +758,7 @@ pub struct Download;
 impl Macro for Download {
     fn info(&self) -> crate::MacroInfo<'static> {
         crate::MacroInfo {
-            identifier: "network::download",
+            identifier: "download",
             description: "Download a file from a URL.",
         }
     }
@@ -812,7 +826,7 @@ pub struct Status;
 impl Macro for Status {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "git::status",
+            identifier: "git_status",
             description: "Get the repository status for the current directory.",
         }
     }
@@ -865,7 +879,7 @@ pub struct DirCreate;
 impl Macro for DirCreate {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "dir::create",
+            identifier: "create_dir",
             description: "Create one or more directories.",
         }
     }
@@ -922,7 +936,7 @@ pub struct DirRead;
 impl Macro for DirRead {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "dir::read",
+            identifier: "read_dir",
             description: "Read the content of a directory.",
         }
     }
@@ -938,7 +952,7 @@ pub struct DirRemove;
 impl Macro for DirRemove {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "dir::remove",
+            identifier: "remove_dir",
             description: "Remove directories.",
         }
     }
@@ -956,7 +970,7 @@ pub struct DirTrash;
 impl Macro for DirTrash {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "dir::trash",
+            identifier: "trash_dir",
             description: "Move a directory to the trash.",
         }
     }
@@ -975,7 +989,7 @@ pub struct DirMove;
 impl Macro for DirMove {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "dir::move",
+            identifier: "move_dir",
             description: "Move a directory to a new path.",
         }
     }
@@ -1016,7 +1030,7 @@ pub struct DocumentConvert;
 impl Macro for DocumentConvert {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "document_convert",
+            identifier: "convert_document",
             description: "Convert a file's contents to a format and set the extension.",
         }
     }
@@ -1052,7 +1066,7 @@ pub struct FileRead;
 impl Macro for FileRead {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "file::read",
+            identifier: "read_file",
             description: "Read file contents.",
         }
     }
@@ -1076,7 +1090,7 @@ pub struct FileWrite;
 impl Macro for FileWrite {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "file::write",
+            identifier: "write_file",
             description: "Write data to a file.",
         }
     }
@@ -1113,7 +1127,7 @@ pub struct FileAppend;
 impl Macro for FileAppend {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "file::append",
+            identifier: "append_file",
             description: "Append data to a file.",
         }
     }
@@ -1146,8 +1160,8 @@ pub struct Remove;
 impl Macro for Remove {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "file::remove",
-            description: "Remove files.",
+            identifier: "remove_file",
+            description: "Permanentl remove on or more files.",
         }
     }
 
@@ -1164,7 +1178,7 @@ pub struct Move;
 impl Macro for Move {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "file::move",
+            identifier: "move_file",
             description: "Move a file to a new location.",
         }
     }
@@ -1193,7 +1207,7 @@ pub struct Metadata;
 impl Macro for Metadata {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "file::metadata",
+            identifier: "file_metadata",
             description: "Get meteadata for files.",
         }
     }
@@ -1211,7 +1225,7 @@ pub struct List;
 impl Macro for List {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "disk::list",
+            identifier: "list_disks",
             description: "List all block devices.",
         }
     }
@@ -1263,7 +1277,7 @@ pub struct Partition;
 impl Macro for Partition {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "disk::partition",
+            identifier: "partition_disk",
             description: "Partition a disk, clearing its content.",
         }
     }
@@ -1325,7 +1339,7 @@ pub struct Trash;
 impl Macro for Trash {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "dir::trash",
+            identifier: "trash_dir",
             description: "Move a directory to the trash.",
         }
     }
@@ -1362,6 +1376,7 @@ impl Macro for FileMetadata {
         todo!()
     }
 }
+
 pub struct Get;
 
 impl Macro for Get {
@@ -1373,9 +1388,9 @@ impl Macro for Get {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-        let collection = &argument[0];
-        let index = &argument[1];
+        let argument_list = argument.as_list()?;
+        let collection = &argument_list[0];
+        let index = &argument_list[1];
 
         if let Ok(list) = collection.as_list() {
             let index = index.as_int()?;
@@ -1393,7 +1408,15 @@ impl Macro for Get {
             }
         }
 
-        Ok(Value::Empty)
+        Err(Error::ExpectedValueType {
+            expected: &[
+                ValueType::List,
+                ValueType::Map,
+                ValueType::Table,
+                ValueType::String,
+            ],
+            actual: collection.clone(),
+        })
     }
 }
 
@@ -1465,11 +1488,16 @@ impl Macro for FromJson {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_string()?;
-        let json: JsonValue = json::parse(argument)?;
-        let value = Value::try_from(json)?;
+        if let Ok(string) = argument.as_string() {
+            let json: JsonValue = json::parse(string)?;
+            let value = Value::try_from(json)?;
 
-        Ok(value)
+            Ok(value)
+        } else {
+            Err(Error::ExpectedString {
+                actual: argument.clone(),
+            })
+        }
     }
 }
 
@@ -1502,7 +1530,7 @@ pub struct Sh;
 impl Macro for Sh {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "command::sh",
+            identifier: "sh",
             description: "Pass input to the Bourne Shell.",
         }
     }
@@ -1521,7 +1549,7 @@ pub struct Bash;
 impl Macro for Bash {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "command::bash",
+            identifier: "bash",
             description: "Pass input to the Bourne Again Shell.",
         }
     }
@@ -1543,7 +1571,7 @@ pub struct Fish;
 impl Macro for Fish {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "command::fish",
+            identifier: "fish",
             description: "Pass input to the fish shell.",
         }
     }
@@ -1566,7 +1594,7 @@ pub struct Zsh;
 impl Macro for Zsh {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "command::zsh",
+            identifier: "zsh",
             description: "Pass input to the Z shell.",
         }
     }
@@ -1589,7 +1617,7 @@ pub struct Raw;
 impl Macro for Raw {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "command::raw",
+            identifier: "raw",
             description: "Run input as a command without a shell",
         }
     }

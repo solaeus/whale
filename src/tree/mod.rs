@@ -601,7 +601,7 @@ impl Node {
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
         {
             if self.operator().is_leaf() {
-                Err(Error::AppendedToLeafNode)
+                Err(Error::AppendedToLeafNode(node))
             } else if self.has_enough_children() {
                 // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
                 let last_child_operator = self.children.last().unwrap().operator();
@@ -624,7 +624,7 @@ impl Node {
                 } else {
                     // println!("Rotating");
                     if node.operator().is_leaf() {
-                        return Err(Error::AppendedToLeafNode);
+                        return Err(Error::AppendedToLeafNode(node));
                     }
 
                     // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
@@ -807,7 +807,6 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node> {
 
             Token::Comma => Some(Node::new(Operator::Tuple)),
             Token::Semicolon => Some(Node::new(Operator::Chain)),
-
             Token::Identifier(identifier) => {
                 let mut result = Some(Node::new(Operator::variable_identifier_read(
                     identifier.clone(),
@@ -830,6 +829,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node> {
             Token::Function(string) => Some(Node::new(Operator::value(Value::Function(
                 Function::from(string),
             )))),
+            Token::Yield(_, _) => todo!(),
         };
 
         if let Some(mut node) = node {
