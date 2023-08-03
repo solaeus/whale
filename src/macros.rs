@@ -65,7 +65,7 @@ pub struct MacroInfo<'a> {
 /// Searches all macros for a matching identifier and runs the corresponding
 /// macro with the given input. Returns the function's output or an error.
 ///
-/// The word "macro" is reserved in Rust so `r#macro` is the way to escape the
+/// The word "macro" is reserved in Rust, `r#macro` is the way to escape the
 /// reserved keyword.
 pub fn call_macro(identifier: &str, argument: &Value) -> Result<Value> {
     for r#macro in MACRO_LIST {

@@ -81,13 +81,16 @@ impl Macro for Select {
         let collection = &arguments[0];
 
         if let Value::List(list) = collection {
+            let mut selected = Vec::new();
+
             let index = arguments[1].as_int()?;
             let value = list.get(index as usize);
 
             if let Some(value) = value {
-                return Ok(value.clone());
+                selected.push(value.clone());
+                return Ok(Value::List(selected));
             } else {
-                return Ok(Value::Empty);
+                return Ok(Value::List(selected));
             }
         }
 
@@ -214,5 +217,38 @@ impl Macro for Where {
             expected: &[ValueType::List, ValueType::Table],
             actual: collection.clone(),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn select_from_list() {
+        let arguments = Value::List(vec![
+            Value::List(vec![Value::Integer(1), Value::Integer(2)]),
+            Value::Integer(0),
+        ]);
+        let select = Select.run(&arguments).unwrap();
+
+        assert_eq!(Value::List(vec![Value::Integer(1)]), select);
+    }
+
+    #[test]
+    fn select_from_map() {
+        let mut map = VariableMap::new();
+
+        map.set_value("foo", Value::Integer(1)).unwrap();
+        map.set_value("bar", Value::Integer(2)).unwrap();
+
+        let arguments = Value::List(vec![Value::Map(map), Value::String("foo".to_string())]);
+        let select = Select.run(&arguments).unwrap();
+
+        let mut map = VariableMap::new();
+
+        map.set_value("foo", Value::Integer(1)).unwrap();
+
+        assert_eq!(Value::Map(map), select);
     }
 }
