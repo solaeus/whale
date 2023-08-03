@@ -19,23 +19,12 @@ impl Macro for Append {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let strings = argument.as_list()?;
+        let arguments = argument.as_fixed_len_list(2)?;
+        let path = arguments[0].as_string()?;
+        let content = arguments[1].as_string()?;
+        let mut file = OpenOptions::new().append(true).open(path)?;
 
-        if strings.len() < 2 {
-            return Err(Error::WrongFunctionArgumentAmount {
-                expected: 2,
-                actual: strings.len(),
-            });
-        }
-
-        let path = strings.first().unwrap().as_string()?;
-        let mut file = std::fs::OpenOptions::new().append(true).open(path)?;
-
-        for content in &strings[1..] {
-            let content = content.as_string()?;
-
-            file.write_all(content.as_bytes())?;
-        }
+        file.write_all(content.as_bytes())?;
 
         Ok(Value::Empty)
     }
