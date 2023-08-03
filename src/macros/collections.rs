@@ -105,7 +105,7 @@ impl Macro for Select {
         } else if let Value::String(column) = &arguments[1] {
             column_names.push(column.clone());
         } else {
-            return Err(Error::ExpectedValueType {
+            return Err(Error::TypeError {
                 expected: &[ValueType::String, ValueType::List],
                 actual: arguments[1].clone(),
             });
@@ -123,7 +123,7 @@ impl Macro for Select {
             return Ok(Value::Map(selected));
         }
 
-        Err(Error::ExpectedValueType {
+        Err(Error::TypeError {
             expected: &[ValueType::List, ValueType::Map],
             actual: collection.clone(),
         })
@@ -213,7 +213,7 @@ impl Macro for Where {
             return Ok(Value::Table(new_table));
         }
 
-        Err(Error::ExpectedValueType {
+        Err(Error::TypeError {
             expected: &[ValueType::List, ValueType::Table],
             actual: collection.clone(),
         })

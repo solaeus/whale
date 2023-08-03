@@ -1,3 +1,7 @@
+//! Error and Result types.
+//!
+//! To deal with errors from dependencies, either create a new error variant
+//! or use the MacroFailure variant if the error can only occur inside a macro.
 use crate::{
     operator::Operator, token::PartialToken, value::value_type::ValueType, value::Value, Node,
 };
@@ -9,115 +13,77 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
 pub enum Error {
-    /// Actual value's type does not match one of the expected types
-    ExpectedValueType {
-        expected: &'static [ValueType],
-        actual: Value,
-    },
-
-    /// A row was inserted with a wrong amount of arguments.
+    /// A row was inserted to a table with the wrong amount of values.
     WrongColumnAmount {
-        /// The expected amount of arguments.
         expected: usize,
-        /// The actual amount of arguments.
         actual: usize,
     },
 
-    /// An operator was called with a wrong amount of arguments.
+    /// An operator was called with the wrong amount of arguments.
     WrongOperatorArgumentAmount {
-        /// The expected amount of arguments.
         expected: usize,
-        /// The actual amount of arguments.
         actual: usize,
     },
 
-    /// A function was called with a wrong amount of arguments.
+    /// A function was called with the wrong amount of arguments.
     WrongFunctionArgumentAmount {
-        /// The expected amount of arguments.
         expected: usize,
-        /// The actual amount of arguments.
         actual: usize,
     },
 
-    /// A string value was expected.
     ExpectedString {
-        /// The actual value.
         actual: Value,
     },
 
-    /// An integer value was expected.
     ExpectedInt {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A float value was expected.
     ExpectedFloat {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A numeric value was expected.
-    /// Numeric values are the variants `Value::Int` and `Value::Float`.
+    /// An integer, floating point or value was expected.
     ExpectedNumber {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A numeric or string value was expected.
-    /// Numeric values are the variants `Value::Int` and `Value::Float`.
+    /// An integer, floating point or string value was expected.
     ExpectedNumberOrString {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A boolean value was expected.
     ExpectedBoolean {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A tuple value was expected.
-    ExpectedTuple {
-        /// The actual value.
+    ExpectedList {
         actual: Value,
     },
 
-    /// A tuple value of a certain length was expected.
-    ExpectedFixedLenTuple {
-        /// The expected len
+    ExpectedFixedLenList {
         expected_len: usize,
-        /// The actual value.
         actual: Value,
     },
 
-    /// An empty value was expected.
     ExpectedEmpty {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A map value was expected.
     ExpectedMap {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A map value was expected.
     ExpectedTable {
-        /// The actual value.
         actual: Value,
     },
 
-    /// A map value was expected.
     ExpectedFunction {
-        /// The actual value.
         actual: Value,
     },
 
     /// A string, list, map or table value was expected.
     ExpectedCollection {
-        /// The actual value.
         actual: Value,
     },
 
@@ -125,9 +91,9 @@ pub enum Error {
     /// Leaf nodes cannot have children.
     AppendedToLeafNode(Node),
 
-    /// Tried to append a child to a node such that the precedence of the child is not higher.
-    /// This error should never occur.
-    /// If it does, please file a bug report.
+    /// Tried to append a child to a node such that the precedence of the child
+    /// is not higher. This error should never occur. If it does, please file a
+    /// bug report.
     PrecedenceViolation,
 
     /// A `VariableIdentifier` operation did not find its value in the context.
@@ -137,10 +103,11 @@ pub enum Error {
     FunctionIdentifierNotFound(String),
 
     /// A value has the wrong type.
-    /// Only use this if there is no other error that describes the expected and provided types in more detail.
+    /// Only use this if there is no other error that describes the expected and
+    /// provided types in more detail.
     TypeError {
         /// The expected types.
-        expected: Vec<ValueType>,
+        expected: &'static [ValueType],
         /// The actual value.
         actual: Value,
     },
@@ -240,7 +207,7 @@ pub enum Error {
     BuiltinFunctionsCannotBeDisabled,
 
     /// The function failed due to an external error.
-    FunctionFailure(String),
+    MacroFailure(String),
 
     /// A custom error explained by its message.
     CustomMessage(String),
@@ -248,43 +215,43 @@ pub enum Error {
 
 impl From<csv::Error> for Error {
     fn from(value: csv::Error) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
 impl From<json::Error> for Error {
     fn from(value: json::Error) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
 impl From<io::Error> for Error {
     fn from(value: std::io::Error) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
 impl From<git2::Error> for Error {
     fn from(value: git2::Error) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
 impl From<sys_info::Error> for Error {
     fn from(value: sys_info::Error) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
 impl From<SystemTimeError> for Error {
     fn from(value: SystemTimeError) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
 impl From<trash::Error> for Error {
     fn from(value: trash::Error) -> Self {
-        Error::FunctionFailure(value.to_string())
+        Error::MacroFailure(value.to_string())
     }
 }
 
@@ -297,98 +264,67 @@ impl Error {
         Error::WrongFunctionArgumentAmount { actual, expected }
     }
 
-    /// Constructs `EvalexprError::TypeError{actual, expected}`.
-    pub fn type_error(actual: Value, expected: Vec<ValueType>) -> Self {
+    pub fn type_error(actual: Value, expected: &'static [ValueType]) -> Self {
         Error::TypeError { actual, expected }
     }
 
-    /// Constructs `EvalexprError::WrongTypeCombination{operator, actual}`.
     pub fn wrong_type_combination(operator: Operator, actual: Vec<ValueType>) -> Self {
         Error::WrongTypeCombination { operator, actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedString{actual}`.
     pub fn expected_string(actual: Value) -> Self {
         Error::ExpectedString { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedInt{actual}`.
     pub fn expected_int(actual: Value) -> Self {
         Error::ExpectedInt { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedFloat{actual}`.
     pub fn expected_float(actual: Value) -> Self {
         Error::ExpectedFloat { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedNumber{actual}`.
     pub fn expected_number(actual: Value) -> Self {
         Error::ExpectedNumber { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedNumberOrString{actual}`.
     pub fn expected_number_or_string(actual: Value) -> Self {
         Error::ExpectedNumberOrString { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedBoolean{actual}`.
     pub fn expected_boolean(actual: Value) -> Self {
         Error::ExpectedBoolean { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedTuple{actual}`.
-    pub fn expected_tuple(actual: Value) -> Self {
-        Error::ExpectedTuple { actual }
+    pub fn expected_list(actual: Value) -> Self {
+        Error::ExpectedList { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
-    pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
-        Error::ExpectedFixedLenTuple {
+    pub fn expected_fixed_len_list(expected_len: usize, actual: Value) -> Self {
+        Error::ExpectedFixedLenList {
             expected_len,
             actual,
         }
     }
 
-    /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
     pub fn expected_empty(actual: Value) -> Self {
         Error::ExpectedEmpty { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
     pub fn expected_map(actual: Value) -> Self {
         Error::ExpectedMap { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
     pub fn expected_table(actual: Value) -> Self {
         Error::ExpectedTable { actual }
     }
 
-    /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
     pub fn expected_function(actual: Value) -> Self {
         Error::ExpectedFunction { actual }
     }
 
-    /// Constructs `EvalexprError::Collection{actual}`.
     pub fn expected_collection(actual: Value) -> Self {
         Error::ExpectedCollection { actual }
-    }
-
-    /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
-    #[allow(unused)]
-    pub(crate) fn expected_type(expected: &Value, actual: Value) -> Self {
-        match ValueType::from(expected) {
-            ValueType::String => Self::expected_string(actual),
-            ValueType::Int => Self::expected_int(actual),
-            ValueType::Float => Self::expected_float(actual),
-            ValueType::Boolean => Self::expected_boolean(actual),
-            ValueType::List => Self::expected_tuple(actual),
-            ValueType::Empty => Self::expected_empty(actual),
-            ValueType::Map => Self::expected_map(actual),
-            ValueType::Table => Self::expected_table(actual),
-            ValueType::Function => todo!(),
-        }
     }
 
     pub(crate) fn unmatched_partial_token(
@@ -474,10 +410,6 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use crate::Error::*;
         match self {
-            ExpectedValueType { expected, actual } => write!(
-                f,
-                "Expected one of the following types: {expected:?} but found {actual}."
-            ),
             WrongOperatorArgumentAmount { expected, actual } => write!(
                 f,
                 "An operator expected {} arguments, but got {}.",
@@ -506,8 +438,8 @@ impl fmt::Display for Error {
             ExpectedBoolean { actual } => {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
             }
-            ExpectedTuple { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
-            ExpectedFixedLenTuple {
+            ExpectedList { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
+            ExpectedFixedLenList {
                 expected_len,
                 actual,
             } => write!(
@@ -604,45 +536,12 @@ impl fmt::Display for Error {
                 write!(f, "This context does not allow disabling builtin functions")
             }
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
-            FunctionFailure(message) => write!(f, "Function failure: {}", message),
+            MacroFailure(message) => write!(f, "Function failure: {}", message),
             CustomMessage(message) => write!(f, "Error: {}", message),
             WrongColumnAmount { expected, actual } => write!(
                 f,
                 "Wrong number of columns for this table. Expected {expected}, found {actual}."
             ),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{Error, Value, ValueType};
-
-    /// Tests whose only use is to bring test coverage of trivial lines up, like trivial constructors.
-    #[test]
-    fn trivial_coverage_tests() {
-        assert_eq!(
-            Error::type_error(Value::Integer(3), vec![ValueType::String]),
-            Error::TypeError {
-                actual: Value::Integer(3),
-                expected: vec![ValueType::String]
-            }
-        );
-        assert_eq!(
-            Error::expected_type(&Value::String("abc".to_string()), Value::Empty),
-            Error::expected_string(Value::Empty)
-        );
-        assert_eq!(
-            Error::expected_type(&Value::Boolean(false), Value::Empty),
-            Error::expected_boolean(Value::Empty)
-        );
-        assert_eq!(
-            Error::expected_type(&Value::List(vec![]), Value::Empty),
-            Error::expected_tuple(Value::Empty)
-        );
-        assert_eq!(
-            Error::expected_type(&Value::Empty, Value::String("abc".to_string())),
-            Error::expected_empty(Value::String("abc".to_string()))
-        );
     }
 }

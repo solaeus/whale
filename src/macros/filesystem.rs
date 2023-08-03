@@ -30,7 +30,6 @@ impl Macro for Append {
     }
 }
 
-#[derive(Copy, Clone)]
 pub struct CreateDir;
 
 impl Macro for CreateDir {
@@ -83,7 +82,7 @@ impl Macro for ReadDir {
         } else if argument.is_empty() {
             "."
         } else {
-            return Err(Error::ExpectedValueType {
+            return Err(Error::TypeError {
                 expected: &[ValueType::Empty, ValueType::String],
                 actual: argument.clone(),
             });

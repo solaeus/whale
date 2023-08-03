@@ -408,7 +408,7 @@ impl Node {
     pub fn eval_tuple_with_context(&self, context: &VariableMap) -> Result<Vec<Value>> {
         match self.eval_with_context(context) {
             Ok(Value::List(tuple)) => Ok(tuple),
-            Ok(value) => Err(Error::expected_tuple(value)),
+            Ok(value) => Err(Error::expected_list(value)),
             Err(error) => Err(error),
         }
     }
@@ -487,7 +487,7 @@ impl Node {
     pub fn eval_tuple_with_context_mut(&self, context: &mut VariableMap) -> Result<Vec<Value>> {
         match self.eval_with_context_mut(context) {
             Ok(Value::List(tuple)) => Ok(tuple),
-            Ok(value) => Err(Error::expected_tuple(value)),
+            Ok(value) => Err(Error::expected_list(value)),
             Err(error) => Err(error),
         }
     }

@@ -123,7 +123,7 @@ impl Value {
     pub fn as_list(&self) -> Result<&Vec<Value>> {
         match self {
             Value::List(list) => Ok(list),
-            value => Err(Error::expected_tuple(value.clone())),
+            value => Err(Error::expected_list(value.clone())),
         }
     }
 
@@ -134,10 +134,10 @@ impl Value {
                 if tuple.len() == len {
                     Ok(tuple)
                 } else {
-                    Err(Error::expected_fixed_len_tuple(len, self.clone()))
+                    Err(Error::expected_fixed_len_list(len, self.clone()))
                 }
             }
-            value => Err(Error::expected_tuple(value.clone())),
+            value => Err(Error::expected_list(value.clone())),
         }
     }
 
@@ -444,7 +444,7 @@ impl TryFrom<Value> for Vec<Value> {
         if let Value::List(value) = value {
             Ok(value)
         } else {
-            Err(Error::ExpectedTuple { actual: value })
+            Err(Error::ExpectedList { actual: value })
         }
     }
 }

@@ -45,7 +45,13 @@ mod values;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 2] = [&filesystem::Append, &collections::Select];
+pub const MACRO_LIST: [&'static dyn Macro; 5] = [
+    &filesystem::Append,
+    &collections::CreateTable,
+    &collections::Insert,
+    &collections::Where,
+    &collections::Select,
+];
 
 /// Internal whale function with its business logic and all information.
 pub trait Macro: Sync + Send {
@@ -291,7 +297,7 @@ impl Macro for Sort {
 
             Ok(Value::Table(table))
         } else {
-            Err(crate::Error::ExpectedTuple {
+            Err(crate::Error::ExpectedList {
                 actual: argument.clone(),
             })
         }
@@ -839,7 +845,7 @@ impl Macro for Partition {
             .clone();
 
         if range.len() != 2 {
-            return Err(crate::Error::ExpectedFixedLenTuple {
+            return Err(crate::Error::ExpectedFixedLenList {
                 expected_len: 2,
                 actual: Value::List(range),
             });
@@ -912,7 +918,7 @@ impl Macro for Get {
             }
         }
 
-        Err(Error::ExpectedValueType {
+        Err(Error::TypeError {
             expected: &[
                 ValueType::List,
                 ValueType::Map,
