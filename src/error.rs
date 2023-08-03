@@ -115,6 +115,12 @@ pub enum Error {
         actual: Value,
     },
 
+    /// A string, list, map or table value was expected.
+    ExpectedCollection {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// Tried to append a child to a leaf node.
     /// Leaf nodes cannot have children.
     AppendedToLeafNode(Node),
@@ -364,6 +370,11 @@ impl Error {
         Error::ExpectedFunction { actual }
     }
 
+    /// Constructs `EvalexprError::Collection{actual}`.
+    pub fn expected_collection(actual: Value) -> Self {
+        Error::ExpectedCollection { actual }
+    }
+
     /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
     #[allow(unused)]
     pub(crate) fn expected_type(expected: &Value, actual: Value) -> Self {
@@ -441,11 +452,19 @@ pub fn expect_function_argument_length(actual: usize, expected: usize) -> Result
     }
 }
 
-/// Returns `Ok(())` if the given value is a string or a numeric
+/// Returns `Ok(())` if the given value is a string or a numeric.
 pub fn expect_number_or_string(actual: &Value) -> Result<()> {
     match actual {
         Value::String(_) | Value::Float(_) | Value::Integer(_) => Ok(()),
         _ => Err(Error::expected_number_or_string(actual.clone())),
+    }
+}
+
+/// Returns `Ok(())` if the given value is a String, List, Map or Table.
+pub fn expect_collection(actual: &Value) -> Result<()> {
+    match actual {
+        Value::String(_) | Value::List(_) | Value::Map(_) | Value::Table(_) => Ok(()),
+        _ => Err(Error::expected_collection(actual.clone())),
     }
 }
 
@@ -501,6 +520,13 @@ impl fmt::Display for Error {
             ExpectedTable { actual } => write!(f, "Expected a Value::Table, but got {:?}.", actual),
             ExpectedFunction { actual } => {
                 write!(f, "Expected Value::Function, but got {:?}.", actual)
+            }
+            ExpectedCollection { actual } => {
+                write!(
+                    f,
+                    "Expected a string, list, map or table, but got {:?}.",
+                    actual
+                )
             }
             AppendedToLeafNode(node) => write!(f, "Syntax error at \"{node}\"."),
             PrecedenceViolation => write!(
