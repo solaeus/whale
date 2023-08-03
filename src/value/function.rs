@@ -8,8 +8,8 @@ use crate::{eval, eval_with_context, Result, Value, VariableMap};
 pub struct Function(String);
 
 impl Function {
-    pub fn new(body: String) -> Self {
-        Function(body)
+    pub fn new(body: &str) -> Self {
+        Function(body.to_string())
     }
 
     pub fn run(&self) -> Result<Value> {

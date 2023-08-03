@@ -117,7 +117,7 @@ impl Macro for Run {
         let path = argument.as_string()?;
         let file_contents = fs::read_to_string(path)?;
 
-        Function::new(file_contents).run()
+        Function::new(&file_contents).run()
     }
 }
 

@@ -222,7 +222,103 @@ impl Macro for Where {
 
 #[cfg(test)]
 mod tests {
+    use crate::Function;
+
     use super::*;
+
+    #[test]
+    fn where_from_non_collections() {
+        Where
+            .run(&Value::List(vec![
+                Value::Integer(1),
+                Value::Function(Function::new("input == 1")),
+            ]))
+            .unwrap_err();
+        Where
+            .run(&Value::List(vec![
+                Value::Float(1.0),
+                Value::Function(Function::new("input == 1.0")),
+            ]))
+            .unwrap_err();
+        Where
+            .run(&Value::List(vec![
+                Value::Boolean(true),
+                Value::Function(Function::new("input == true")),
+            ]))
+            .unwrap_err();
+    }
+
+    #[test]
+    fn where_from_list() {
+        let arguments = Value::List(vec![
+            Value::List(vec![Value::Integer(1), Value::Integer(2)]),
+            Value::Function(Function::new("input == 1")),
+        ]);
+        let select = Where.run(&arguments).unwrap();
+
+        assert_eq!(Value::List(vec![Value::Integer(1)]), select);
+    }
+
+    #[test]
+    fn where_from_map() {
+        let mut map = VariableMap::new();
+
+        map.set_value("foo", Value::Integer(1)).unwrap();
+        map.set_value("bar", Value::Integer(2)).unwrap();
+
+        let arguments = Value::List(vec![
+            Value::Map(map),
+            Value::Function(Function::new("input == 1")),
+        ]);
+        let select = Where.run(&arguments).unwrap();
+
+        let mut map = VariableMap::new();
+
+        map.set_value("foo", Value::Integer(1)).unwrap();
+
+        assert_eq!(Value::Map(map), select);
+    }
+
+    #[test]
+    fn where_from_table() {
+        let mut table = Table::new(vec!["foo".to_string(), "bar".to_string()]);
+
+        table
+            .insert(vec![Value::Integer(1), Value::Integer(2)])
+            .unwrap();
+        table
+            .insert(vec![Value::Integer(3), Value::Integer(4)])
+            .unwrap();
+
+        let arguments = Value::List(vec![
+            Value::Table(table),
+            Value::Function(Function::new("foo == 1")),
+        ]);
+        let select = Where.run(&arguments).unwrap();
+        let mut table = Table::new(vec!["foo".to_string(), "bar".to_string()]);
+
+        table
+            .insert(vec![Value::Integer(1), Value::Integer(2)])
+            .unwrap();
+
+        assert_eq!(Value::Table(table), select);
+    }
+
+    #[test]
+    fn select_from_non_collections() {
+        Select
+            .run(&Value::List(vec![Value::Integer(1), Value::Integer(1)]))
+            .unwrap_err();
+        Select
+            .run(&Value::List(vec![Value::Float(1.0), Value::Float(1.0)]))
+            .unwrap_err();
+        Select
+            .run(&Value::List(vec![
+                Value::Boolean(true),
+                Value::Boolean(true),
+            ]))
+            .unwrap_err();
+    }
 
     #[test]
     fn select_from_list() {
@@ -250,5 +346,23 @@ mod tests {
         map.set_value("foo", Value::Integer(1)).unwrap();
 
         assert_eq!(Value::Map(map), select);
+    }
+
+    #[test]
+    fn select_from_table() {
+        let mut table = Table::new(vec!["foo".to_string(), "bar".to_string()]);
+
+        table
+            .insert(vec![Value::Integer(1), Value::Integer(2)])
+            .unwrap();
+
+        let arguments = Value::List(vec![Value::Table(table), Value::String("foo".to_string())]);
+        let select = Select.run(&arguments).unwrap();
+
+        let mut table = Table::new(vec!["foo".to_string()]);
+
+        table.insert(vec![Value::Integer(1)]).unwrap();
+
+        assert_eq!(Value::Table(table), select);
     }
 }
