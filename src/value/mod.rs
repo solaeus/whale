@@ -12,6 +12,7 @@ use std::{
 };
 
 pub mod function;
+pub mod iter;
 pub mod table;
 pub mod value_type;
 pub mod variable_map;
@@ -240,7 +241,7 @@ impl Display for Value {
             Value::String(string) => write!(f, "{string}"),
             Value::Float(float) => write!(f, "{}", float),
             Value::Integer(int) => write!(f, "{}", int),
-            Value::Boolean(boolean) => writef(f, "{}", boolean),
+            Value::Boolean(boolean) => write!(f, "{}", boolean),
             Value::List(list) => {
                 write!(f, "(")?;
 

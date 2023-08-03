@@ -461,7 +461,7 @@ pub fn expect_number_or_string(actual: &Value) -> Result<()> {
 }
 
 /// Returns `Ok(())` if the given value is a String, List, Map or Table.
-pub fn expect_collection(actual: &Value) -> Result<()> {
+pub fn _expect_collection(actual: &Value) -> Result<()> {
     match actual {
         Value::String(_) | Value::List(_) | Value::Map(_) | Value::Table(_) => Ok(()),
         _ => Err(Error::expected_collection(actual.clone())),
