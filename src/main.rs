@@ -128,7 +128,7 @@ impl WhaleCompeleter {
     }
 
     pub fn update_files(&mut self, mut path: &str) {
-        if path.starts_with("\"") {
+        if path.starts_with('\"') {
             path = &path[1..];
         }
 

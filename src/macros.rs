@@ -1,28 +1,27 @@
-/// This module contains whale's built-in macro system. Every macro is listed
-/// alphabetically. Use [call_macro] to check an identifier against every macro.
-///
-/// ## Writing macros
-///
-/// - snake case identifier, this is enforced by a test
-/// - the type name should be the identifier in upper camel case
-/// - always verify user input, this creates helpful errors
-/// - the description should be brief, it will display in the shell
-/// - maintain alphabetical order
-///
-/// ## Usage
-///
-/// Macros can be used in Rust by passing a Value to the run method.
-///
-/// ```
-/// let value = Value::List(vec![1, 2,3]);
-/// let count = Count.run(value).as_string().unwrap();
-///
-/// assert_eq!(count, 3);
-/// ```
+//! This module contains whale's built-in macro system. Every macro is listed
+//! alphabetically. Use [call_macro] to check an identifier against every macro.
+//!
+//! ## Writing macros
+//!
+//! - snake case identifier, this is enforced by a test
+//! - the type name should be the identifier in upper camel case
+//! - always verify user input, this creates helpful errors
+//! - the description should be brief, it will display in the shell
+//! - maintain alphabetical order
+//!
+//! ## Usage
+//!
+//! Macros can be used in Rust by passing a Value to the run method.
+//!
+//! ```
+//! let value = Value::List(vec![1, 2,3]);
+//! let count = Count.run(value).as_string().unwrap();
+//!
+//! assert_eq!(count, 3);
+//! ```
 use std::{
     convert::{TryFrom, TryInto},
-    fs::{self, OpenOptions},
-    io::{Read, Write},
+    fs,
     path::PathBuf,
     process::{Command, Stdio},
     thread::sleep,
@@ -36,11 +35,9 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use sys_info::{cpu_num, cpu_speed, hostname};
 use sysinfo::{DiskExt, System, SystemExt};
 
-use crate::{
-    error::expect_function_argument_length, Error, Function, Result, Table, Value, ValueType,
-    VariableMap,
-};
+use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
 
+mod collections;
 mod filesystem;
 mod values;
 
@@ -48,7 +45,7 @@ mod values;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 1] = [&filesystem::Append];
+pub const MACRO_LIST: [&'static dyn Macro; 2] = [&filesystem::Append, &collections::Select];
 
 /// Internal whale function with its business logic and all information.
 pub trait Macro: Sync + Send {
@@ -56,17 +53,20 @@ pub trait Macro: Sync + Send {
     fn run(&self, argument: &Value) -> Result<Value>;
 }
 
-/// Information needed for each function.
+/// Information needed for each macro.
 pub struct MacroInfo<'a> {
-    /// Text pattern that triggers this function.
+    /// Text pattern that triggers this macro.
     pub identifier: &'a str,
 
-    /// User-facing information about how the function works.
+    /// User-facing information about how the macro works.
     pub description: &'a str,
 }
 
 /// Searches all macros for a matching identifier and runs the corresponding
 /// macro with the given input. Returns the function's output or an error.
+///
+/// The word "macro" is reserved in Rust so `r#macro` is the way to escape the
+/// reserved keyword.
 pub fn call_macro(identifier: &str, argument: &Value) -> Result<Value> {
     for r#macro in MACRO_LIST {
         if identifier == r#macro.info().identifier {
@@ -141,12 +141,11 @@ impl Macro for Async {
                 } else {
                     return value.clone();
                 };
-                let result = match function.run() {
+
+                match function.run() {
                     Ok(value) => value,
                     Err(error) => Value::String(error.to_string()),
-                };
-
-                result
+                }
             })
             .collect();
 
@@ -223,191 +222,6 @@ impl Macro for Seconds {
         sleep(Duration::from_secs(argument as u64));
 
         Ok(Value::Empty)
-    }
-}
-
-pub struct CreateTable;
-
-impl Macro for CreateTable {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "create_table",
-            description: "Define a new table with a list of column names and list of rows.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-
-        let column_names = argument[0]
-            .as_list()?
-            .iter()
-            .map(|value| value.to_string())
-            .collect::<Vec<String>>();
-        let column_count = column_names.len();
-        let rows = argument[1].as_list()?;
-        let mut table = Table::new(column_names);
-
-        for row in rows {
-            let row = row.as_list()?.clone();
-
-            expect_function_argument_length(row.len(), column_count)?;
-
-            table.insert(row).unwrap();
-        }
-
-        Ok(Value::Table(table))
-    }
-}
-
-pub struct Insert;
-
-impl Macro for Insert {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "insert",
-            description: "Add a new row to a table.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-
-        let mut table = argument[0].as_table()?.clone();
-
-        for row in &argument[1..] {
-            let row = row.as_list()?.clone();
-
-            table.insert(row)?;
-        }
-
-        Ok(Value::Table(table))
-    }
-}
-
-pub struct Select;
-
-impl Macro for Select {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "select",
-            description: "Return a map with the selected columns.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-        expect_function_argument_length(argument.len(), 2)?;
-
-        let columns = argument[1].as_list()?;
-        let map = argument[0].as_map()?;
-        let mut column_names = Vec::new();
-
-        for column in columns {
-            let name = column.as_string()?;
-
-            column_names.push(name.clone());
-        }
-
-        let mut selected = VariableMap::new();
-
-        for (key, value) in map.inner() {
-            if column_names.contains(key) {
-                selected.set_value(key, value.clone())?;
-            }
-        }
-
-        Ok(Value::Map(selected))
-    }
-}
-
-pub struct ForEach;
-
-impl Macro for ForEach {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "for_each",
-            description: "Run an operation on every item in a collection.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-        expect_function_argument_length(argument.len(), 2)?;
-
-        let table = argument[0].as_table()?;
-        let columns = argument[1].as_list()?;
-        let mut column_names = Vec::new();
-
-        for column in columns {
-            let name = column.as_string()?;
-
-            column_names.push(name.clone());
-        }
-
-        let selected = table.select(&column_names);
-
-        Ok(Value::Table(selected))
-    }
-}
-
-pub struct Where;
-
-impl Macro for Where {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "where",
-            description: "Keep rows matching a predicate.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument_list = argument.as_list()?;
-        expect_function_argument_length(argument_list.len(), 2)?;
-
-        let collection = &argument_list[0];
-        let function = argument_list[1].as_function()?;
-
-        if let Ok(list) = collection.as_list() {
-            let mut context = VariableMap::new();
-            let mut new_list = Vec::new();
-
-            for value in list {
-                context.set_value("input", value.clone())?;
-                let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
-
-                if keep_row {
-                    new_list.push(value.clone());
-                }
-            }
-
-            return Ok(Value::List(new_list));
-        }
-
-        if let Ok(table) = collection.as_table() {
-            let mut context = VariableMap::new();
-            let mut new_table = Table::new(table.column_names().clone());
-
-            for row in table.rows() {
-                for (column_index, cell) in row.iter().enumerate() {
-                    let column_name = table.column_names().get(column_index).unwrap();
-
-                    context.set_value(column_name, cell.clone())?;
-                }
-                let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
-
-                if keep_row {
-                    new_table.insert(row.clone())?;
-                }
-            }
-
-            return Ok(Value::Table(new_table));
-        }
-
-        Err(Error::ExpectedValueType {
-            expected: &[ValueType::List, ValueType::Table],
-            actual: collection.clone(),
-        })
     }
 }
 

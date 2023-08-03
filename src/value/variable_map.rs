@@ -166,7 +166,7 @@ impl From<&Table> for VariableMap {
     fn from(value: &Table) -> Self {
         let mut map = VariableMap::new();
 
-        for (row_index, row) in value.rows().into_iter().enumerate() {
+        for (row_index, row) in value.rows().iter().enumerate() {
             map.set_value(&row_index.to_string(), Value::List(row.clone()))
                 .unwrap();
         }

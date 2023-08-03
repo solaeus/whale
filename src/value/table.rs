@@ -21,6 +21,10 @@ impl Table {
         }
     }
 
+    pub fn reserve(&mut self, additional: usize) {
+        self.rows.reserve(additional);
+    }
+
     pub fn column_names(&self) -> &Vec<String> {
         &self.column_names
     }
