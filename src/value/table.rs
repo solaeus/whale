@@ -137,7 +137,13 @@ impl Display for Table {
 
         for row in &self.rows {
             let row = row.iter().map(|value| {
-                let mut cell = Cell::new(value.to_string()).bg(Color::Rgb {
+                let text = if value.is_table() {
+                    "Table".to_string()
+                } else {
+                    value.to_string()
+                };
+
+                let mut cell = Cell::new(text).bg(Color::Rgb {
                     r: 40,
                     g: 40,
                     b: 40,

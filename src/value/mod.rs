@@ -3,7 +3,6 @@ use crate::{
     Function, Table, VariableMap,
 };
 
-use comfy_table::{ContentArrangement, Table as ComfyTable};
 use json::JsonValue;
 use serde::{ser::SerializeTuple, Deserialize, Serialize, Serializer};
 use std::{
@@ -37,6 +36,10 @@ pub enum Value {
 }
 
 impl Value {
+    pub fn is_table(&self) -> bool {
+        matches!(self, Value::Table(_))
+    }
+
     pub fn is_string(&self) -> bool {
         matches!(self, Value::String(_))
     }
@@ -234,19 +237,24 @@ impl Serialize for Value {
 impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            Value::String(string) => write!(f, "\"{string}\""),
+            Value::String(string) => write!(f, "{string}"),
             Value::Float(float) => write!(f, "{}", float),
             Value::Integer(int) => write!(f, "{}", int),
-            Value::Boolean(boolean) => write!(f, "{}", boolean),
+            Value::Boolean(boolean) => writef(f, "{}", boolean),
             Value::List(list) => {
-                let mut comfy_table = ComfyTable::new();
+                write!(f, "(")?;
 
-                comfy_table
-                    .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
-                    .set_content_arrangement(ContentArrangement::Dynamic)
-                    .add_row(list);
+                for value in list {
+                    if value.is_table() {
+                        write!(f, "\n{value}\n")?;
+                    } else if value == list.last().unwrap() {
+                        write!(f, "{value}")?;
+                    } else {
+                        write!(f, "{value}, ")?;
+                    }
+                }
 
-                write!(f, "{comfy_table}")
+                write!(f, ")")
             }
             Value::Empty => write!(f, "()"),
             Value::Map(map) => write!(f, "{}", map),

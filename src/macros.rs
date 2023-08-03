@@ -45,7 +45,7 @@ use crate::{
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 46] = [
+pub const MACRO_LIST: [&'static dyn Macro; 47] = [
     &Async,
     &Bash,
     &CoprRepositories,
@@ -63,8 +63,9 @@ pub const MACRO_LIST: [&'static dyn Macro; 46] = [
     &Insert,
     &Install,
     &ListDisks,
-    &Map,
+    &Transform,
     &FileMetadata,
+    &Map,
     &MoveFile,
     &Output,
     &Partition,
@@ -421,6 +422,22 @@ impl Macro for Where {
 
         let collection = &argument_list[0];
         let function = argument_list[1].as_function()?;
+
+        if let Ok(list) = collection.as_list() {
+            let mut context = VariableMap::new();
+            let mut new_list = Vec::new();
+
+            for value in list {
+                context.set_value("input", value.clone())?;
+                let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
+
+                if keep_row {
+                    new_list.push(value.clone());
+                }
+            }
+
+            return Ok(Value::List(new_list));
+        }
 
         if let Ok(table) = collection.as_table() {
             let mut context = VariableMap::new();
@@ -815,12 +832,38 @@ impl Macro for Download {
         ))
     }
 }
+
 pub struct Map;
 
 impl Macro for Map {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "map",
+            description: "Create a map from a value.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        match argument {
+            Value::String(_) => todo!(),
+            Value::Float(_) => todo!(),
+            Value::Integer(_) => todo!(),
+            Value::Boolean(_) => todo!(),
+            Value::List(_) => todo!(),
+            Value::Map(_) => todo!(),
+            Value::Table(table) => Ok(Value::Map(VariableMap::from(table))),
+            Value::Function(_) => todo!(),
+            Value::Empty => todo!(),
+        }
+    }
+}
+
+pub struct Transform;
+
+impl Macro for Transform {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "transform",
             description: "Change each value with a function.",
         }
     }

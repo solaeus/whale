@@ -10,7 +10,7 @@ use std::{
     marker::PhantomData,
 };
 
-use crate::{value::Value, Error, Result, MACRO_LIST};
+use crate::{value::Value, Error, Result, Table, MACRO_LIST};
 
 /// A context that stores its mappings in hash maps.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq)]
@@ -159,6 +159,19 @@ impl Display for VariableMap {
             .add_row(self.variables.values());
 
         write!(f, "{comfy_table}")
+    }
+}
+
+impl From<&Table> for VariableMap {
+    fn from(value: &Table) -> Self {
+        let mut map = VariableMap::new();
+
+        for (row_index, row) in value.rows().into_iter().enumerate() {
+            map.set_value(&row_index.to_string(), Value::List(row.clone()))
+                .unwrap();
+        }
+
+        map
     }
 }
 
