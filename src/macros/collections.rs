@@ -18,11 +18,13 @@ impl Macro for CreateTable {
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_fixed_len_list(2)?;
 
-        let column_names = argument[0]
-            .as_list()?
-            .iter()
-            .map(|value| value.to_string())
-            .collect::<Vec<String>>();
+        let column_name_inputs = argument[0].as_list()?;
+        let mut column_names = Vec::with_capacity(column_name_inputs.len());
+
+        for name in column_name_inputs {
+            column_names.push(name.as_string()?.clone());
+        }
+
         let column_count = column_names.len();
         let rows = argument[1].as_list()?;
         let mut table = Table::new(column_names);

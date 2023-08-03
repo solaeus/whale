@@ -370,7 +370,8 @@ impl Error {
     }
 }
 
-/// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongOperatorArgumentAmount)` otherwise.
+/// Returns `Ok(())` if the actual and expected parameters are equal, and
+/// `Err(Error::WrongOperatorArgumentAmount)` otherwise.
 pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) -> Result<()> {
     if actual == expected {
         Ok(())
@@ -379,7 +380,8 @@ pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) ->
     }
 }
 
-/// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
+/// Returns `Ok(())` if the actual and expected parameters are equal, and
+/// `Err(Error::WrongFunctionArgumentAmount)` otherwise.
 pub fn expect_function_argument_length(actual: usize, expected: usize) -> Result<()> {
     if actual == expected {
         Ok(())
@@ -408,7 +410,8 @@ impl std::error::Error for Error {}
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use crate::Error::*;
+        use Error::*;
+
         match self {
             WrongOperatorArgumentAmount { expected, actual } => write!(
                 f,
@@ -476,7 +479,10 @@ impl fmt::Display for Error {
                 identifier
             ),
             TypeError { expected, actual } => {
-                write!(f, "Expected one of {:?}, but got {:?}.", expected, actual)
+                write!(
+                    f,
+                    "Type Error. The value {actual} is not one of the following: {expected:?}.",
+                )
             }
             WrongTypeCombination { operator, actual } => write!(
                 f,
