@@ -39,18 +39,21 @@ use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
 
 mod collections;
 mod filesystem;
+mod test;
 mod values;
 
 /// Master list of all macros.
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 5] = [
+pub const MACRO_LIST: [&'static dyn Macro; 7] = [
     &filesystem::Append,
     &collections::CreateTable,
     &collections::Insert,
     &collections::Where,
     &collections::Select,
+    &test::Assert,
+    &test::AssertEqual,
 ];
 
 /// Internal whale function with its business logic and all information.
