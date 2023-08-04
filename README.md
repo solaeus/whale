@@ -69,8 +69,8 @@ big_list = (x, y, z, list);
 
 **Macros** are whale's built-in tools. Some of them can reconfigure your whole
 system while others are do very little. They may accept different inputs, or
-none at all. Functions in the `random` group can be run without input, but the
-`integer` function can optionally take two numbers as in inclusive range.
+none at all. Macros in the `random` group can be run without input, but the
+`random_integer` macro can optionally take two numbers as in inclusive range.
 
 ```whale
 coin_flip = random_boolean();
