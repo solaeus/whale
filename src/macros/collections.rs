@@ -125,8 +125,14 @@ impl Macro for Select {
             return Ok(Value::Map(selected));
         }
 
+        if let Value::Table(table) = collection {
+            let selected = table.select(&column_names);
+
+            return Ok(Value::Table(selected));
+        }
+
         Err(Error::TypeError {
-            expected: &[ValueType::List, ValueType::Map],
+            expected: &[ValueType::List, ValueType::Map, ValueType::Table],
             actual: collection.clone(),
         })
     }
