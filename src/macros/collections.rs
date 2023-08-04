@@ -46,7 +46,7 @@ pub struct Insert;
 impl Macro for Insert {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "insert_rows",
+            identifier: "insert",
             description: "Add new rows to a table.",
         }
     }
@@ -201,6 +201,29 @@ impl Macro for Where {
             return Ok(Value::List(new_list));
         }
 
+        if let Ok(map) = collection.as_map() {
+            let mut context = VariableMap::new();
+            let mut new_map = VariableMap::new();
+
+            for (key, value) in map.inner() {
+                if let Ok(map) = value.as_map() {
+                    for (key, value) in map.inner() {
+                        context.set_value(key, value.clone())?;
+                    }
+                } else {
+                    context.set_value("input", value.clone())?;
+                }
+
+                let keep_row = function.run_with_context(&mut context)?.as_boolean()?;
+
+                if keep_row {
+                    new_map.set_value(key, value.clone())?;
+                }
+            }
+
+            return Ok(Value::Map(new_map));
+        }
+
         if let Ok(table) = collection.as_table() {
             let mut context = VariableMap::new();
             let mut new_table = Table::new(table.column_names().clone());
@@ -222,7 +245,7 @@ impl Macro for Where {
         }
 
         Err(Error::TypeError {
-            expected: &[ValueType::List, ValueType::Table],
+            expected: &[ValueType::List, ValueType::Map, ValueType::Table],
             actual: collection.clone(),
         })
     }
