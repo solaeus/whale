@@ -45,14 +45,14 @@ assistance of the shell.
 Variables have two parts: a key and a value. The key is always a text string.
 The value can be any of the following data types:
 
- - string
- - integer
- - floating point value
- - boolean
- - list
- - map
- - table
- - function
+- string
+- integer
+- floating point value
+- boolean
+- list
+- map
+- table
+- function
 
 Here are some examples of variables in whale.
 
@@ -202,7 +202,7 @@ like any other value. The function body is wrapped in single parentheses. To
 call a function, it's just like calling a macro: simply pass it an argument or
 use an empty set of parentheses to pass an empty value.
 
-The `input` variable represents whatever value is passed to the function when
+The **`input` variable** represents whatever value is passed to the function when
 called.
 
 ```whale
@@ -213,11 +213,10 @@ assert_eq(add_one(3), 4);
 say_hi();
 ```
 
-This function simply prints its input.
+This function simply passes the input to the shell's standard output.
 
 ```whale
-print = 'output input';
-print "foobar";
+print = 'input:output';
 ```
 
 Because functions are stored in variables, we can use collections like maps to
