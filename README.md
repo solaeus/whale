@@ -81,7 +81,7 @@ die_roll = random_integer(1, 6);
 The **method operator `:`** offers an alternate syntax for passing variables to
 macros and functions. Like calling methods in object-oriented languages, the
 variable name on the left is passed as the first argument to the macro or
-function on the left. You can pass more values using the syntax shown above.
+function on the right. You can pass more values using the syntax shown above.
 
 ```whale
 message = "I hate whale";
@@ -104,7 +104,8 @@ assert_eq(list:get(0), true);
 ### Maps
 
 Maps are flexible collections with arbitrary key-value pairs, similar to JSON
-objects.
+objects. Under the hood, all of whale's runtime variables are stored in a map,
+so, as with variables, the key is always a string.
 
 ```whale
 info.message = "FOOBAR";
@@ -131,8 +132,8 @@ animals.all = create_table (
 ```
 
 The macros `create_table` and `insert` make sure that all of the memory used to
-hold the variables is allocated at once, so it is good practice to group your
-rows together instead of using a call for each row.
+hold the rows is allocated at once, so it is good practice to group your rows
+together instead of using a call for each row.
 
 ```whale
 animals.all:insert(
