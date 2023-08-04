@@ -46,8 +46,16 @@ mod values;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 7] = [
+pub const MACRO_LIST: [&'static dyn Macro; 15] = [
     &filesystem::Append,
+    &filesystem::CreateDir,
+    &filesystem::FileMetadata,
+    &filesystem::MoveDir,
+    &filesystem::ReadDir,
+    &filesystem::ReadFile,
+    &filesystem::RemoveDir,
+    &filesystem::Trash,
+    &filesystem::Write,
     &collections::CreateTable,
     &collections::Insert,
     &collections::Where,

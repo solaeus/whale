@@ -2,7 +2,7 @@
 
 use std::{
     fs::{self, OpenOptions},
-    io::{Read, Write},
+    io::{Read, Write as IoWrite},
     path::PathBuf,
 };
 
@@ -230,12 +230,12 @@ impl Macro for Trash {
     }
 }
 
-pub struct WriteFile;
+pub struct Write;
 
-impl Macro for WriteFile {
+impl Macro for Write {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "write_file",
+            identifier: "write",
             description: "Write data to a file.",
         }
     }

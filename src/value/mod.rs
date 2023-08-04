@@ -436,27 +436,3 @@ impl TryFrom<Value> for bool {
         }
     }
 }
-
-impl TryFrom<Value> for Vec<Value> {
-    type Error = Error;
-
-    fn try_from(value: Value) -> std::result::Result<Self, Self::Error> {
-        if let Value::List(value) = value {
-            Ok(value)
-        } else {
-            Err(Error::ExpectedList { actual: value })
-        }
-    }
-}
-
-impl TryFrom<Value> for () {
-    type Error = Error;
-
-    fn try_from(value: Value) -> std::result::Result<Self, Self::Error> {
-        if let Value::Empty = value {
-            Ok(())
-        } else {
-            Err(Error::ExpectedEmpty { actual: value })
-        }
-    }
-}
