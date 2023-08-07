@@ -35,8 +35,15 @@ impl VariableMap {
 
         for (key, value) in &self.variables {
             if identifier == key {
+                let matches = identifier == key;
+                println!("{identifier} {key} {value}");
+
                 if let Ok(function) = value.as_function() {
-                    return function.run();
+                    let mut context = VariableMap::new();
+
+                    context.set_value("input", argument.clone())?;
+
+                    return function.run_with_context(&mut context);
                 }
             }
         }

@@ -1,0 +1,9 @@
+if (true, 'assert true', 'assert false');
+
+if (false, 'assert false', 'assert true');
+
+i = 0;
+while (
+	'i < 5',
+	'output i; i += 1'
+);

@@ -260,7 +260,7 @@ impl Display for Value {
             Value::Empty => write!(f, "()"),
             Value::Map(map) => write!(f, "{}", map),
             Value::Table(table) => table.fmt(f),
-            Value::Function(string) => write!(f, "'{string}'"),
+            Value::Function(function) => function.fmt(f),
         }
     }
 }

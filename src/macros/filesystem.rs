@@ -59,10 +59,33 @@ impl Macro for FileMetadata {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let path = argument.as_string()?;
-        let metadata = fs::metadata(path)?;
+        let path_string = argument.as_string()?;
+        let metadata = PathBuf::from(path_string).metadata()?;
+        let created = metadata.accessed()?.elapsed()?.as_secs() / 60;
+        let accessed = metadata.accessed()?.elapsed()?.as_secs() / 60;
+        let modified = metadata.modified()?.elapsed()?.as_secs() / 60;
+        let read_only = metadata.permissions().readonly();
+        let size = metadata.len();
 
-        Ok(Value::String(format!("{:#?}", metadata)))
+        let mut file_table = Table::new(vec![
+            "path".to_string(),
+            "size".to_string(),
+            "created".to_string(),
+            "accessed".to_string(),
+            "modified".to_string(),
+            "read only".to_string(),
+        ]);
+
+        file_table.insert(vec![
+            Value::String(path_string.clone()),
+            Value::Integer(size as i64),
+            Value::Integer(created as i64),
+            Value::Integer(accessed as i64),
+            Value::Integer(modified as i64),
+            Value::Boolean(read_only),
+        ])?;
+
+        Ok(Value::Table(file_table))
     }
 }
 
