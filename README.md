@@ -1,12 +1,9 @@
 # Whale
 
-Whale is data-oriented programming language for system management tasks such as
-installing packages, managing disks and getting system information. Whale comes
-with a command-line tool and an interactive shell that provides a live REPL with
-syntax completion and history.
-
-Whale is minimal, easy to read and easy to learn by example. Your code will
-always do exactly what it looks like it's going to do.
+Whale is a data-oriented programming language and interactive shell. The
+command-line interface can also be run as a singular command or it can run a
+file. Whale is minimal, easy to read and easy to learn by example. Your code
+will always do exactly what it looks like it's going to do.
 
 A basic whale program:
 
@@ -26,11 +23,24 @@ async (
 Wait for a file to change, then print the time:
 
 ```whale
+
 watch "foo.whale";
-output "The time is " + date::time;
+output "The time is " + local_time();
 ```
 
+## Project Status
+
+Whale is in pre-alpha and under active development. At this stage, features come
+and go and the API is always changing. It should not be considered for serious
+use yet.
+
 ## Usage
+
+## Installation
+
+You must have the default rust toolchain installed and up-to-date. Clone the
+repository and run `cargo run` to start the interactive shell. To see other
+command line options, use `cargo run -- --help`.
 
 ## The Whale Programming Language
 
@@ -40,7 +50,7 @@ large, complex sets of data and perform complicated tasks through macros. It
 should not take long for a new user to learn the language, especially with the
 assistance of the shell.
 
-### Variables
+### Variables and Data Types
 
 Variables have two parts: a key and a value. The key is always a text string.
 The value can be any of the following data types:
@@ -53,6 +63,7 @@ The value can be any of the following data types:
 - map
 - table
 - function
+- empty
 
 Here are some examples of variables in whale.
 
@@ -73,9 +84,9 @@ none at all. Macros in the `random` group can be run without input, but the
 `random_integer` macro can optionally take two numbers as in inclusive range.
 
 ```whale
-coin_flip = random_boolean();
-number = random_integer();
 die_roll = random_integer(1, 6);
+d20_roll = random_integer(1, 20);
+coin_flip = random_boolean();
 ```
 
 The **method operator `:`** offers an alternate syntax for passing variables to
@@ -90,10 +101,10 @@ message:replace("hate", "love");
 
 ### Lists
 
-Lists are sequential collections of values. They can be built by grouping
-values with parentheses and separating them with commas. Values can be indexed
-by their position to access their contents. Lists are used to represent rows
-in tables and most macros take a list as an argument.
+Lists are sequential collections. They can be built by grouping values with
+parentheses and separating them with commas. Values can be indexed by their
+position to access their contents. Lists are used to represent rows in tables
+and most macros take a list as an argument.
 
 ```whale
 list = (true, 42, "Ok");
@@ -108,10 +119,11 @@ objects. Under the hood, all of whale's runtime variables are stored in a map,
 so, as with variables, the key is always a string.
 
 ```whale
-info.message = "FOOBAR";
-info.time = now().timestamp;
+reminder.message = "Buy milk";
+reminder.tags = ("groceries", "home");
 
-info:to_json:write "info.txt";
+json = reminder:to_json();
+json:append("info.txt");
 ```
 
 ### Tables
@@ -122,12 +134,10 @@ SQL.
 
 ```whale
 animals.all = create_table (
-  ("name", "species", "age"),
-  (
+    ("name", "species", "age"),
     ("rover", "cat", 14),
     ("spot", "snake", 9),
     ("bob", "giraffe", 2),
-  )
 );
 ```
 
@@ -147,7 +157,7 @@ assert_eq(animals:length(), 6);
 animals.by_name = animals:sort_by("name");
 ```
 
-### Expressions, assignment and the yield operator
+### The Yield Operator
 
 Whale has flexible syntax. The following block will print the same thing three
 times by passing a raw string to a macro.
@@ -155,7 +165,7 @@ times by passing a raw string to a macro.
 ```whale
 output "hiya";
 output("hiya");
-"hiya"::output;
+"hiya" :: input:output;
 ```
 
 This block assigns a variable and prints its value three times; first with
@@ -167,7 +177,7 @@ message = "hiya";
 
 output message;
 message:output;
-message::output;
+message :: input:output;
 ```
 
 Like a pipe in bash, zsh or fish, the yield operator evaluates the expression
@@ -177,23 +187,20 @@ may simply contain a value or they can call a macro or function that returns
 a value.
 
 ```whale
-"https://api.sampleapis.com/futurama/characters"::download(input):from_json():get(4)
+download "https://api.sampleapis.com/futurama/characters"
+    :: input:get(4)
 ```
 
 This can be useful when working on the command line but to make a script easier
-to read, we can also declare variables.
+to read or to avoid fetching the same resource multiple times, we can also
+declare variables. You should use `::` and variables together to write short,
+elegant scripts.
 
 ```whale
-json = endpoint:download();
-data = json:from_json();
-data:get(4)
-```
-
-You can use all of this together to write short, elegant scripts.
-
-```whale
-characters = download "https://api.sampleapis.com/futurama/characters";
-characters:from_json():get(4)
+json = download "https://api.sampleapis.com/futurama/characters";
+characters = from_json(json);
+names = characters:select("name");
+output(names:get(4));
 ```
 
 ### Functions
