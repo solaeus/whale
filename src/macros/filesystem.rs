@@ -266,3 +266,25 @@ impl Macro for Write {
         Ok(Value::Empty)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn write() {
+        let path = PathBuf::from("./target/test_message.txt");
+        let message = "hiya".to_string();
+
+        let _ = std::fs::remove_file(&path);
+
+        let path_value = Value::String(path.to_string_lossy().to_string());
+        let message_value = Value::String(message.clone());
+
+        Write
+            .run(&Value::List(vec![path_value, message_value]))
+            .unwrap();
+
+        assert!(path.is_file());
+    }
+}
