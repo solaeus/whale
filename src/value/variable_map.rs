@@ -232,3 +232,35 @@ impl<'de> Deserialize<'de> for VariableMap {
         deserializer.deserialize_map(VariableMapVisitor::new())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_and_set_simple_value() {
+        let mut map = VariableMap::new();
+
+        map.set_value("x", Value::Integer(1)).unwrap();
+
+        assert_eq!(Value::Integer(1), map.get_value("x").unwrap().unwrap());
+    }
+
+    #[test]
+    fn get_and_set_nested_maps() {
+        let mut map = VariableMap::new();
+
+        map.set_value("x", Value::Map(VariableMap::new())).unwrap();
+        map.set_value("x.x", Value::Map(VariableMap::new()))
+            .unwrap();
+        map.set_value("x.x.x", Value::Map(VariableMap::new()))
+            .unwrap();
+        map.set_value("x.x.x.x", Value::Map(VariableMap::new()))
+            .unwrap();
+
+        assert_eq!(
+            Value::Map(VariableMap::new()),
+            map.get_value("x.x.x.x").unwrap().unwrap()
+        );
+    }
+}
