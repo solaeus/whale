@@ -35,9 +35,6 @@ impl VariableMap {
 
         for (key, value) in &self.variables {
             if identifier == key {
-                let matches = identifier == key;
-                println!("{identifier} {key} {value}");
-
                 if let Ok(function) = value.as_function() {
                     let mut context = VariableMap::new();
 

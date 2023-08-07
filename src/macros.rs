@@ -39,6 +39,7 @@ use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
 
 mod collections;
 mod filesystem;
+mod logic;
 mod test;
 mod values;
 
@@ -46,7 +47,7 @@ mod values;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 15] = [
+pub const MACRO_LIST: [&'static dyn Macro; 16] = [
     &filesystem::Append,
     &filesystem::CreateDir,
     &filesystem::FileMetadata,
@@ -62,6 +63,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 15] = [
     &collections::Select,
     &test::Assert,
     &test::AssertEqual,
+    &logic::If,
 ];
 
 /// Internal whale function with its business logic and all information.
@@ -77,21 +79,6 @@ pub struct MacroInfo<'a> {
 
     /// User-facing information about how the macro works.
     pub description: &'a str,
-}
-
-/// Searches all macros for a matching identifier and runs the corresponding
-/// macro with the given input. Returns the function's output or an error.
-///
-/// The word "macro" is reserved in Rust, `r#macro` is the way to escape the
-/// reserved keyword.
-pub fn call_macro(identifier: &str, argument: &Value) -> Result<Value> {
-    for r#macro in MACRO_LIST {
-        if identifier == r#macro.info().identifier {
-            return r#macro.run(argument);
-        }
-    }
-
-    Err(Error::FunctionIdentifierNotFound(identifier.to_string()))
 }
 
 pub struct Repeat;

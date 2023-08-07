@@ -178,6 +178,7 @@ impl Operator {
     /// Evaluates the operator with the given arguments and context.
     pub(crate) fn eval(&self, arguments: &[Value], context: &VariableMap) -> Result<Value> {
         use crate::operator::Operator::*;
+
         match self {
             RootNode => {
                 if let Some(first) = arguments.first() {
@@ -450,12 +451,7 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 let arguments = &arguments[0];
 
-                match context.call_function(identifier, arguments) {
-                    Err(Error::FunctionIdentifierNotFound(_)) => {
-                        Err(Error::FunctionIdentifierNotFound(identifier.clone()))
-                    }
-                    result => result,
-                }
+                context.call_function(identifier, arguments)
             }
         }
     }
