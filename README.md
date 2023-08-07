@@ -23,10 +23,19 @@ async (
 Wait for a file to change, then print the time:
 
 ```whale
-
 watch "foo.whale";
 output "The time is " + local_time();
 ```
+
+## Features
+
+- Structured data: Unlike a traditional shell, whale can represent data with
+  more than just strings. Lists, maps and tables are everywhere in whale.
+- Format conversion: Effortlessly convert between whale and formats like JSON,
+  CSV and TOML
+- Package management: Whale integrates the [DNF] package manager, so you can use
+  whale to manage installed packages on any system with DNF installed. This is
+  completely optional.
 
 ## Project Status
 

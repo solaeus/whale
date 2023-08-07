@@ -38,17 +38,18 @@ use sysinfo::{DiskExt, System, SystemExt};
 use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
 
 mod collections;
+mod data_formats;
 mod filesystem;
 mod logic;
 mod network;
 mod test;
-mod values;
 
 /// Master list of all macros.
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 18] = [
+pub const MACRO_LIST: [&'static dyn Macro; 19] = [
+    &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
     &filesystem::FileMetadata,

@@ -14,8 +14,8 @@ impl Macro for Download {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_string()?;
-        let output = reqwest::blocking::get(argument)?.json::<Value>()?;
+        let output = reqwest::blocking::get(argument)?.text()?;
 
-        Ok(output)
+        Ok(Value::String(output))
     }
 }

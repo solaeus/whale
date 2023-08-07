@@ -1,6 +1,6 @@
-use crate::{Error, Result, Value};
-
 use comfy_table::{Cell, Color, ContentArrangement, Table as ComfyTable};
+
+use crate::{Error, Result, Value};
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
