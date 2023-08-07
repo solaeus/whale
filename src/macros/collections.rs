@@ -41,6 +41,37 @@ impl Macro for CreateTable {
     }
 }
 
+pub struct Get;
+
+impl Macro for Get {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "get",
+            description: "Retrieve a value from a collection.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_list()?;
+
+        let collection = &argument[0];
+        let index = argument[1].as_int()?;
+
+        if let Ok(list) = collection.as_list() {
+            if let Some(value) = list.get(index as usize) {
+                return Ok(value.clone());
+            } else {
+                return Ok(Value::Empty);
+            }
+        }
+
+        Err(Error::TypeError {
+            expected: &[ValueType::List, ValueType::Map, ValueType::Table],
+            actual: collection.clone(),
+        })
+    }
+}
+
 pub struct Insert;
 
 impl Macro for Insert {
