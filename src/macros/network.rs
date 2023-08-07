@@ -1,0 +1,21 @@
+//! Macros for network access.
+
+use crate::{Macro, MacroInfo, Result, Value};
+
+pub struct Download;
+
+impl Macro for Download {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "download",
+            description: "Fetch a network resource.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_string()?;
+        let output = reqwest::blocking::get(argument)?.json::<Value>()?;
+
+        Ok(output)
+    }
+}

@@ -237,6 +237,12 @@ impl From<git2::Error> for Error {
     }
 }
 
+impl From<reqwest::Error> for Error {
+    fn from(value: reqwest::Error) -> Self {
+        Error::MacroFailure(value.to_string())
+    }
+}
+
 impl From<sys_info::Error> for Error {
     fn from(value: sys_info::Error) -> Self {
         Error::MacroFailure(value.to_string())

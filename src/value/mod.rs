@@ -4,11 +4,16 @@ use crate::{
 };
 
 use json::JsonValue;
-use serde::{ser::SerializeTuple, Deserialize, Serialize, Serializer};
+use serde::{
+    de::{MapAccess, SeqAccess, Visitor},
+    ser::SerializeTuple,
+    Deserialize, Serialize, Serializer,
+};
 use std::{
     cmp::Ordering,
     convert::TryFrom,
     fmt::{self, Display, Formatter},
+    marker::PhantomData,
 };
 
 pub mod function;
@@ -22,7 +27,7 @@ pub mod variable_map;
 /// Every whale variable has a key and a Value. Variables are represented by
 /// storing them in a VariableMap. This means the map of variables is itself a
 /// value that can be treated as any other.
-#[derive(Clone, Debug, PartialEq, Deserialize, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub enum Value {
     String(String),
     Float(f64),
@@ -246,7 +251,7 @@ impl Display for Value {
                 write!(f, "(")?;
 
                 for value in list {
-                    if value.is_table() {
+                    if value.is_table() || value.is_map() {
                         write!(f, "\n{value}\n")?;
                     } else if value == list.last().unwrap() {
                         write!(f, "{value}")?;
@@ -434,5 +439,269 @@ impl TryFrom<Value> for bool {
         } else {
             Err(Error::ExpectedBoolean { actual: value })
         }
+    }
+}
+
+struct ValueVisitor {
+    marker: PhantomData<fn() -> Value>,
+}
+
+impl ValueVisitor {
+    fn new() -> Self {
+        ValueVisitor {
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<'de> Visitor<'de> for ValueVisitor {
+    type Value = Value;
+
+    fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
+        formatter.write_str("Any valid whale data.")
+    }
+
+    fn visit_bool<E>(self, v: bool) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Value::Boolean(v))
+    }
+
+    fn visit_i8<E>(self, v: i8) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_i64(v as i64)
+    }
+
+    fn visit_i16<E>(self, v: i16) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_i64(v as i64)
+    }
+
+    fn visit_i32<E>(self, v: i32) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_i64(v as i64)
+    }
+
+    fn visit_i64<E>(self, v: i64) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Value::Integer(v as i64))
+    }
+
+    fn visit_i128<E>(self, v: i128) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        if v > i64::MAX as i128 {
+            Ok(Value::Integer(i64::MAX))
+        } else {
+            Ok(Value::Integer(v as i64))
+        }
+    }
+
+    fn visit_u8<E>(self, v: u8) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_u64(v as u64)
+    }
+
+    fn visit_u16<E>(self, v: u16) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_u64(v as u64)
+    }
+
+    fn visit_u32<E>(self, v: u32) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_u64(v as u64)
+    }
+
+    fn visit_u64<E>(self, v: u64) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_i64(v as i64)
+    }
+
+    fn visit_u128<E>(self, v: u128) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_i128(v as i128)
+    }
+
+    fn visit_f32<E>(self, v: f32) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_f64(v as f64)
+    }
+
+    fn visit_f64<E>(self, v: f64) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Value::Float(v))
+    }
+
+    fn visit_char<E>(self, v: char) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_str(&v.to_string())
+    }
+
+    fn visit_str<E>(self, v: &str) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Value::String(v.to_string()))
+    }
+
+    fn visit_borrowed_str<E>(self, v: &'de str) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_str(v)
+    }
+
+    fn visit_string<E>(self, v: String) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Value::String(v))
+    }
+
+    fn visit_bytes<E>(self, v: &[u8]) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        let _ = v;
+        Err(serde::de::Error::invalid_type(
+            serde::de::Unexpected::Bytes(v),
+            &self,
+        ))
+    }
+
+    fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_bytes(v)
+    }
+
+    fn visit_byte_buf<E>(self, v: Vec<u8>) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_bytes(&v)
+    }
+
+    fn visit_none<E>(self) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Err(serde::de::Error::invalid_type(
+            serde::de::Unexpected::Option,
+            &self,
+        ))
+    }
+
+    fn visit_some<D>(self, deserializer: D) -> std::result::Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let _ = deserializer;
+        Err(serde::de::Error::invalid_type(
+            serde::de::Unexpected::Option,
+            &self,
+        ))
+    }
+
+    fn visit_unit<E>(self) -> std::result::Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Err(serde::de::Error::invalid_type(
+            serde::de::Unexpected::Unit,
+            &self,
+        ))
+    }
+
+    fn visit_newtype_struct<D>(self, deserializer: D) -> std::result::Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let _ = deserializer;
+        Err(serde::de::Error::invalid_type(
+            serde::de::Unexpected::NewtypeStruct,
+            &self,
+        ))
+    }
+
+    fn visit_seq<A>(self, mut access: A) -> std::result::Result<Self::Value, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        let mut list = Vec::new();
+
+        while let Some(value) = access.next_element()? {
+            list.push(value);
+        }
+
+        Ok(Value::List(list))
+    }
+
+    fn visit_map<M>(self, mut access: M) -> std::result::Result<Value, M::Error>
+    where
+        M: MapAccess<'de>,
+    {
+        let mut map = VariableMap::new();
+
+        while let Some((key, value)) = access.next_entry()? {
+            map.set_value(key, value)
+                .expect("Failed to deserialize Value. This is a no-op.");
+        }
+
+        Ok(Value::Map(map))
+    }
+
+    fn visit_enum<A>(self, data: A) -> std::result::Result<Self::Value, A::Error>
+    where
+        A: serde::de::EnumAccess<'de>,
+    {
+        let _ = data;
+        Err(serde::de::Error::invalid_type(
+            serde::de::Unexpected::Enum,
+            &self,
+        ))
+    }
+
+    fn __private_visit_untagged_option<D>(self, _: D) -> std::result::Result<Self::Value, ()>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Err(())
+    }
+}
+
+impl<'de> Deserialize<'de> for Value {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(ValueVisitor::new())
     }
 }

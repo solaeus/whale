@@ -1,19 +1,14 @@
 use comfy_table::{ContentArrangement, Table as ComfyTable};
-use serde::{
-    de::{MapAccess, Visitor},
-    ser::SerializeMap,
-    Deserialize, Serialize,
-};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
     fmt::{self, Display, Formatter},
-    marker::PhantomData,
 };
 
 use crate::{value::Value, Error, Result, Table, MACRO_LIST};
 
 /// A context that stores its mappings in hash maps.
-#[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq, Serialize, Deserialize)]
 pub struct VariableMap {
     variables: BTreeMap<String, Value>,
 }
@@ -176,64 +171,6 @@ impl From<&Table> for VariableMap {
         }
 
         map
-    }
-}
-
-impl Serialize for VariableMap {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut map = serializer.serialize_map(Some(self.variables.len()))?;
-
-        for (key, value) in &self.variables {
-            map.serialize_entry(&key, &value)?;
-        }
-
-        map.end()
-    }
-}
-
-struct VariableMapVisitor {
-    marker: PhantomData<fn() -> VariableMap>,
-}
-
-impl VariableMapVisitor {
-    fn new() -> Self {
-        VariableMapVisitor {
-            marker: PhantomData,
-        }
-    }
-}
-
-impl<'de> Visitor<'de> for VariableMapVisitor {
-    type Value = VariableMap;
-
-    fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
-        formatter.write_str("VariableMap of key-value pairs.")
-    }
-
-    fn visit_map<M>(self, mut access: M) -> std::result::Result<VariableMap, M::Error>
-    where
-        M: MapAccess<'de>,
-    {
-        let mut map = VariableMap::new();
-
-        while let Some((key, value)) = access.next_entry()? {
-            map.set_value(key, value)
-                .expect("Failed to deserialize VariableMap. This is a no-op.");
-        }
-
-        Ok(map)
-    }
-}
-
-impl<'de> Deserialize<'de> for VariableMap {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_map(VariableMapVisitor::new())
     }
 }
 

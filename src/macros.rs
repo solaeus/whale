@@ -40,6 +40,7 @@ use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
 mod collections;
 mod filesystem;
 mod logic;
+mod network;
 mod test;
 mod values;
 
@@ -47,7 +48,7 @@ mod values;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 16] = [
+pub const MACRO_LIST: [&'static dyn Macro; 17] = [
     &filesystem::Append,
     &filesystem::CreateDir,
     &filesystem::FileMetadata,
@@ -64,6 +65,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 16] = [
     &test::Assert,
     &test::AssertEqual,
     &logic::If,
+    &network::Download,
 ];
 
 /// Internal whale function with its business logic and all information.
