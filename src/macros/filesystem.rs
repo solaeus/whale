@@ -287,4 +287,24 @@ mod tests {
 
         assert!(path.is_file());
     }
+
+    #[test]
+    fn read_file() {
+        let path = PathBuf::from("./target/test_message.txt");
+        let message = "hiya".to_string();
+
+        let _ = std::fs::remove_file(&path);
+
+        let path_value = Value::String(path.to_string_lossy().to_string());
+        let message_value = Value::String(message.clone());
+
+        Write
+            .run(&Value::List(vec![path_value.clone(), message_value]))
+            .unwrap();
+
+        let test = ReadFile.run(&path_value).unwrap();
+        let read = fs::read_to_string(&path).unwrap();
+
+        assert_eq!(test, Value::String(read));
+    }
 }
