@@ -54,7 +54,7 @@ impl Macro for FileMetadata {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
             identifier: "file_metadata",
-            description: "Get meteadata for files.",
+            description: "Get metadata for files.",
         }
     }
 
@@ -298,8 +298,30 @@ mod tests {
     use super::*;
 
     #[test]
+    fn create_dir() {
+        let path = PathBuf::from("./target/create_dir/");
+        let path_value = Value::String(path.to_string_lossy().to_string());
+        let _ = std::fs::remove_file(&path);
+
+        CreateDir.run(&path_value).unwrap();
+
+        assert!(path.is_dir());
+    }
+
+    #[test]
+    fn create_dir_nested() {
+        let path = PathBuf::from("./target/create_dir/nested");
+        let path_value = Value::String(path.to_string_lossy().to_string());
+        let _ = std::fs::remove_file(&path);
+
+        CreateDir.run(&path_value).unwrap();
+
+        assert!(path.is_dir());
+    }
+
+    #[test]
     fn write() {
-        let path = PathBuf::from("./target/test_message.txt");
+        let path = PathBuf::from("./target/write.txt");
         let path_value = Value::String(path.to_string_lossy().to_string());
         let message = "hiya".to_string();
         let message_value = Value::String(message.clone());
@@ -314,7 +336,7 @@ mod tests {
 
     #[test]
     fn append() {
-        let path = PathBuf::from("./target/test_message.txt");
+        let path = PathBuf::from("./target/append.txt");
         let path_value = Value::String(path.to_string_lossy().to_string());
         let message = "hiya".to_string();
         let message_value = Value::String(message.clone());
@@ -337,7 +359,7 @@ mod tests {
 
     #[test]
     fn read_file() {
-        let path = PathBuf::from("./target/test_message.txt");
+        let path = PathBuf::from("./target/read_file.txt");
         let path_value = Value::String(path.to_string_lossy().to_string());
         let message = "hiya".to_string();
         let message_value = Value::String(message.clone());
@@ -355,7 +377,7 @@ mod tests {
 
     #[test]
     fn remove_file() {
-        let path = PathBuf::from("./target/test_message.txt");
+        let path = PathBuf::from("./target/remove_file.txt");
         let path_value = Value::String(path.to_string_lossy().to_string());
         let _ = std::fs::File::create(&path);
 
