@@ -267,6 +267,32 @@ impl Macro for Write {
     }
 }
 
+pub struct RemoveFile;
+
+impl Macro for RemoveFile {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "write",
+            description: "Write data to a file.",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let strings = argument.as_list()?;
+
+        if strings.len() < 2 {
+            return Err(Error::WrongFunctionArgumentAmount {
+                expected: 2,
+                actual: strings.len(),
+            });
+        }
+
+        let _path = strings.first().unwrap().as_string()?;
+
+        todo!();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -274,12 +300,10 @@ mod tests {
     #[test]
     fn write() {
         let path = PathBuf::from("./target/test_message.txt");
-        let message = "hiya".to_string();
-
-        let _ = std::fs::remove_file(&path);
-
         let path_value = Value::String(path.to_string_lossy().to_string());
+        let message = "hiya".to_string();
         let message_value = Value::String(message.clone());
+        let _ = std::fs::remove_file(&path);
 
         Write
             .run(&Value::List(vec![path_value, message_value]))
@@ -291,12 +315,10 @@ mod tests {
     #[test]
     fn append() {
         let path = PathBuf::from("./target/test_message.txt");
-        let message = "hiya".to_string();
-
-        let _ = std::fs::remove_file(&path);
-
         let path_value = Value::String(path.to_string_lossy().to_string());
+        let message = "hiya".to_string();
         let message_value = Value::String(message.clone());
+        let _ = std::fs::remove_file(&path);
 
         Write
             .run(&Value::List(vec![
@@ -316,12 +338,10 @@ mod tests {
     #[test]
     fn read_file() {
         let path = PathBuf::from("./target/test_message.txt");
-        let message = "hiya".to_string();
-
-        let _ = std::fs::remove_file(&path);
-
         let path_value = Value::String(path.to_string_lossy().to_string());
+        let message = "hiya".to_string();
         let message_value = Value::String(message.clone());
+        let _ = std::fs::remove_file(&path);
 
         Write
             .run(&Value::List(vec![path_value.clone(), message_value]))
@@ -331,5 +351,16 @@ mod tests {
         let read = fs::read_to_string(&path).unwrap();
 
         assert_eq!(test, Value::String(read));
+    }
+
+    #[test]
+    fn remove_file() {
+        let path = PathBuf::from("./target/test_message.txt");
+        let path_value = Value::String(path.to_string_lossy().to_string());
+        let _ = std::fs::File::create(&path);
+
+        RemoveFile.run(&path_value).unwrap();
+
+        assert!(!path.exists());
     }
 }
