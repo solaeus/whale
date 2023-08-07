@@ -16,7 +16,7 @@ impl Macro for CreateTable {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_fixed_len_list(2)?;
+        let argument = argument.as_list()?;
 
         let column_name_inputs = argument[0].as_list()?;
         let mut column_names = Vec::with_capacity(column_name_inputs.len());
@@ -26,7 +26,7 @@ impl Macro for CreateTable {
         }
 
         let column_count = column_names.len();
-        let rows = argument[1].as_list()?;
+        let rows = &argument[1..];
         let mut table = Table::new(column_names);
 
         for row in rows {
