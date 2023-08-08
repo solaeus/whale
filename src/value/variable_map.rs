@@ -148,9 +148,7 @@ impl Default for VariableMap {
 
 impl Display for VariableMap {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let table = Table::from(self);
-
-        write!(f, "{table}")
+        Table::from(self).fmt(f)
     }
 }
 

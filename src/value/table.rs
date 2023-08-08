@@ -199,20 +199,6 @@ impl From<&Value> for Table {
     }
 }
 
-impl From<&VariableMap> for Table {
-    fn from(map: &VariableMap) -> Self {
-        let keys = map.inner().keys().cloned().collect();
-        let values = map.inner().values().cloned().collect();
-        let mut table = Table::new(keys);
-
-        table
-            .insert(values)
-            .expect("Failed to create Table from Map. This is a no-op.");
-
-        table
-    }
-}
-
 impl From<&Vec<Value>> for Table {
     fn from(list: &Vec<Value>) -> Self {
         let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
@@ -231,7 +217,39 @@ impl From<&Vec<Value>> for Table {
     }
 }
 
+impl From<&VariableMap> for Table {
+    fn from(map: &VariableMap) -> Self {
+        let keys = map.inner().keys().cloned().collect();
+        let values = map.inner().values().cloned().collect();
+        let mut table = Table::new(keys);
+
+        table
+            .insert(values)
+            .expect("Failed to create Table from Map. This is a no-op.");
+
+        table
+    }
+}
+
 impl Eq for Table {}
+
+impl PartialEq for Table {
+    fn eq(&self, other: &Self) -> bool {
+        if self.column_names != other.column_names {
+            return false;
+        }
+
+        for self_row in &self.rows {
+            for other_row in &other.rows {
+                if self_row != other_row {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+}
 
 impl PartialOrd for Table {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -242,11 +260,5 @@ impl PartialOrd for Table {
 impl Ord for Table {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.column_names.cmp(&other.column_names)
-    }
-}
-
-impl PartialEq for Table {
-    fn eq(&self, other: &Self) -> bool {
-        self.column_names == other.column_names
     }
 }
