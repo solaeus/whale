@@ -1,6 +1,6 @@
-use comfy_table::{Cell, Color, ContentArrangement, Table as ComfyTable};
+use nu_table::{Cell, NuTable, TableConfig};
 
-use crate::{Error, Result, Value};
+use crate::{Error, Result, Value, VariableMap};
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
@@ -132,51 +132,20 @@ impl Table {
 
 impl Display for Table {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let mut table = ComfyTable::new();
+        let rows: Vec<Vec<Cell>> = self
+            .rows
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .map(|value| Cell::new(value.to_string()))
+                    .collect()
+            })
+            .collect();
+        let table = NuTable::from(rows);
 
-        table
-            .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
-            .set_content_arrangement(ContentArrangement::Dynamic)
-            .set_header(&self.column_names);
+        let display = table.draw(TableConfig::default(), 80).unwrap();
 
-        for row in &self.rows {
-            let row = row.iter().map(|value| {
-                let text = if value.is_table() {
-                    "Table".to_string()
-                } else {
-                    value.to_string()
-                };
-
-                let mut cell = Cell::new(text).bg(Color::Rgb {
-                    r: 40,
-                    g: 40,
-                    b: 40,
-                });
-
-                if value.is_string() {
-                    cell = cell.fg(Color::Green);
-                }
-                if value.is_integer() {
-                    cell = cell.fg(Color::Blue);
-                }
-                if value.is_boolean() {
-                    cell = cell.fg(Color::Red);
-                }
-                if value.is_function() {
-                    cell = cell.fg(Color::Cyan);
-                }
-
-                cell
-            });
-
-            table.add_row(row);
-        }
-
-        if self.column_names.is_empty() {
-            table.set_header(["empty"]);
-        }
-
-        write!(f, "{table}")
+        write!(f, "{display}")
     }
 }
 
@@ -213,33 +182,9 @@ impl From<&Value> for Table {
 
                 table
             }
-            Value::List(list) => {
-                let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
-
-                for (i, value) in list.iter().enumerate() {
-                    if let Ok(list) = value.as_list() {
-                        table.insert(list.clone()).unwrap();
-                    } else {
-                        table
-                            .insert(vec![Value::Integer(i as i64), value.clone()])
-                            .unwrap();
-                    }
-                }
-
-                table
-            }
+            Value::List(list) => Self::from(list),
             Value::Empty => Table::new(Vec::with_capacity(0)),
-            Value::Map(map) => {
-                let keys = map.inner().keys().cloned().collect();
-                let values = map.inner().values().cloned().collect();
-                let mut table = Table::new(keys);
-
-                table
-                    .insert(values)
-                    .expect("Failed to create Table from Map. This is a no-op.");
-
-                table
-            }
+            Value::Map(map) => Self::from(map),
             Value::Table(table) => table.clone(),
             Value::Function(function) => {
                 let mut table = Table::new(vec!["function".to_string()]);
@@ -251,6 +196,38 @@ impl From<&Value> for Table {
                 table
             }
         }
+    }
+}
+
+impl From<&VariableMap> for Table {
+    fn from(map: &VariableMap) -> Self {
+        let keys = map.inner().keys().cloned().collect();
+        let values = map.inner().values().cloned().collect();
+        let mut table = Table::new(keys);
+
+        table
+            .insert(values)
+            .expect("Failed to create Table from Map. This is a no-op.");
+
+        table
+    }
+}
+
+impl From<&Vec<Value>> for Table {
+    fn from(list: &Vec<Value>) -> Self {
+        let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
+
+        for (i, value) in list.iter().enumerate() {
+            if let Ok(list) = value.as_list() {
+                table.insert(list.clone()).unwrap();
+            } else {
+                table
+                    .insert(vec![Value::Integer(i as i64), value.clone()])
+                    .unwrap();
+            }
+        }
+
+        table
     }
 }
 

@@ -1,4 +1,3 @@
-use comfy_table::{ContentArrangement, Table as ComfyTable};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -149,15 +148,9 @@ impl Default for VariableMap {
 
 impl Display for VariableMap {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mut comfy_table = ComfyTable::new();
+        let table = Table::from(self);
 
-        comfy_table
-            .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
-            .set_content_arrangement(ContentArrangement::Dynamic)
-            .set_header(self.variables.keys())
-            .add_row(self.variables.values());
-
-        write!(f, "{comfy_table}")
+        write!(f, "{table}")
     }
 }
 

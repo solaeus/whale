@@ -247,23 +247,9 @@ impl Display for Value {
             Value::Float(float) => write!(f, "{}", float),
             Value::Integer(int) => write!(f, "{}", int),
             Value::Boolean(boolean) => write!(f, "{}", boolean),
-            Value::List(list) => {
-                write!(f, "(")?;
-
-                for value in list {
-                    if value.is_table() || value.is_map() {
-                        write!(f, "\n{value}\n")?;
-                    } else if value == list.last().unwrap() {
-                        write!(f, "{value}")?;
-                    } else {
-                        write!(f, "{value}, ")?;
-                    }
-                }
-
-                write!(f, ")")
-            }
             Value::Empty => write!(f, "()"),
-            Value::Map(map) => write!(f, "{}", map),
+            Value::List(list) => Table::from(list).fmt(f),
+            Value::Map(map) => map.fmt(f),
             Value::Table(table) => table.fmt(f),
             Value::Function(function) => function.fmt(f),
         }
