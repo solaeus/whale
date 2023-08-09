@@ -30,13 +30,10 @@ fn main() {
 
     if let Some(path) = args.path {
         let file_contents = read_to_string(path).unwrap();
-        let eval_result = eval(&file_contents).unwrap();
 
-        println!("{eval_result}");
+        eval(&file_contents).unwrap();
     } else if let Some(command) = args.command {
-        let eval_result = eval(&command).unwrap();
-
-        println!("{eval_result}");
+        eval(&command).unwrap();
     } else {
         run_shell()
     }
@@ -58,11 +55,7 @@ fn run_shell() {
                 let eval_result = eval_with_context(&buffer, &mut context);
 
                 match eval_result {
-                    Ok(value) => {
-                        if !value.is_empty() {
-                            println!("{value}");
-                        }
-                    }
+                    Ok(value) => println!("{value}"),
                     Err(error) => eprintln!("{error}"),
                 }
             }
