@@ -24,19 +24,13 @@ impl Macro for CreateTable {
         }
 
         let column_count = column_names.len();
-        let rows = &argument[1..];
+        let rows = argument[1].as_list()?;
         let mut table = Table::new(column_names);
 
         for row in rows {
-            let row = row.as_list()?.clone();
+            let row = row.as_fixed_len_list(column_count)?;
 
-            Error::expect_function_argument_amount(
-                self.info().identifier,
-                row.len(),
-                column_count,
-            )?;
-
-            table.insert(row).unwrap();
+            table.insert(row.clone()).unwrap();
         }
 
         Ok(Value::Table(table))

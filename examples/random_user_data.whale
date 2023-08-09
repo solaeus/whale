@@ -1,5 +1,9 @@
-user = '(random_integer(), random_string(), random_integer(0, 100))';
 create_table(
 	("id", "name", "age"),
-	(repeat('random_integer()', 10))
+	(
+	 	repeat (
+			'(random_integer(), random_string(), random_integer(0, 100))',
+			3
+		)
+	)
 )
