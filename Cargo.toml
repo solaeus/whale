@@ -1,7 +1,7 @@
 [package]
 name = "whale"
 version = "0.2.0"
-description = "Programming language for system management"
+description = "Data-oriented programming language and shell."
 authors = ["jeff <dev@jeffa.io.com>"]
 repository = "https://git.jeffa.io/jeff/whale.git"
 homepage = "https://git.jeffa.io/jeff/whale"

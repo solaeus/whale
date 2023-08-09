@@ -141,9 +141,9 @@ impl Display for Table {
         for row in &self.rows {
             let row = row.iter().map(|value| {
                 let text = match value {
-                    Value::List(list) => format!("List ({} items)", list.len()),
-                    Value::Map(map) => format!("List ({} items)", map.len()),
-                    Value::Table(table) => format!("List ({} items)", table.len()),
+                    Value::List(list) => format!("{list:?}"),
+                    Value::Map(map) => format!("Map ({} items)", map.len()),
+                    Value::Table(table) => format!("Table ({} items)", table.len()),
                     Value::Function(_) => "Function".to_string(),
                     Value::Empty => "Empty".to_string(),
                     value => value.to_string(),

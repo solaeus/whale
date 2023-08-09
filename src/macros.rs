@@ -40,6 +40,7 @@ use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
 mod collections;
 mod data_formats;
 mod filesystem;
+mod general;
 mod logic;
 mod network;
 mod test;
@@ -48,7 +49,7 @@ mod test;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 19] = [
+pub const MACRO_LIST: [&'static dyn Macro; 20] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -59,6 +60,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 19] = [
     &filesystem::RemoveDir,
     &filesystem::Trash,
     &filesystem::Write,
+    &general::Output,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,
@@ -70,7 +72,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 19] = [
     &network::Download,
 ];
 
-/// Internal whale function with its business logic and all information.
+/// A whale macro function.
 pub trait Macro: Sync + Send {
     fn info(&self) -> MacroInfo<'static>;
     fn run(&self, argument: &Value) -> Result<Value>;
