@@ -37,13 +37,11 @@ output "The time is " + local_time();
   whale to manage installed packages on any system with DNF installed. This is
   completely optional.
 
-## Project Status
+## Usage
 
 Whale is in pre-alpha and under active development. At this stage, features come
 and go and the API is always changing. It should not be considered for serious
 use yet.
-
-## Usage
 
 ## Installation
 
@@ -53,11 +51,11 @@ command line options, use `cargo run -- --help`.
 
 ## The Whale Programming Language
 
-Whale started as a hard fork of [evalexpr], which is a simple expression
-language and unrelated project. Whale is still very simple but can manage
-large, complex sets of data and perform complicated tasks through macros. It
-should not take long for a new user to learn the language, especially with the
-assistance of the shell.
+Whale is a hard fork of [evalexpr]; a simple expression language. Whale's core
+language features maintin this simplicity. But it can manage large, complex
+sets of data and perform complicated tasks through macros. It should not take
+long for a new user to learn the language, especially with the assistance of
+the shell.
 
 ### Variables and Data Types
 

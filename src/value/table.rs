@@ -272,15 +272,7 @@ impl PartialEq for Table {
             return false;
         }
 
-        for self_row in &self.rows {
-            for other_row in &other.rows {
-                if self_row != other_row {
-                    return false;
-                }
-            }
-        }
-
-        true
+        self.rows == other.rows
     }
 }
 
