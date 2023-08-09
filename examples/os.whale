@@ -1,3 +1,0 @@
-hostname = "foohost";
-packages.add = ("autofs", "zsh");
-packages.remove = ("firefox", "firefox-langpacks");
