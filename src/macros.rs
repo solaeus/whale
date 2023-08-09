@@ -21,7 +21,6 @@
 //! ```
 use std::{
     convert::{TryFrom, TryInto},
-    fs,
     path::PathBuf,
     process::{Command, Stdio},
     thread::sleep,
@@ -31,11 +30,10 @@ use std::{
 use git2::Repository;
 use json::JsonValue;
 use rand::{random, thread_rng, Rng};
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use sys_info::{cpu_num, cpu_speed, hostname};
 use sysinfo::{DiskExt, System, SystemExt};
 
-use crate::{Error, Function, Result, Table, Value, ValueType, VariableMap};
+use crate::{Error, Result, Table, Value, ValueType, VariableMap};
 
 mod collections;
 mod data_formats;
@@ -49,7 +47,7 @@ mod test;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 20] = [
+pub const MACRO_LIST: [&'static dyn Macro; 23] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -61,6 +59,9 @@ pub const MACRO_LIST: [&'static dyn Macro; 20] = [
     &filesystem::Trash,
     &filesystem::Write,
     &general::Output,
+    &general::Async,
+    &general::Repeat,
+    &general::Run,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,
@@ -85,82 +86,6 @@ pub struct MacroInfo<'a> {
 
     /// User-facing information about how the macro works.
     pub description: &'a str,
-}
-
-pub struct Repeat;
-
-impl Macro for Repeat {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "repeat",
-            description: "Run a function the given number of times.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_list()?;
-        let function = argument[0].as_function()?;
-        let count = argument[1].as_int()?;
-        let mut result_list = Vec::with_capacity(count as usize);
-
-        for _ in 0..count {
-            let result = function.run()?;
-
-            result_list.push(result);
-        }
-
-        Ok(Value::List(result_list))
-    }
-}
-
-pub struct Run;
-
-impl Macro for Run {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "run",
-            description: "Run a whale file.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let path = argument.as_string()?;
-        let file_contents = fs::read_to_string(path)?;
-
-        Function::new(&file_contents).run()
-    }
-}
-
-pub struct Async;
-
-impl Macro for Async {
-    fn info(&self) -> MacroInfo<'static> {
-        MacroInfo {
-            identifier: "async",
-            description: "Run functions in parallel.",
-        }
-    }
-
-    fn run(&self, argument: &Value) -> Result<Value> {
-        let argument_list = argument.as_list()?;
-        let results = argument_list
-            .par_iter()
-            .map(|value| {
-                let function = if let Ok(function) = value.as_function() {
-                    function
-                } else {
-                    return value.clone();
-                };
-
-                match function.run() {
-                    Ok(value) => value,
-                    Err(error) => Value::String(error.to_string()),
-                }
-            })
-            .collect();
-
-        Ok(Value::List(results))
-    }
 }
 
 pub struct Pipe;

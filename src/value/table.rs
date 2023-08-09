@@ -291,7 +291,7 @@ impl PartialOrd for Table {
 }
 
 impl Ord for Table {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.column_names.cmp(&other.column_names)
     }
 }

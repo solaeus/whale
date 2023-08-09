@@ -1,5 +1,0 @@
-write("target/test_file.txt", "foo");
-
-read_file = read_file("target/test_file.txt");
-
-assert_equal(read_file, "foo");
