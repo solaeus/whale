@@ -249,9 +249,9 @@ impl Display for Value {
             Value::Boolean(boolean) => write!(f, "{}", boolean),
             Value::Empty => write!(f, "()"),
             Value::List(list) => Table::from(list).fmt(f),
-            Value::Map(map) => map.fmt(f),
-            Value::Table(table) => table.fmt(f),
-            Value::Function(function) => function.fmt(f),
+            Value::Map(map) => write!(f, "{map}"),
+            Value::Table(table) => write!(f, "{table}"),
+            Value::Function(function) => write!(f, "{function}"),
         }
     }
 }

@@ -827,7 +827,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node> {
             Token::Boolean(boolean) => Some(Node::new(Operator::value(Value::Boolean(boolean)))),
             Token::String(string) => Some(Node::new(Operator::value(Value::String(string)))),
             Token::Function(string) => Some(Node::new(Operator::value(Value::Function(
-                Function::from(string),
+                Function::new(&string),
             )))),
             Token::Yield(_, _) => todo!(),
         };

@@ -1,6 +1,5 @@
-use nu_table::{Cell, NuTable, TableConfig};
-
 use crate::{Error, Result, Value, VariableMap};
+use comfy_table::{Cell, Color, ContentArrangement, Table as ComfyTable};
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
@@ -132,20 +131,54 @@ impl Table {
 
 impl Display for Table {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let rows: Vec<Vec<Cell>> = self
-            .rows
-            .iter()
-            .map(|row| {
-                row.iter()
-                    .map(|value| Cell::new(value.to_string()))
-                    .collect()
-            })
-            .collect();
-        let table = NuTable::from(rows);
+        let mut table = ComfyTable::new();
 
-        let display = table.draw(TableConfig::default(), 80).unwrap();
+        table
+            .load_preset("││──├─┼┤│    ┬┴╭╮╰╯")
+            .set_content_arrangement(ContentArrangement::Dynamic)
+            .set_header(&self.column_names);
 
-        write!(f, "{display}")
+        for row in &self.rows {
+            let row = row.iter().map(|value| {
+                let text = match value {
+                    Value::List(list) => format!("List ({} items)", list.len()),
+                    Value::Map(map) => format!("List ({} items)", map.len()),
+                    Value::Table(table) => format!("List ({} items)", table.len()),
+                    Value::Function(_) => "Function".to_string(),
+                    Value::Empty => "Empty".to_string(),
+                    value => value.to_string(),
+                };
+
+                let mut cell = Cell::new(text).bg(Color::Rgb {
+                    r: 40,
+                    g: 40,
+                    b: 40,
+                });
+
+                if value.is_string() {
+                    cell = cell.fg(Color::Green);
+                }
+                if value.is_integer() {
+                    cell = cell.fg(Color::Blue);
+                }
+                if value.is_boolean() {
+                    cell = cell.fg(Color::Red);
+                }
+                if value.is_function() {
+                    cell = cell.fg(Color::Cyan);
+                }
+
+                cell
+            });
+
+            table.add_row(row);
+        }
+
+        if self.column_names.is_empty() {
+            table.set_header(["empty"]);
+        }
+
+        write!(f, "{table}")
     }
 }
 

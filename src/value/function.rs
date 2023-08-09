@@ -21,14 +21,8 @@ impl Function {
     }
 }
 
-impl From<String> for Function {
-    fn from(value: String) -> Self {
-        Function(value)
-    }
-}
-
 impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "'{}'", self.0)
+        write!(f, "{}", self.0)
     }
 }
