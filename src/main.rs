@@ -93,19 +93,24 @@ impl WhaleCompeleter {
     pub fn set_macro_list(&mut self, macro_list: Vec<&'static dyn Macro>) -> &mut Self {
         self.macro_list = macro_list
             .iter()
-            .map(|function| {
+            .map(|r#macro| {
                 let MacroInfo {
                     identifier,
                     description,
-                } = function.info();
+                    group,
+                } = r#macro.info();
 
                 Suggestion {
                     value: identifier.to_string(),
                     description: Some(description.to_string()),
+                    extra: Some(vec![group.to_string()]),
                     ..Default::default()
                 }
             })
             .collect();
+
+        self.macro_list
+            .sort_by_key(|suggestion| suggestion.extra.clone());
 
         self
     }

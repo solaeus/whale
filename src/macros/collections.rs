@@ -12,6 +12,7 @@ impl Macro for CreateTable {
         MacroInfo {
             identifier: "create_table",
             description: "Define a new table with a list of column names and list of rows.",
+            group: "collections",
         }
     }
 
@@ -48,6 +49,7 @@ impl Macro for Get {
         MacroInfo {
             identifier: "get",
             description: "Retrieve a value from a collection.",
+            group: "collections",
         }
     }
 
@@ -79,6 +81,7 @@ impl Macro for Insert {
         MacroInfo {
             identifier: "insert",
             description: "Add new rows to a table.",
+            group: "collections",
         }
     }
 
@@ -106,6 +109,7 @@ impl Macro for Select {
         MacroInfo {
             identifier: "select",
             description: "Extract one or more values based on their key.",
+            group: "collections",
         }
     }
 
@@ -176,6 +180,7 @@ impl Macro for ForEach {
         MacroInfo {
             identifier: "for_each",
             description: "Run an operation on every item in a collection.",
+            group: "collections",
         }
     }
 
@@ -206,6 +211,7 @@ impl Macro for Where {
         MacroInfo {
             identifier: "where",
             description: "Keep rows matching a predicate.",
+            group: "collections",
         }
     }
 

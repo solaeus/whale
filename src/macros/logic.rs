@@ -4,7 +4,11 @@ pub struct If;
 
 impl Macro for If {
     fn info(&self) -> MacroInfo<'static> {
-        MacroInfo { identifier: "if", description: "Evaluates the first argument. If true, it does the second argument. If false, it does the third argument" }
+        MacroInfo {
+            identifier: "if",
+            description: "Evaluates the first argument. If true, it does the second argument. If false, it does the third argument",            
+            group: "general",
+        }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {

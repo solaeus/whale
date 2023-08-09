@@ -11,6 +11,7 @@ impl Macro for Output {
         MacroInfo {
             identifier: "output",
             description: "Print a value.",
+            group: "general",
         }
     }
 
@@ -27,6 +28,7 @@ impl Macro for Repeat {
         MacroInfo {
             identifier: "repeat",
             description: "Run a function the given number of times.",
+            group: "general",
         }
     }
 
@@ -53,6 +55,7 @@ impl Macro for Run {
         MacroInfo {
             identifier: "run",
             description: "Run a whale file.",
+            group: "general",
         }
     }
 
@@ -71,6 +74,7 @@ impl Macro for Async {
         MacroInfo {
             identifier: "async",
             description: "Run functions in parallel.",
+            group: "general",
         }
     }
 

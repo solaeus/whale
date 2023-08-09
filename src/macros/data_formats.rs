@@ -9,6 +9,7 @@ impl Macro for FromJson {
         MacroInfo {
             identifier: "from_json",
             description: "Get a whale value from a JSON string.",
+            group: "data",
         }
     }
 

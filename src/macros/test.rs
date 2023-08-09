@@ -7,6 +7,7 @@ impl Macro for Assert {
         MacroInfo {
             identifier: "assert",
             description: "Panic if a boolean is false.",
+            group: "test",
         }
     }
 
@@ -26,6 +27,7 @@ impl Macro for AssertEqual {
         MacroInfo {
             identifier: "assert_equal",
             description: "Panic if two values do not match.",
+            group: "test",
         }
     }
 

@@ -15,6 +15,7 @@ impl Macro for Append {
         MacroInfo {
             identifier: "append",
             description: "Append data to a file.",
+            group: "filesystem",
         }
     }
 
@@ -37,6 +38,7 @@ impl Macro for CreateDir {
         MacroInfo {
             identifier: "create_dir",
             description: "Create one or more directories.",
+            group: "filesystem",
         }
     }
 
@@ -55,6 +57,7 @@ impl Macro for FileMetadata {
         MacroInfo {
             identifier: "file_metadata",
             description: "Get metadata for files.",
+            group: "filesystem",
         }
     }
 
@@ -96,6 +99,7 @@ impl Macro for ReadDir {
         MacroInfo {
             identifier: "read_dir",
             description: "Read the content of a directory.",
+            group: "filesystem",
         }
     }
 
@@ -158,6 +162,7 @@ impl Macro for ReadFile {
         MacroInfo {
             identifier: "read_file",
             description: "Read file contents.",
+            group: "filesystem",
         }
     }
 
@@ -182,6 +187,7 @@ impl Macro for RemoveDir {
         MacroInfo {
             identifier: "remove_dir",
             description: "Remove directories.",
+            group: "filesystem",
         }
     }
 
@@ -200,6 +206,7 @@ impl Macro for MoveDir {
         MacroInfo {
             identifier: "move_dir",
             description: "Move a directory to a new path.",
+            group: "filesystem",
         }
     }
 
@@ -241,6 +248,7 @@ impl Macro for Trash {
         MacroInfo {
             identifier: "trash",
             description: "Move a file or directory to the trash.",
+            group: "filesystem",
         }
     }
 
@@ -260,6 +268,7 @@ impl Macro for Write {
         MacroInfo {
             identifier: "write",
             description: "Write data to a file.",
+            group: "filesystem",
         }
     }
 
@@ -297,6 +306,7 @@ impl Macro for RemoveFile {
         MacroInfo {
             identifier: "write",
             description: "Write data to a file.",
+            group: "filesystem",
         }
     }
 

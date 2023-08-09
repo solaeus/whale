@@ -9,6 +9,7 @@ impl Macro for Download {
         MacroInfo {
             identifier: "download",
             description: "Fetch a network resource.",
+            group: "network",
         }
     }
 
