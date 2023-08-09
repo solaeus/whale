@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, thread::sleep, time::Duration};
 
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -97,5 +97,25 @@ impl Macro for Async {
             .collect();
 
         Ok(Value::List(results))
+    }
+}
+
+pub struct Wait;
+
+impl Macro for Wait {
+    fn info(&self) -> crate::MacroInfo<'static> {
+        MacroInfo {
+            identifier: "wait",
+            description: "Wait for the given number of seconds.",
+            group: "general",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let argument = argument.as_int()?;
+
+        sleep(Duration::from_secs(argument as u64));
+
+        Ok(Value::Empty)
     }
 }

@@ -34,7 +34,7 @@ mod test;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 27] = [
+pub const MACRO_LIST: [&'static dyn Macro; 28] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -49,6 +49,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 27] = [
     &general::Async,
     &general::Repeat,
     &general::Run,
+    &general::Wait,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,
@@ -132,25 +133,6 @@ pub struct MacroInfo<'a> {
 //         };
 
 //         Ok(Value::Integer(wait_time))
-//     }
-// }
-
-// pub struct Seconds;
-
-// impl Macro for Seconds {
-//     fn info(&self) -> crate::MacroInfo<'static> {
-//         crate::MacroInfo {
-//             identifier: "wait",
-//             description: "Wait for the given number of seconds.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let argument = argument.as_int()?;
-
-//         sleep(Duration::from_secs(argument as u64));
-
-//         Ok(Value::Empty)
 //     }
 // }
 
