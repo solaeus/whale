@@ -27,13 +27,14 @@ mod filesystem;
 mod general;
 mod logic;
 mod network;
+mod random;
 mod test;
 
 /// Master list of all macros.
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 23] = [
+pub const MACRO_LIST: [&'static dyn Macro; 27] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -57,6 +58,10 @@ pub const MACRO_LIST: [&'static dyn Macro; 23] = [
     &test::AssertEqual,
     &logic::If,
     &network::Download,
+    &random::RandomBoolean,
+    &random::RandomFloat,
+    &random::RandomInteger,
+    &random::RandomString,
 ];
 
 /// A whale macro function.
@@ -219,102 +224,6 @@ pub struct MacroInfo<'a> {
 //                 actual: argument.clone(),
 //             })
 //         }
-//     }
-// }
-
-// pub struct RandomInteger;
-
-// impl Macro for RandomInteger {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "random_integer",
-//             description: "Create a random integer.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         match argument {
-//             Value::Integer(max) => {
-//                 let integer = rand::thread_rng().gen_range(0..*max);
-
-//                 Ok(Value::Integer(integer))
-//             }
-//             Value::List(min_max) => {
-//                 if min_max.len() != 2 {
-//                     return Err(Error::WrongFunctionArgumentAmount {
-//                         expected: 2,
-//                         actual: min_max.len(),
-//                     });
-//                 }
-
-//                 let min = min_max.get(0).unwrap().as_int()?;
-//                 let max = min_max.get(1).unwrap().as_int()? + 1;
-//                 let integer = rand::thread_rng().gen_range(min..max);
-
-//                 Ok(Value::Integer(integer))
-//             }
-//             Value::Empty => Ok(crate::Value::Integer(random())),
-//             _ => todo!(),
-//         }
-//     }
-// }
-
-// pub struct RandomString;
-
-// impl Macro for RandomString {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "random_string",
-//             description: "Generate a random string.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         match argument {
-//             Value::Integer(length) => {
-//                 let length: usize = length.unsigned_abs().try_into().unwrap_or(0);
-//                 let mut random = String::with_capacity(length);
-
-//                 for _ in 0..length {
-//                     let random_char = thread_rng().gen_range('A'..='z').to_string();
-
-//                     random.push_str(&random_char);
-//                 }
-
-//                 Ok(Value::String(random))
-//             }
-//             Value::Empty => {
-//                 let mut random = String::with_capacity(10);
-
-//                 for _ in 0..10 {
-//                     let random_char = thread_rng().gen_range('A'..='z').to_string();
-
-//                     random.push_str(&random_char);
-//                 }
-
-//                 Ok(Value::String(random))
-//             }
-//             _ => Err(Error::ExpectedEmpty {
-//                 actual: argument.clone(),
-//             }),
-//         }
-//     }
-// }
-
-// pub struct RandomFloat;
-
-// impl Macro for RandomFloat {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "random_float",
-//             description: "Generate a random floating point value between 0 and 1.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         argument.as_empty()?;
-
-//         Ok(Value::Float(random()))
 //     }
 // }
 

@@ -27,6 +27,7 @@ pub enum Error {
 
     /// A function was called with the wrong amount of arguments.
     WrongFunctionArgumentAmount {
+        identifier: String,
         expected: usize,
         actual: usize,
     },
@@ -272,8 +273,16 @@ impl Error {
         Error::WrongOperatorArgumentAmount { actual, expected }
     }
 
-    pub(crate) fn wrong_function_argument_amount(actual: usize, expected: usize) -> Self {
-        Error::WrongFunctionArgumentAmount { actual, expected }
+    pub(crate) fn wrong_function_argument_amount(
+        identifier: String,
+        actual: usize,
+        expected: usize,
+    ) -> Self {
+        Error::WrongFunctionArgumentAmount {
+            actual,
+            expected,
+            identifier,
+        }
     }
 
     pub fn type_error(actual: Value, expected: &'static [ValueType]) -> Self {
@@ -394,11 +403,17 @@ pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) ->
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and
 /// `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub fn expect_function_argument_length(actual: usize, expected: usize) -> Result<()> {
+pub fn expect_function_argument_length(
+    identifier: String,
+    actual: usize,
+    expected: usize,
+) -> Result<()> {
     if actual == expected {
         Ok(())
     } else {
-        Err(Error::wrong_function_argument_amount(actual, expected))
+        Err(Error::wrong_function_argument_amount(
+            identifier, actual, expected,
+        ))
     }
 }
 
@@ -430,10 +445,13 @@ impl fmt::Display for Error {
                 "An operator expected {} arguments, but got {}.",
                 expected, actual
             ),
-            WrongFunctionArgumentAmount { expected, actual } => write!(
+            WrongFunctionArgumentAmount {
+                expected,
+                actual,
+                identifier,
+            } => write!(
                 f,
-                "A function expected {} arguments, but got {}.",
-                expected, actual
+                "{identifier} expected {expected} arguments, but got {actual}.",
             ),
             ExpectedString { actual } => {
                 write!(f, "Expected a Value::String, but got {:?}.", actual)
