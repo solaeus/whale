@@ -2,7 +2,7 @@ use std::convert::TryInto;
 
 use rand::{random, thread_rng, Rng};
 
-use crate::{error::expect_function_argument_length, Error, Macro, MacroInfo, Result, Value};
+use crate::{Error, Macro, MacroInfo, Result, Value};
 
 pub struct RandomBoolean;
 
@@ -43,11 +43,7 @@ impl Macro for RandomInteger {
                 Ok(Value::Integer(integer))
             }
             Value::List(min_max) => {
-                expect_function_argument_length(
-                    self.info().identifier.to_string(),
-                    min_max.len(),
-                    2,
-                )?;
+                Error::expect_function_argument_amount(self.info().identifier, min_max.len(), 2)?;
 
                 let min = min_max.get(0).unwrap().as_int()?;
                 let max = min_max.get(1).unwrap().as_int()? + 1;

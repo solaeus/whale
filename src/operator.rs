@@ -188,7 +188,7 @@ impl Operator {
                 }
             }
             Add => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -221,7 +221,7 @@ impl Operator {
                 }
             }
             Sub => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
@@ -242,7 +242,7 @@ impl Operator {
                 }
             }
             Neg => {
-                expect_operator_argument_amount(arguments.len(), 1)?;
+                Error::expect_operator_argument_amount(arguments.len(), 1)?;
                 arguments[0].as_number()?;
 
                 if let Ok(a) = arguments[0].as_int() {
@@ -257,7 +257,7 @@ impl Operator {
                 }
             }
             Mul => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
@@ -278,7 +278,7 @@ impl Operator {
                 }
             }
             Div => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
@@ -299,7 +299,7 @@ impl Operator {
                 }
             }
             Mod => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
@@ -320,7 +320,7 @@ impl Operator {
                 }
             }
             Exp => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
@@ -329,17 +329,17 @@ impl Operator {
                 ))
             }
             Eq => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
 
                 Ok(Value::Boolean(arguments[0] == arguments[1]))
             }
             Neq => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
 
                 Ok(Value::Boolean(arguments[0] != arguments[1]))
             }
             Gt => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -354,7 +354,7 @@ impl Operator {
                 }
             }
             Lt => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -369,7 +369,7 @@ impl Operator {
                 }
             }
             Geq => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -384,7 +384,7 @@ impl Operator {
                 }
             }
             Leq => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -399,21 +399,21 @@ impl Operator {
                 }
             }
             And => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
                 Ok(Value::Boolean(a && b))
             }
             Or => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
                 Ok(Value::Boolean(a || b))
             }
             Not => {
-                expect_operator_argument_amount(arguments.len(), 1)?;
+                Error::expect_operator_argument_amount(arguments.len(), 1)?;
                 let a = arguments[0].as_boolean()?;
 
                 Ok(Value::Boolean(!a))
@@ -423,23 +423,23 @@ impl Operator {
             Tuple => Ok(Value::List(arguments.into())),
             Chain => {
                 if arguments.is_empty() {
-                    return Err(Error::wrong_operator_argument_amount(0, 1));
+                    return Err(Error::expect_operator_argument_amount(0, 1).unwrap_err());
                 }
 
                 Ok(arguments.last().cloned().unwrap_or(Value::Empty))
             }
             Const { value } => {
-                expect_operator_argument_amount(arguments.len(), 0)?;
+                Error::expect_operator_argument_amount(arguments.len(), 0)?;
 
                 Ok(value.clone())
             }
             VariableIdentifierWrite { identifier } => {
-                expect_operator_argument_amount(arguments.len(), 0)?;
+                Error::expect_operator_argument_amount(arguments.len(), 0)?;
 
                 Ok(identifier.clone().into())
             }
             VariableIdentifierRead { identifier } => {
-                expect_operator_argument_amount(arguments.len(), 0)?;
+                Error::expect_operator_argument_amount(arguments.len(), 0)?;
 
                 if let Some(value) = context.get_value(identifier)? {
                     Ok(value)
@@ -448,7 +448,7 @@ impl Operator {
                 }
             }
             FunctionIdentifier { identifier } => {
-                expect_operator_argument_amount(arguments.len(), 1)?;
+                Error::expect_operator_argument_amount(arguments.len(), 1)?;
                 let arguments = &arguments[0];
 
                 context.call_function(identifier, arguments)
@@ -461,7 +461,7 @@ impl Operator {
         use crate::operator::Operator::*;
         match self {
             Assign => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
                 let target = arguments[0].as_string()?;
                 context.set_value(target, arguments[1].clone())?;
 
@@ -469,7 +469,7 @@ impl Operator {
             }
             AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign | AndAssign
             | OrAssign => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Error::expect_operator_argument_amount(arguments.len(), 2)?;
 
                 let target = arguments[0].as_string()?;
                 let left_value = Operator::VariableIdentifierRead {

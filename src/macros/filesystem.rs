@@ -6,10 +6,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::{
-    error::expect_function_argument_length, Error, Macro, MacroInfo, Result, Table, Value,
-    ValueType,
-};
+use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType};
 
 pub struct Append;
 
@@ -216,7 +213,7 @@ impl Macro for MoveDir {
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
 
-        expect_function_argument_length(self.info().identifier.to_string(), argument.len(), 2)?;
+        Error::expect_function_argument_amount(self.info().identifier, argument.len(), 2)?;
 
         let current_path = argument[0].as_string()?;
         let target_path = argument[1].as_string()?;
@@ -273,7 +270,7 @@ impl Macro for Write {
     fn run(&self, argument: &Value) -> Result<Value> {
         let strings = argument.as_list()?;
 
-        expect_function_argument_length(self.info().identifier.to_string(), strings.len(), 2)?;
+        Error::expect_function_argument_amount(self.info().identifier, strings.len(), 2)?;
 
         let path = strings.first().unwrap().as_string()?;
         let mut file = OpenOptions::new()
@@ -306,7 +303,7 @@ impl Macro for RemoveFile {
     fn run(&self, argument: &Value) -> Result<Value> {
         let strings = argument.as_list()?;
 
-        expect_function_argument_length(self.info().identifier.to_string(), strings.len(), 2)?;
+        Error::expect_function_argument_amount(self.info().identifier, strings.len(), 2)?;
 
         let _path = strings.first().unwrap().as_string()?;
 

@@ -1,9 +1,6 @@
 //! Macros for collection values: strings, lists, maps and tables.
 
-use crate::{
-    error::expect_function_argument_length, Error, Macro, MacroInfo, Result, Table, Value,
-    ValueType, VariableMap,
-};
+use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType, VariableMap};
 
 pub struct CreateTable;
 
@@ -33,8 +30,8 @@ impl Macro for CreateTable {
         for row in rows {
             let row = row.as_list()?.clone();
 
-            expect_function_argument_length(
-                self.info().identifier.to_string(),
+            Error::expect_function_argument_amount(
+                self.info().identifier,
                 row.len(),
                 column_count,
             )?;
@@ -190,7 +187,12 @@ impl Macro for ForEach {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_list()?;
-        expect_function_argument_length(self.info().identifier.to_string(), argument.len(), 2)?;
+
+        Error::expected_minimum_function_argument_amount(
+            self.info().identifier,
+            2,
+            argument.len(),
+        )?;
 
         let table = argument[0].as_table()?;
         let columns = argument[1].as_list()?;
@@ -221,11 +223,7 @@ impl Macro for Where {
 
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument_list = argument.as_list()?;
-        expect_function_argument_length(
-            self.info().identifier.to_string(),
-            argument_list.len(),
-            2,
-        )?;
+        Error::expect_function_argument_amount(self.info().identifier, argument_list.len(), 2)?;
 
         let collection = &argument_list[0];
         let function = argument_list[1].as_function()?;

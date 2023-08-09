@@ -20,15 +20,22 @@ pub enum Error {
     },
 
     /// An operator was called with the wrong amount of arguments.
-    WrongOperatorArgumentAmount {
+    ExpectedOperatorArgumentAmount {
         expected: usize,
         actual: usize,
     },
 
     /// A function was called with the wrong amount of arguments.
-    WrongFunctionArgumentAmount {
+    ExpectedFunctionArgumentAmount {
         identifier: String,
         expected: usize,
+        actual: usize,
+    },
+
+    /// A function was called with the wrong amount of arguments.
+    ExpectedAtLeastFunctionArgumentAmount {
+        identifier: String,
+        minimum: usize,
         actual: usize,
     },
 
@@ -269,19 +276,43 @@ impl From<trash::Error> for Error {
 }
 
 impl Error {
-    pub(crate) fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
-        Error::WrongOperatorArgumentAmount { actual, expected }
+    pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) -> Result<()> {
+        if actual == expected {
+            Ok(())
+        } else {
+            Err(Error::ExpectedOperatorArgumentAmount { expected, actual })
+        }
     }
 
-    pub(crate) fn wrong_function_argument_amount(
-        identifier: String,
+    pub(crate) fn expect_function_argument_amount(
+        identifier: &str,
         actual: usize,
         expected: usize,
-    ) -> Self {
-        Error::WrongFunctionArgumentAmount {
-            actual,
-            expected,
-            identifier,
+    ) -> Result<()> {
+        if actual == expected {
+            Ok(())
+        } else {
+            Err(Error::ExpectedFunctionArgumentAmount {
+                identifier: identifier.to_string(),
+                expected,
+                actual,
+            })
+        }
+    }
+
+    pub(crate) fn expected_minimum_function_argument_amount(
+        identifier: &str,
+        actual: usize,
+        minimum: usize,
+    ) -> Result<()> {
+        if actual >= minimum {
+            Ok(())
+        } else {
+            Err(Error::ExpectedAtLeastFunctionArgumentAmount {
+                identifier: identifier.to_string(),
+                minimum,
+                actual,
+            })
         }
     }
 
@@ -391,32 +422,6 @@ impl Error {
     }
 }
 
-/// Returns `Ok(())` if the actual and expected parameters are equal, and
-/// `Err(Error::WrongOperatorArgumentAmount)` otherwise.
-pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) -> Result<()> {
-    if actual == expected {
-        Ok(())
-    } else {
-        Err(Error::wrong_operator_argument_amount(actual, expected))
-    }
-}
-
-/// Returns `Ok(())` if the actual and expected parameters are equal, and
-/// `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub fn expect_function_argument_length(
-    identifier: String,
-    actual: usize,
-    expected: usize,
-) -> Result<()> {
-    if actual == expected {
-        Ok(())
-    } else {
-        Err(Error::wrong_function_argument_amount(
-            identifier, actual, expected,
-        ))
-    }
-}
-
 /// Returns `Ok(())` if the given value is a string or a numeric.
 pub fn expect_number_or_string(actual: &Value) -> Result<()> {
     match actual {
@@ -440,18 +445,26 @@ impl fmt::Display for Error {
         use Error::*;
 
         match self {
-            WrongOperatorArgumentAmount { expected, actual } => write!(
+            ExpectedOperatorArgumentAmount { expected, actual } => write!(
                 f,
                 "An operator expected {} arguments, but got {}.",
                 expected, actual
             ),
-            WrongFunctionArgumentAmount {
+            ExpectedFunctionArgumentAmount {
                 expected,
                 actual,
                 identifier,
             } => write!(
                 f,
                 "{identifier} expected {expected} arguments, but got {actual}.",
+            ),
+            ExpectedAtLeastFunctionArgumentAmount {
+                minimum,
+                actual,
+                identifier,
+            } => write!(
+                f,
+                "{identifier} expected a minimum of {minimum} arguments, but got {actual}.",
             ),
             ExpectedString { actual } => {
                 write!(f, "Expected a Value::String, but got {:?}.", actual)
