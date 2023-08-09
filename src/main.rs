@@ -150,7 +150,7 @@ impl WhaleCompeleter {
                 let path = path.to_string_lossy();
 
                 Suggestion {
-                    value: format!("\"{path}"),
+                    value: format!("\"{path}\""),
                     description: None,
                     ..Default::default()
                 }
@@ -163,7 +163,7 @@ impl Completer for WhaleCompeleter {
     fn complete(&mut self, line: &str, pos: usize) -> Vec<Suggestion> {
         let split = line.split(' ');
         let current_word = split.last().unwrap_or("");
-        let start = pos - current_word.len();
+        let start = pos.saturating_sub(current_word.len());
         let end = line.len();
 
         self.update_files(current_word);
