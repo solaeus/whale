@@ -29,13 +29,55 @@ output "The time is " + local_time();
 
 ## Features
 
-- Structured data: Unlike a traditional shell, whale can represent data with
-  more than just strings. Lists, maps and tables are everywhere in whale.
-- Format conversion: Effortlessly convert between whale and formats like JSON,
-  CSV and TOML
-- Package management: Whale integrates the [DNF] package manager, so you can use
-  whale to manage installed packages on any system with DNF installed. This is
-  completely optional.
+### Powerful macros
+
+Built-in tools called **macros** reduce complex tasks to plain, simple code.
+
+```whale
+download "https://api.sampleapis.com/futurama/cast"
+```
+
+### Pipelines
+
+Like a pipe in bash, zsh or fish, the yield operator `::` evaluates the expression
+on the left and passes it as input to the expression on the right. That input is
+always assigned to the **`input` variable** for that context. These expressions
+may simply contain a value or they can call a macro or function that returns
+a value.
+
+```whale
+download "https://api.sampleapis.com/futurama/cast"
+  :: output(input)
+```
+ 
+### Format conversion
+
+Effortlessly convert between whale and formats like JSON, CSV and TOML.
+
+```whale
+download "https://api.sampleapis.com/futurama/cast"
+  :: from_json(input)
+  :: to_csv(input)
+```
+
+### Structured data
+
+Unlike a traditional command line shell, whale can represent data with more than
+just strings. Lists, maps and tables are everywhere in whale. When you pull in 
+external data, it is easy to deserialize it into whale.
+
+```whale
+download "https://api.sampleapis.com/futurama/cast"
+  :: from_json(input)
+  :: input:get(0)
+  :: input.name
+```
+
+### Package management
+
+Whale integrates the [DNF] package manager, so you can use whale to manage
+installed packages on any system with DNF installed. This is completely
+optional.
 
 ## Usage
 
@@ -52,7 +94,7 @@ command line options, use `cargo run -- --help`.
 ## The Whale Programming Language
 
 Whale is a hard fork of [evalexpr]; a simple expression language. Whale's core
-language features maintin this simplicity. But it can manage large, complex
+language features maintain this simplicity. But it can manage large, complex
 sets of data and perform complicated tasks through macros. It should not take
 long for a new user to learn the language, especially with the assistance of
 the shell.
