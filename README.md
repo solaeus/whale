@@ -68,7 +68,7 @@ external data, it is easy to deserialize it into whale.
 
 ```whale
 download "https://api.sampleapis.com/futurama/cast"
-  :: from_json(input)
+  :: input:from_json()
   :: input:get(0)
   :: input.name
 ```
@@ -76,8 +76,48 @@ download "https://api.sampleapis.com/futurama/cast"
 ### Package management
 
 Whale integrates the [DNF] package manager, so you can use whale to manage
-installed packages on any system with DNF installed. This is completely
-optional.
+installed packages on any system with DNF installed. DNF is a safe and reliable
+package manager with distinct repositories for free and non-free software.
+
+```whale
+install_package (
+  "bat",
+  "fzf",
+  "lsd"
+)
+```
+
+### Disk Management
+
+Whale scripts are clear and easy-to-maintain. You can manage disks with sets of
+key-value pairs instead of remembering positional arguments. Under the hood,
+whale passes these arguments to GNU's [parted].
+
+```
+new_disk.name = "My Files"
+new_disk.filesystem = "btrfs";
+new_disk.path = "/dev/sdb";
+new_disk.label = "gpt";
+new_disk.range = (0, 8000);
+
+new_disk:partition();
+```
+
+### First-Class Functions
+
+Assigning custom functions to variables allows whale to mimic features from
+other languages. 
+
+```whale
+User = '
+  this.name = input.0;
+  this.age = input.1;
+  this
+';
+
+user_0 = User("bob", "44");
+user_1 = User("mary", "77");
+```
 
 ## Usage
 
