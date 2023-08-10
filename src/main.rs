@@ -28,14 +28,22 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    if let Some(path) = args.path {
+    let eval_result = if let Some(path) = args.path {
         let file_contents = read_to_string(path).unwrap();
-
-        eval(&file_contents).unwrap();
+        eval(&file_contents)
     } else if let Some(command) = args.command {
-        eval(&command).unwrap();
+        eval(&command)
     } else {
-        run_shell()
+        return run_shell();
+    };
+
+    match eval_result {
+        Ok(value) => {
+            if !value.is_empty() {
+                println!("{value}");
+            }
+        }
+        Err(error) => eprintln!("{error}"),
     }
 }
 
@@ -60,11 +68,11 @@ fn run_shell() {
                 }
             }
             Ok(Signal::CtrlD) | Ok(Signal::CtrlC) => {
-                println!("\nAborted!");
+                println!("\nExit");
                 break;
             }
             signal => {
-                println!("Event: {:?}", signal);
+                println!("Unhandled signal: {:?}", signal);
             }
         }
     }
