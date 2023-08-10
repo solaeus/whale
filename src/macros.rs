@@ -27,6 +27,7 @@ mod filesystem;
 mod general;
 mod logic;
 mod network;
+mod package_management;
 mod random;
 mod test;
 
@@ -34,7 +35,7 @@ mod test;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 28] = [
+pub const MACRO_LIST: [&'static dyn Macro; 33] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -63,6 +64,11 @@ pub const MACRO_LIST: [&'static dyn Macro; 28] = [
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,
+    &package_management::CoprRepositories,
+    &package_management::EnableRpmRepositories,
+    &package_management::InstallPackage,
+    &package_management::UninstallPackage,
+    &package_management::UpgradePackages,
 ];
 
 /// A whale macro function.
@@ -206,204 +212,6 @@ pub struct MacroInfo<'a> {
 //                 actual: argument.clone(),
 //             })
 //         }
-//     }
-// }
-
-// pub struct CoprRepositories;
-
-// impl Macro for CoprRepositories {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "enable_copr_repository",
-//             description: "Enable one or more COPR repositories.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let repo_list_string = if let Ok(repo) = argument.as_string().cloned() {
-//             repo
-//         } else if let Ok(repos) = argument.as_list() {
-//             repos.iter().map(|value| value.to_string() + " ").collect()
-//         } else {
-//             return Err(crate::Error::ExpectedString {
-//                 actual: argument.clone(),
-//             });
-//         };
-
-//         Command::new("fish")
-//             .arg("-c")
-//             .arg(format!("sudo dnf -y copr enable {repo_list_string}"))
-//             .spawn()?
-//             .wait()?;
-
-//         Ok(Value::Empty)
-//     }
-// }
-
-// pub struct Install;
-
-// impl Macro for Install {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "install_package",
-//             description: "Install one or more packages.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let package_list_string = if let Ok(package) = argument.as_string().cloned() {
-//             package
-//         } else if let Ok(packages) = argument.as_list() {
-//             packages
-//                 .iter()
-//                 .map(|value| value.to_string() + " ")
-//                 .collect()
-//         } else {
-//             return Err(Error::ExpectedString {
-//                 actual: argument.clone(),
-//             });
-//         };
-
-//         Command::new("fish")
-//             .arg("-c")
-//             .arg(format!("sudo dnf -y install {package_list_string}"))
-//             .spawn()?
-//             .wait()?;
-
-//         Ok(Value::Empty)
-//     }
-// }
-
-// pub struct RpmRepositories;
-
-// impl Macro for RpmRepositories {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "enable_rpm_repositories",
-//             description: "Enable one or more RPM repositories.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         if let Ok(repo) = argument.as_string() {
-//             Command::new("fish")
-//                 .arg("-c")
-//                 .arg(format!("sudo dnf -y config-manager --add-repo {repo}"))
-//                 .spawn()?
-//                 .wait()?;
-//         } else if let Ok(repos) = argument.as_list() {
-//             for repo in repos {
-//                 Command::new("fish")
-//                     .arg("-c")
-//                     .arg(format!("sudo dnf -y config-manager --add-repo {repo}"))
-//                     .spawn()?
-//                     .wait()?;
-//             }
-//         } else {
-//             return Err(crate::Error::ExpectedString {
-//                 actual: argument.clone(),
-//             });
-//         };
-
-//         Ok(Value::Empty)
-//     }
-// }
-
-// pub struct Uninstall;
-
-// impl Macro for Uninstall {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "uninstall_package",
-//             description: "Uninstall one or more packages.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let package_list_string = if let Ok(package) = argument.as_string().cloned() {
-//             package
-//         } else if let Ok(packages) = argument.as_list() {
-//             packages
-//                 .iter()
-//                 .map(|value| value.to_string() + " ")
-//                 .collect()
-//         } else {
-//             return Err(Error::ExpectedString {
-//                 actual: argument.clone(),
-//             });
-//         };
-
-//         Command::new("fish")
-//             .arg("-c")
-//             .arg(format!("sudo dnf -y remove {package_list_string}"))
-//             .spawn()?
-//             .wait()?;
-
-//         Ok(Value::Empty)
-//     }
-// }
-
-// pub struct Upgrade;
-
-// impl Macro for Upgrade {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "upgrade_packages",
-//             description: "Upgrade all installed packages.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         argument.as_empty()?;
-
-//         Command::new("fish")
-//             .arg("-c")
-//             .arg("sudo dnf -y upgrade")
-//             .spawn()?
-//             .wait()?;
-
-//         Ok(Value::Empty)
-//     }
-// }
-// pub struct Output;
-
-// impl Macro for Output {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "output",
-//             description: "Print a value.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         println!("{argument}");
-//         Ok(Value::Empty)
-//     }
-// }
-// pub struct Download;
-
-// impl Macro for Download {
-//     fn info(&self) -> crate::MacroInfo<'static> {
-//         crate::MacroInfo {
-//             identifier: "download",
-//             description: "Download a file from a URL.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let url = argument.as_string()?;
-//         let script = format!("curl --tlsv1.2 -sSf {url}");
-//         let download = Command::new("fish")
-//             .arg("-c")
-//             .arg(script)
-//             .stdout(Stdio::piped())
-//             .spawn()?
-//             .wait_with_output()?
-//             .stdout;
-
-//         Ok(Value::String(
-//             String::from_utf8_lossy(&download).to_string(),
-//         ))
 //     }
 // }
 

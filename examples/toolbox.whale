@@ -3,7 +3,7 @@ enable_rpm_repositories (
 	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",
 	"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-nonfree-release-38.noarch.rpm"
 );
-install_packagess (
+install_package (
 	"bat",
 	"egl-wayland",
 	"fd-find",
