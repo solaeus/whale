@@ -1,6 +1,7 @@
 use eframe::{
-    egui::{CentralPanel, Context, Layout},
+    egui::{CentralPanel, Context, Layout, Style},
     emath::Align,
+    epaint::Color32,
     run_native, NativeOptions,
 };
 use egui_extras::{Column, TableBuilder};
@@ -19,13 +20,13 @@ impl Macro for Gui {
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.as_table()?.clone();
+        let table = Table::from(argument);
         let native_options = NativeOptions::default();
 
         run_native(
             "MyApp",
             native_options,
-            Box::new(|cc| Box::new(TableDisplay::new(argument))),
+            Box::new(|_cc| Box::new(TableDisplay::new(table))),
         )
         .unwrap();
 
@@ -42,15 +43,13 @@ impl TableDisplay {
 }
 
 impl eframe::App for TableDisplay {
-    fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui| {
-            let mut table = TableBuilder::new(ui)
+            let table = TableBuilder::new(ui)
                 .striped(true)
                 .resizable(true)
                 .cell_layout(Layout::left_to_right(Align::Center))
-                .column(Column::auto())
-                .column(Column::initial(100.0).range(40.0..=300.0))
-                .column(Column::initial(100.0).at_least(40.0).clip(true))
+                .columns(Column::auto(), self.0.column_names().len())
                 .column(Column::remainder())
                 .min_scrolled_height(0.0);
 
@@ -67,7 +66,19 @@ impl eframe::App for TableDisplay {
                         body.row(20.0, |mut row| {
                             for cell_data in row_data {
                                 row.col(|ui| {
-                                    ui.label(cell_data.to_string());
+                                    let color = match cell_data {
+                                        Value::String(_) => Color32::GREEN,
+                                        Value::Float(_) => todo!(),
+                                        Value::Integer(_) => Color32::DARK_RED,
+                                        Value::Boolean(_) => todo!(),
+                                        Value::List(_) => todo!(),
+                                        Value::Map(_) => todo!(),
+                                        Value::Table(_) => todo!(),
+                                        Value::Function(_) => todo!(),
+                                        Value::Empty => todo!(),
+                                    };
+
+                                    ui.colored_label(color, cell_data.to_string());
                                 });
                             }
                         });
