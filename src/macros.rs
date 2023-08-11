@@ -25,6 +25,7 @@ mod collections;
 mod data_formats;
 mod filesystem;
 mod general;
+mod gui;
 mod logic;
 mod network;
 mod package_management;
@@ -35,7 +36,7 @@ mod test;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 33] = [
+pub const MACRO_LIST: [&'static dyn Macro; 34] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -51,6 +52,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 33] = [
     &general::Repeat,
     &general::Run,
     &general::Wait,
+    &gui::Gui,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,

@@ -101,9 +101,11 @@ impl WhaleCompeleter {
                     group,
                 } = r#macro.info();
 
+                let description = format!("{description} | {group}");
+
                 Suggestion {
                     value: identifier.to_string(),
-                    description: Some(description.to_string()),
+                    description: Some(description),
                     extra: Some(vec![group.to_string()]),
                     ..Default::default()
                 }
@@ -180,7 +182,7 @@ fn setup_reedline() -> Reedline {
     let completion_menu = Box::new(
         ColumnarMenu::default()
             .with_name("completion_menu")
-            .with_columns(2)
+            .with_columns(1)
             .with_text_style(Style {
                 foreground: Some(Color::White),
                 is_dimmed: false,
@@ -241,25 +243,4 @@ fn setup_reedline() -> Reedline {
         .with_hinter(Box::new(hinter))
         .with_partial_completions(true)
         .with_quick_completions(true)
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Debug)]
-pub enum Error {
-    Whale(whale_lib::Error),
-    Io(std::io::Error),
-    NotYetImplemented,
-}
-
-impl From<whale_lib::Error> for Error {
-    fn from(value: whale_lib::Error) -> Self {
-        Error::Whale(value)
-    }
-}
-
-impl From<std::io::Error> for Error {
-    fn from(value: std::io::Error) -> Self {
-        Error::Io(value)
-    }
 }
