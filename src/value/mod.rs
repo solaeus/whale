@@ -124,8 +124,16 @@ impl Value {
         }
     }
 
-    /// Borrows the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::Tuple`.
+    /// Borrows the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::List`.
     pub fn as_list(&self) -> Result<&Vec<Value>> {
+        match self {
+            Value::List(list) => Ok(list),
+            value => Err(Error::expected_list(value.clone())),
+        }
+    }
+
+    /// Borrows the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a `Value::List`.
+    pub fn into_inner_list(self) -> Result<Vec<Value>> {
         match self {
             Value::List(list) => Ok(list),
             value => Err(Error::expected_list(value.clone())),
@@ -176,6 +184,16 @@ impl Value {
         match self {
             Value::Empty => Ok(()),
             value => Err(Error::expected_empty(value.clone())),
+        }
+    }
+
+    /// Returns an owned table, either by cloning or converting the inner value..
+    pub fn to_table(&self) -> Result<Table> {
+        match self {
+            Value::Table(table) => Ok(table.clone()),
+            Value::List(list) => Ok(Table::from(list)),
+            Value::Map(map) => Ok(Table::from(map)),
+            value => Err(Error::expected_table(value.clone())),
         }
     }
 }

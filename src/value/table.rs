@@ -250,8 +250,54 @@ impl From<&Vec<Value>> for Table {
     }
 }
 
+impl From<&mut Vec<Value>> for Table {
+    fn from(list: &mut Vec<Value>) -> Self {
+        let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
+
+        for (i, value) in list.iter().enumerate() {
+            if let Ok(list) = value.as_list() {
+                table.insert(list.clone()).unwrap();
+            } else {
+                table
+                    .insert(vec![Value::Integer(i as i64), value.clone()])
+                    .unwrap();
+            }
+        }
+
+        table
+    }
+}
+
+impl From<VariableMap> for Table {
+    fn from(map: VariableMap) -> Self {
+        let keys = map.inner().keys().cloned().collect();
+        let values = map.inner().values().cloned().collect();
+        let mut table = Table::new(keys);
+
+        table
+            .insert(values)
+            .expect("Failed to create Table from Map. This is a no-op.");
+
+        table
+    }
+}
+
 impl From<&VariableMap> for Table {
     fn from(map: &VariableMap) -> Self {
+        let keys = map.inner().keys().cloned().collect();
+        let values = map.inner().values().cloned().collect();
+        let mut table = Table::new(keys);
+
+        table
+            .insert(values)
+            .expect("Failed to create Table from Map. This is a no-op.");
+
+        table
+    }
+}
+
+impl From<&mut VariableMap> for Table {
+    fn from(map: &mut VariableMap) -> Self {
         let keys = map.inner().keys().cloned().collect();
         let values = map.inner().values().cloned().collect();
         let mut table = Table::new(keys);
