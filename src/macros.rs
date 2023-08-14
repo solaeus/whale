@@ -119,35 +119,6 @@ pub struct MacroInfo<'a> {
 //     }
 // }
 
-// pub struct Watch;
-
-// impl Macro for Watch {
-//     fn info(&self) -> crate::MacroInfo<'static> {
-//         crate::MacroInfo {
-//             identifier: "watch",
-//             description: "Wait until a file changes.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let argument = argument.as_string()?;
-//         let path = PathBuf::from(argument);
-//         let modified_old = path.metadata()?.modified()?;
-//         let wait_time = loop {
-//             let modified_new = path.metadata()?.modified()?;
-
-//             if modified_old != modified_new {
-//                 break modified_new
-//                     .duration_since(modified_old)
-//                     .unwrap_or_default()
-//                     .as_millis() as i64;
-//             }
-//         };
-
-//         Ok(Value::Integer(wait_time))
-//     }
-// }
-
 // pub struct SystemInfo;
 
 // impl Macro for SystemInfo {
