@@ -36,7 +36,7 @@ mod test;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 34] = [
+pub const MACRO_LIST: [&'static dyn Macro; 35] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -46,6 +46,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 34] = [
     &filesystem::ReadFile,
     &filesystem::RemoveDir,
     &filesystem::Trash,
+    &filesystem::Watch,
     &filesystem::Write,
     &general::Output,
     &general::Async,

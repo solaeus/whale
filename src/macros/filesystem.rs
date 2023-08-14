@@ -4,6 +4,8 @@ use std::{
     fs::{self, OpenOptions},
     io::{Read, Write as IoWrite},
     path::PathBuf,
+    thread::sleep,
+    time::Duration,
 };
 
 use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType};
@@ -308,6 +310,33 @@ impl Macro for RemoveFile {
         let _path = strings.first().unwrap().as_string()?;
 
         todo!();
+    }
+}
+
+pub struct Watch;
+
+impl Macro for Watch {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "watch",
+            description: "Pause until a file changes.",
+            group: "filesystem",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let path = argument.as_string()?;
+        let first_modified = fs::metadata(path)?.modified()?;
+
+        loop {
+            let next_modified = fs::metadata(path)?.modified()?;
+
+            if first_modified != next_modified {
+                return Ok(Value::Empty);
+            }
+
+            sleep(Duration::from_millis(300));
+        }
     }
 }
 
