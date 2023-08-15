@@ -4,8 +4,6 @@ use std::{
     fs::{self, OpenOptions},
     io::{Read, Write as IoWrite},
     path::PathBuf,
-    thread::sleep,
-    time::Duration,
 };
 
 use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType};

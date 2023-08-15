@@ -1,7 +1,6 @@
 use eframe::{
-    egui::{CentralPanel, Context, Layout, Widget, Window},
+    egui::{Context, Layout, Widget, Window},
     emath::Align,
-    epaint::Color32,
     run_native, NativeOptions,
 };
 use egui_extras::{Column, TableBuilder};
@@ -83,15 +82,11 @@ impl Widget for &Value {
 
 struct ValueDisplay {
     data: Value,
-    show_data_types: bool,
 }
 
 impl ValueDisplay {
     fn new(data: Value) -> Self {
-        Self {
-            data,
-            show_data_types: false,
-        }
+        Self { data }
     }
 }
 

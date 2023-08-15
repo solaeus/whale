@@ -1,16 +1,21 @@
 //! Command line interface for the whale programming language.
 use clap::Parser;
+use eframe::{egui::CentralPanel, run_native, App, NativeOptions};
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
     DefaultPromptSegment, EditCommand, Emacs, FileBackedHistory, KeyCode, KeyModifiers, Reedline,
     ReedlineEvent, ReedlineMenu, Signal, Span, Suggestion,
 };
+
 use std::{
     fs::{self, read_to_string},
     path::PathBuf,
 };
-use whale_lib::{eval, eval_with_context, Macro, MacroInfo, VariableMap, MACRO_LIST};
+
+use whale_lib::{
+    eval, eval_with_context, Macro, MacroInfo, Result, Value, VariableMap, MACRO_LIST,
+};
 
 /// Command-line arguments to be parsed.
 #[derive(Parser, Debug)]
@@ -23,6 +28,9 @@ struct Args {
     /// Location of the file to run.
     #[arg(short, long)]
     path: Option<String>,
+
+    #[arg(short, long)]
+    gui: bool,
 }
 
 fn main() {
@@ -33,8 +41,10 @@ fn main() {
         eval(&file_contents)
     } else if let Some(command) = args.command {
         eval(&command)
+    } else if args.gui {
+        return run_gui_shell();
     } else {
-        return run_shell();
+        return run_cli_shell();
     };
 
     match eval_result {
@@ -47,7 +57,58 @@ fn main() {
     }
 }
 
-fn run_shell() {
+pub struct Gui {
+    text_edit_buffer: String,
+    whale_context: VariableMap,
+    eval_result: Result<Value>,
+}
+
+impl Gui {
+    pub fn new() -> Self {
+        Gui {
+            text_edit_buffer: String::new(),
+            whale_context: VariableMap::new(),
+            eval_result: Ok(Value::Empty),
+        }
+    }
+}
+
+impl App for Gui {
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+        CentralPanel::default().show(ctx, |ui| {
+            ui.text_edit_multiline(&mut self.text_edit_buffer);
+
+            let clear = ui.button("clear");
+            let submit = ui.button("submit");
+
+            if clear.clicked() {
+                self.text_edit_buffer.clear();
+            }
+
+            if submit.clicked() {
+                self.eval_result =
+                    eval_with_context(&self.text_edit_buffer, &mut self.whale_context);
+            }
+
+            if let Ok(value) = &self.eval_result {
+                ui.label(format!("{value:?}"));
+            }
+        });
+    }
+}
+
+fn run_gui_shell() {
+    run_native(
+        "Whale",
+        NativeOptions {
+            ..Default::default()
+        },
+        Box::new(|_cc| Box::new(Gui::new())),
+    )
+    .unwrap();
+}
+
+fn run_cli_shell() {
     let mut context = VariableMap::new();
     let mut line_editor = setup_reedline();
     let prompt = DefaultPrompt {
