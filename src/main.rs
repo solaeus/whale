@@ -1,7 +1,8 @@
 //! Command line interface for the whale programming language.
 use clap::Parser;
 use eframe::{
-    egui::{CentralPanel, TextStyle},
+    egui::{CentralPanel, Direction, Layout, TextStyle},
+    emath::Align,
     epaint::Color32,
     run_native, App, NativeOptions,
 };
@@ -78,22 +79,36 @@ impl Gui {
 }
 
 impl App for Gui {
-    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui| {
             ui.style_mut().override_text_style = Some(TextStyle::Heading);
 
-            let line_editor = ui.text_edit_multiline(&mut self.text_edit_buffer);
-            let clear = ui.button("clear");
-            let submit = ui.button("submit");
+            ui.with_layout(
+                Layout {
+                    main_dir: Direction::TopDown,
+                    main_wrap: false,
+                    main_align: Align::Center,
+                    main_justify: false,
+                    cross_align: Align::Center,
+                    cross_justify: true,
+                },
+                |ui| {
+                    ui.text_edit_multiline(&mut self.text_edit_buffer);
+                    ui.horizontal(|ui| {
+                        let clear = ui.button("clear");
+                        let submit = ui.button("submit");
 
-            if clear.clicked() {
-                self.text_edit_buffer.clear();
-            }
+                        if clear.clicked() {
+                            self.text_edit_buffer.clear();
+                        }
 
-            if submit.clicked() {
-                self.eval_result =
-                    eval_with_context(&self.text_edit_buffer, &mut self.whale_context);
-            }
+                        if submit.clicked() {
+                            self.eval_result =
+                                eval_with_context(&self.text_edit_buffer, &mut self.whale_context);
+                        }
+                    });
+                },
+            );
 
             if let Ok(value) = &self.eval_result {
                 ui.label(format!("{value:?}"));
