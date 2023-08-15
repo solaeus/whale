@@ -1,11 +1,12 @@
 //! Command line interface for the whale programming language.
 use clap::Parser;
 use eframe::{
-    egui::{CentralPanel, Direction, Layout, TextStyle},
+    egui::{CentralPanel, Direction, Layout, RichText, TextStyle},
     emath::Align,
     epaint::Color32,
     run_native, App, NativeOptions,
 };
+use egui_extras::{Size, StripBuilder};
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
@@ -65,7 +66,7 @@ fn main() {
 pub struct Gui {
     text_edit_buffer: String,
     whale_context: VariableMap,
-    eval_result: Result<Value>,
+    eval_results: Vec<Result<Value>>,
 }
 
 impl Gui {
@@ -73,7 +74,7 @@ impl Gui {
         Gui {
             text_edit_buffer: String::new(),
             whale_context: VariableMap::new(),
-            eval_result: Ok(Value::Empty),
+            eval_results: Vec::new(),
         }
     }
 }
@@ -103,20 +104,43 @@ impl App for Gui {
                         }
 
                         if submit.clicked() {
-                            self.eval_result =
+                            let eval_result =
                                 eval_with_context(&self.text_edit_buffer, &mut self.whale_context);
+
+                            self.eval_results.push(eval_result);
                         }
                     });
                 },
             );
 
-            if let Ok(value) = &self.eval_result {
-                ui.label(format!("{value:?}"));
-            }
-
-            if let Err(error) = &self.eval_result {
-                ui.colored_label(Color32::RED, error.to_string());
-            }
+            StripBuilder::new(ui)
+                .sizes(
+                    Size::Absolute {
+                        initial: 10.0,
+                        range: (1.0, 10.0),
+                    },
+                    10,
+                )
+                .vertical(|mut strip| {
+                    for result in &self.eval_results {
+                        match result {
+                            Ok(value) => {
+                                strip.cell(|ui| {
+                                    ui.label(RichText::new(value.to_string()).size(16.0));
+                                });
+                            }
+                            Err(error) => {
+                                strip.cell(|ui| {
+                                    ui.label(
+                                        RichText::new(error.to_string())
+                                            .size(16.0)
+                                            .color(Color32::RED),
+                                    );
+                                });
+                            }
+                        }
+                    }
+                });
         });
     }
 }
