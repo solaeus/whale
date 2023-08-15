@@ -1,6 +1,6 @@
 //! Command line interface for the whale programming language.
 use clap::Parser;
-use eframe::{egui::CentralPanel, run_native, App, NativeOptions};
+use eframe::{egui::CentralPanel, epaint::Color32, run_native, App, NativeOptions};
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
@@ -76,8 +76,9 @@ impl Gui {
 impl App for Gui {
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui| {
-            ui.text_edit_multiline(&mut self.text_edit_buffer);
-
+            ui.style_mut().
+            
+            let line_editor = ui.text_edit_multiline(&mut self.text_edit_buffer);
             let clear = ui.button("clear");
             let submit = ui.button("submit");
 
@@ -92,6 +93,10 @@ impl App for Gui {
 
             if let Ok(value) = &self.eval_result {
                 ui.label(format!("{value:?}"));
+            }
+
+            if let Err(error) = &self.eval_result {
+                ui.colored_label(Color32::RED, error.to_string());
             }
         });
     }
