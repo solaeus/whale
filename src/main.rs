@@ -81,6 +81,8 @@ impl Gui {
 
 impl App for Gui {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
+        self.eval_results.truncate(9);
+
         CentralPanel::default().show(ctx, |ui| {
             ui.style_mut().override_text_style = Some(TextStyle::Heading);
 
@@ -107,30 +109,38 @@ impl App for Gui {
                             let eval_result =
                                 eval_with_context(&self.text_edit_buffer, &mut self.whale_context);
 
-                            self.eval_results.push(eval_result);
+                            self.eval_results.insert(0, eval_result);
                         }
                     });
                 },
             );
+            ui.separator();
 
             StripBuilder::new(ui)
                 .sizes(
                     Size::Absolute {
-                        initial: 10.0,
-                        range: (1.0, 10.0),
+                        initial: 20.0,
+                        range: (1.0, 100.0),
                     },
-                    10,
+                    20,
                 )
                 .vertical(|mut strip| {
                     for result in &self.eval_results {
+                        strip.empty();
                         match result {
                             Ok(value) => {
                                 strip.cell(|ui| {
+                                    ui.painter().rect_filled(
+                                        ui.available_rect_before_wrap().expand(16.0),
+                                        1.0,
+                                        Color32::DARK_BLUE,
+                                    );
                                     ui.label(RichText::new(value.to_string()).size(16.0));
                                 });
                             }
                             Err(error) => {
                                 strip.cell(|ui| {
+                                    ui.add_space(32.0);
                                     ui.label(
                                         RichText::new(error.to_string())
                                             .size(16.0)
