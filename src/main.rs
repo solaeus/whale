@@ -6,7 +6,6 @@ use eframe::{
     epaint::{Color32, Stroke},
     run_native, App, NativeOptions,
 };
-use egui_extras::{Size, StripBuilder};
 use nu_ansi_term::{Color, Style};
 use reedline::{
     default_emacs_keybindings, ColumnarMenu, Completer, DefaultHinter, DefaultPrompt,
@@ -116,47 +115,110 @@ impl App for Gui {
             );
             ui.separator();
 
-            StripBuilder::new(ui)
-                .sizes(
-                    Size::Absolute {
-                        initial: 30.0,
-                        range: (1.0, 100.0),
-                    },
-                    20,
-                )
-                .vertical(|mut strip| {
-                    for result in &self.eval_results {
-                        strip.empty();
-                        match result {
-                            Ok(value) => {
-                                strip.cell(|ui| {
-                                    let mut rectangle = ui.available_rect_before_wrap();
-                                    rectangle.set_height(50.0);
+            for result in &self.eval_results {
+                let mut rectangle = ui.available_rect_before_wrap();
+                rectangle.set_height(20.0);
 
-                                    ui.painter().rect_stroke(
-                                        rectangle,
-                                        1.0,
-                                        Stroke::new(2.0, Color32::from_rgb(50, 50, 150)),
-                                    );
-                                    ui.label(RichText::new(value.to_string()).size(16.0));
-                                });
-                            }
-                            Err(error) => {
-                                strip.cell(|ui| {
-                                    let mut rectangle = ui.available_rect_before_wrap();
-                                    rectangle.set_height(50.0);
+                ui.painter()
+                    .rect_stroke(rectangle, 10.0, Stroke::new(1.0, Color32::LIGHT_GREEN));
 
-                                    ui.painter().rect_stroke(
-                                        rectangle,
-                                        1.0,
-                                        Stroke::new(2.0, Color32::from_rgb(150, 150, 50)),
-                                    );
-                                    ui.label(RichText::new(error.to_string()).size(16.0));
-                                });
-                            }
+                match result {
+                    Ok(value) => match value {
+                        Value::String(string) => {
+                            ui.label(RichText::new(string).size(16.0));
                         }
-                    }
-                });
+                        Value::Float(float) => {
+                            ui.label(RichText::new(float.to_string()).size(16.0));
+                        }
+                        Value::Integer(integer) => {
+                            ui.label(RichText::new(integer.to_string()).size(16.0));
+                        }
+                        Value::Boolean(boolean) => {
+                            ui.label(RichText::new(boolean.to_string()).size(16.0));
+                        }
+                        Value::List(list) => {
+                            ui.horizontal(|ui| {
+                                for value in list {
+                                    ui.label(RichText::new(value.to_string()).size(16.0));
+                                }
+                            });
+                        }
+                        Value::Map(_) => todo!(),
+                        Value::Table(_) => todo!(),
+                        Value::Function(_) => todo!(),
+                        Value::Empty => todo!(),
+                    },
+                    Err(_) => todo!(),
+                }
+            }
+
+            // StripBuilder::new(ui)
+            //     .sizes(
+            //         Size::Absolute {
+            //             initial: 30.0,
+            //             range: (1.0, 100.0),
+            //         },
+            //         20,
+            //     )
+            //     .vertical(|mut strip| {
+            //         for result in &self.eval_results {
+            //             strip.empty();
+            //             match result {
+            //                 Ok(value) => {
+            //                     strip.cell(|ui| {
+            //                         match value {
+            //                             Value::String(string) => {
+            //                                 ui.label(RichText::new(string).size(16.0));
+            //                             }
+            //                             Value::Float(float) => {
+            //                                 ui.label(RichText::new(float.to_string()).size(16.0));
+            //                             }
+            //                             Value::Integer(integer) => {
+            //                                 ui.label(RichText::new(integer.to_string()).size(16.0));
+            //                             }
+            //                             Value::Boolean(boolean) => {
+            //                                 ui.label(RichText::new(boolean.to_string()).size(16.0));
+            //                             }
+            //                             Value::List(list) => {
+            //                                 for value in list {
+            //                                     ui.horizontal(|ui| {
+            //                                         ui.label(
+            //                                             RichText::new(value.to_string()).size(16.0),
+            //                                         );
+            //                                     });
+            //                                 }
+            //                             }
+            //                             Value::Map(_) => todo!(),
+            //                             Value::Table(_) => todo!(),
+            //                             Value::Function(_) => todo!(),
+            //                             Value::Empty => {
+            //                                 ui.label(RichText::new("empty").size(16.0));
+            //                             }
+            //                         }
+
+            //                         ui.painter().rect_stroke(
+            //                             ui.available_rect_before_wrap(),
+            //                             1.0,
+            //                             Stroke::new(1.0, Color32::from_rgb(50, 150, 50)),
+            //                         );
+            //                     });
+            //                 }
+            //                 Err(error) => {
+            //                     strip.cell(|ui| {
+            //                         let mut rectangle = ui.available_rect_before_wrap();
+            //                         rectangle.set_height(50.0);
+
+            //                         ui.painter().rect_stroke(
+            //                             rectangle,
+            //                             1.0,
+            //                             Stroke::new(2.0, Color32::from_rgb(150, 100, 50)),
+            //                         );
+            //                         ui.label(RichText::new(error.to_string()).size(16.0));
+            //                     });
+            //                 }
+            //             }
+            //         }
+            //     });
         });
     }
 }
