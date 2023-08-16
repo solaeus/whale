@@ -3,7 +3,7 @@ use clap::Parser;
 use eframe::{
     egui::{CentralPanel, Direction, Layout, RichText, TextStyle},
     emath::Align,
-    epaint::Color32,
+    epaint::{Color32, Stroke},
     run_native, App, NativeOptions,
 };
 use egui_extras::{Size, StripBuilder};
@@ -119,7 +119,7 @@ impl App for Gui {
             StripBuilder::new(ui)
                 .sizes(
                     Size::Absolute {
-                        initial: 20.0,
+                        initial: 30.0,
                         range: (1.0, 100.0),
                     },
                     20,
@@ -130,22 +130,28 @@ impl App for Gui {
                         match result {
                             Ok(value) => {
                                 strip.cell(|ui| {
-                                    ui.painter().rect_filled(
-                                        ui.available_rect_before_wrap().expand(16.0),
+                                    let mut rectangle = ui.available_rect_before_wrap();
+                                    rectangle.set_height(50.0);
+
+                                    ui.painter().rect_stroke(
+                                        rectangle,
                                         1.0,
-                                        Color32::DARK_BLUE,
+                                        Stroke::new(2.0, Color32::from_rgb(50, 50, 150)),
                                     );
                                     ui.label(RichText::new(value.to_string()).size(16.0));
                                 });
                             }
                             Err(error) => {
                                 strip.cell(|ui| {
-                                    ui.add_space(32.0);
-                                    ui.label(
-                                        RichText::new(error.to_string())
-                                            .size(16.0)
-                                            .color(Color32::RED),
+                                    let mut rectangle = ui.available_rect_before_wrap();
+                                    rectangle.set_height(50.0);
+
+                                    ui.painter().rect_stroke(
+                                        rectangle,
+                                        1.0,
+                                        Stroke::new(2.0, Color32::from_rgb(150, 150, 50)),
                                     );
+                                    ui.label(RichText::new(error.to_string()).size(16.0));
                                 });
                             }
                         }
