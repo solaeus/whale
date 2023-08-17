@@ -105,8 +105,8 @@ new_disk:partition();
 
 ### First-Class Functions
 
-Assigning custom functions to variables allows whale to mimic features from
-other languages. 
+Assign custom functions to variables. Functions can return any value or none at
+all. Use functions to build structured data or automate tasks.
 
 ```whale
 User = '
@@ -117,6 +117,15 @@ User = '
 
 user_0 = User("bob", "44");
 user_1 = User("mary", "77");
+```
+
+This "fetch" function will download JSON data and parse it.
+
+```
+fetch = '
+  raw_data = download(input.0);
+  from_json(raw_data)
+';
 ```
 
 ## Usage
