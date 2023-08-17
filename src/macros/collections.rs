@@ -2,6 +2,35 @@
 
 use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType, VariableMap};
 
+pub struct String;
+
+impl Macro for String {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "string",
+            description: "Stringify a value.",
+            group: "collections",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let string = match argument.clone() {
+            Value::String(string) => string,
+            Value::List(_list) => todo!(),
+            Value::Map(_map) => todo!(),
+            Value::Table(_table) => todo!(),
+            Value::Function(function) => function.to_string(),
+            Value::Float(float) => float.to_string(),
+            Value::Integer(integer) => integer.to_string(),
+            Value::Boolean(boolean) => boolean.to_string(),
+            Value::Time(_) => todo!(),
+            Value::Empty => todo!(),
+        };
+
+        Ok(Value::String(string))
+    }
+}
+
 pub struct Count;
 
 impl Macro for Count {

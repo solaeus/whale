@@ -36,6 +36,26 @@ impl Macro for If {
     }
 }
 
+pub struct Loop;
+
+impl Macro for Loop {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "loop",
+            description: "Repeats a function until the program ends.",
+            group: "general",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let function = argument.as_function()?;
+
+        function.run()?;
+
+        Loop.run(argument)
+    }
+}
+
 pub struct While;
 
 impl Macro for While {

@@ -32,6 +32,7 @@ mod logic;
 mod network;
 mod package_management;
 mod random;
+mod system;
 mod test;
 mod time;
 
@@ -39,13 +40,14 @@ mod time;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 51] = [
+pub const MACRO_LIST: [&'static dyn Macro; 54] = [
     &collections::Count,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,
     &collections::Rows,
     &collections::Select,
+    &collections::String,
     &collections::Where,
     &command::Bash,
     &command::Fish,
@@ -76,6 +78,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 51] = [
     &gui::BarGraph,
     &gui::Plot,
     &logic::If,
+    &logic::Loop,
     &network::Download,
     &package_management::CoprRepositories,
     &package_management::EnableRpmRepositories,
@@ -87,6 +90,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 51] = [
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,
+    &system::CpuSpeed,
     &test::Assert,
     &test::AssertEqual,
     &time::Local,
@@ -111,30 +115,6 @@ pub struct MacroInfo<'a> {
     pub group: &'a str,
 }
 
-// pub struct Pipe;
-
-// impl Macro for Pipe {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "pipe",
-//             description: "Process a value with a list of functions.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let argument_list = argument.as_list()?;
-//         let input = &argument_list[0];
-//         let pipe = &argument_list[1..];
-//         let mut accumulator = input.clone();
-
-//         for value in pipe {
-//             accumulator = value.as_function()?.run()?;
-//         }
-
-//         Ok(accumulator)
-//     }
-// }
-
 // pub struct SystemInfo;
 
 // impl Macro for SystemInfo {
@@ -153,29 +133,6 @@ pub struct MacroInfo<'a> {
 //         map.set_value("hostname", Value::String(hostname()?))?;
 
 //         Ok(Value::Map(map))
-//     }
-// }
-
-// pub struct SystemCpu;
-
-// impl Macro for SystemCpu {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "system_cpu",
-//             description: "Get information on the system's CPU.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> crate::Result<Value> {
-//         argument.as_empty()?;
-
-//         let mut table = Table::new(vec!["count".to_string(), "speed".to_string()]);
-//         let count = cpu_num().unwrap_or_default() as i64;
-//         let speed = cpu_speed().unwrap_or_default() as i64;
-
-//         table.insert(vec![Value::Integer(count), Value::Integer(speed)])?;
-
-//         Ok(Value::Table(table))
 //     }
 // }
 

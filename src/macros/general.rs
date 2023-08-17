@@ -106,7 +106,7 @@ impl Macro for Wait {
     fn info(&self) -> crate::MacroInfo<'static> {
         MacroInfo {
             identifier: "wait",
-            description: "Wait for the given number of seconds.",
+            description: "Wait for the given number of milliseconds.",
             group: "general",
         }
     }
@@ -114,7 +114,7 @@ impl Macro for Wait {
     fn run(&self, argument: &Value) -> Result<Value> {
         let argument = argument.as_int()?;
 
-        sleep(Duration::from_secs(argument as u64));
+        sleep(Duration::from_millis(argument as u64));
 
         Ok(Value::Empty)
     }
