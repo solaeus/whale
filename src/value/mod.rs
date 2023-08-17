@@ -175,9 +175,18 @@ impl Value {
 
     /// Borrows the value stored in `self` as `Function`, or returns `Err` if
     /// `self` is not a `Value::Function`.
-    pub fn as_function(&self) -> Result<Function> {
+    pub fn as_function(&self) -> Result<&Function> {
         match self {
-            Value::Function(function) => Ok(function.clone()),
+            Value::Function(function) => Ok(function),
+            value => Err(Error::expected_function(value.clone())),
+        }
+    }
+
+    /// Borrows the value stored in `self` as `Time`, or returns `Err` if
+    /// `self` is not a `Value::Time`.
+    pub fn as_time(&self) -> Result<&Time> {
+        match self {
+            Value::Time(time) => Ok(time),
             value => Err(Error::expected_function(value.clone())),
         }
     }

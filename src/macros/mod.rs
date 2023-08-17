@@ -38,7 +38,7 @@ mod time;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 37] = [
+pub const MACRO_LIST: [&'static dyn Macro; 39] = [
     &data_formats::FromJson,
     &filesystem::Append,
     &filesystem::CreateDir,
@@ -63,6 +63,8 @@ pub const MACRO_LIST: [&'static dyn Macro; 37] = [
     &collections::Select,
     &test::Assert,
     &test::AssertEqual,
+    &time::Local,
+    &time::Now,
     &logic::If,
     &network::Download,
     &random::RandomBoolean,
