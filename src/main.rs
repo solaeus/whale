@@ -147,6 +147,7 @@ impl App for Gui {
                         Value::Table(_) => todo!(),
                         Value::Function(_) => todo!(),
                         Value::Empty => todo!(),
+                        Value::Time(_) => todo!(),
                     },
                     Err(_) => todo!(),
                 }

@@ -12,6 +12,7 @@ pub enum ValueType {
     Map,
     Table,
     Function,
+    Time,
 }
 
 impl From<&Value> for ValueType {
@@ -26,6 +27,7 @@ impl From<&Value> for ValueType {
             Value::Map(_) => ValueType::Map,
             Value::Table { .. } => ValueType::Table,
             Value::Function(_) => ValueType::Function,
+            Value::Time(_) => ValueType::Time,
         }
     }
 }

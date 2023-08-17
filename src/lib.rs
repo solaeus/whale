@@ -9,7 +9,8 @@ pub use crate::{
     token::PartialToken,
     tree::Node,
     value::{
-        function::Function, table::Table, value_type::ValueType, variable_map::VariableMap, Value,
+        function::Function, table::Table, time::Time, value_type::ValueType,
+        variable_map::VariableMap, Value,
     },
 };
 

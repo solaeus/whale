@@ -228,6 +228,7 @@ impl From<&Value> for Table {
 
                 table
             }
+            Value::Time(_) => todo!(),
         }
     }
 }

@@ -32,6 +32,7 @@ mod network;
 mod package_management;
 mod random;
 mod test;
+mod time;
 
 /// Master list of all macros.
 ///
