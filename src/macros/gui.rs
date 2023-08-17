@@ -1,30 +1,31 @@
 use eframe::{
-    egui::{Context, Layout, Widget, Window},
-    emath::Align,
+    egui::{
+        plot::{Line, Plot as EguiPlot, PlotPoints},
+        CentralPanel, Context,
+    },
     run_native, NativeOptions,
 };
-use egui_extras::{Column, TableBuilder};
 
-use crate::{Macro, MacroInfo, Result, Table, Value};
+use crate::{Macro, MacroInfo, Result, Value};
 
-pub struct Gui;
+pub struct Plot;
 
-impl Macro for Gui {
+impl Macro for Plot {
     fn info(&self) -> MacroInfo<'static> {
         MacroInfo {
-            identifier: "gui",
-            description: "Display a value in a window.",
+            identifier: "plot",
+            description: "Render a list of numbers as a scatter plot graph.",
             group: "gui",
         }
     }
 
     fn run(&self, argument: &Value) -> Result<Value> {
-        let argument = argument.clone();
+        let argument = argument.as_list()?.clone();
 
         run_native(
             "Whale Gui",
             NativeOptions::default(),
-            Box::new(|_cc| Box::new(ValueDisplay::new(argument))),
+            Box::new(|_cc| Box::new(PlotGui::new(argument))),
         )
         .unwrap();
 
@@ -32,66 +33,29 @@ impl Macro for Gui {
     }
 }
 
-impl Widget for &Value {
-    fn ui(self, ui: &mut eframe::egui::Ui) -> eframe::egui::Response {
-        match self {
-            Value::String(string) => ui.label(string),
-            Value::Float(float) => ui.label(float.to_string()),
-            Value::Integer(int) => ui.label(int.to_string()),
-            Value::Boolean(bool) => ui.label(bool.to_string()),
-            Value::List(list) => ui.add(&Value::Table(Table::from(list))),
-            Value::Map(map) => ui.add(&Value::Table(Table::from(map))),
-            Value::Table(table) => {
-                let collapsing_table = ui.collapsing("table", |ui| {
-                    TableBuilder::new(ui)
-                        .striped(true)
-                        .resizable(true)
-                        .auto_shrink([true, false])
-                        .cell_layout(Layout::left_to_right(Align::LEFT))
-                        .columns(Column::remainder(), table.column_names().len())
-                        .min_scrolled_height(25.0)
-                        .header(25.0, |mut header| {
-                            for column_name in table.column_names() {
-                                header.col(|ui| {
-                                    ui.heading(column_name);
-                                });
-                            }
-                        })
-                        .body(|mut body| {
-                            for row_data in table.rows() {
-                                body.row(20.0, |mut row| {
-                                    for column_data in row_data {
-                                        row.col(|ui| {
-                                            ui.add(column_data);
-                                        });
-                                    }
-                                })
-                            }
-                        });
-                });
-
-                collapsing_table
-                    .body_response
-                    .unwrap_or(collapsing_table.header_response)
-            }
-            Value::Function(_) => todo!(),
-            Value::Empty => todo!(),
-        }
-    }
+struct PlotGui {
+    data: Vec<Value>,
 }
 
-struct ValueDisplay {
-    data: Value,
-}
-
-impl ValueDisplay {
-    fn new(data: Value) -> Self {
+impl PlotGui {
+    fn new(data: Vec<Value>) -> Self {
         Self { data }
     }
 }
 
-impl eframe::App for ValueDisplay {
+impl eframe::App for PlotGui {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
-        Window::new("whale").show(ctx, |ui| ui.add(&self.data));
+        CentralPanel::default().show(ctx, |ui| {
+            EguiPlot::new("plot").show(ui, |plot_ui| {
+                let points = self
+                    .data
+                    .iter()
+                    .enumerate()
+                    .map(|(index, value)| [index as f64, value.as_float().unwrap()])
+                    .collect::<PlotPoints>();
+                let line = Line::new(points);
+                plot_ui.line(line);
+            })
+        });
     }
 }

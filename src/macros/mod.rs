@@ -54,7 +54,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 37] = [
     &general::Repeat,
     &general::Run,
     &general::Wait,
-    &gui::Gui,
+    &gui::Plot,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,
