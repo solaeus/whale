@@ -39,13 +39,24 @@ mod time;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 47] = [
+pub const MACRO_LIST: [&'static dyn Macro; 50] = [
+    &collections::CreateTable,
+    &collections::Get,
+    &collections::Insert,
+    &collections::Rows,
+    &collections::Select,
+    &collections::Where,
     &command::Bash,
     &command::Fish,
     &command::Raw,
     &command::Sh,
     &command::Zsh,
+    &data_formats::FromCsv,
+    &data_formats::ToCsv,
     &data_formats::FromJson,
+    &data_formats::ToJson,
+    &disks::ListDisks,
+    &disks::Partition,
     &filesystem::Append,
     &filesystem::CreateDir,
     &filesystem::FileMetadata,
@@ -56,37 +67,29 @@ pub const MACRO_LIST: [&'static dyn Macro; 47] = [
     &filesystem::Trash,
     &filesystem::Watch,
     &filesystem::Write,
-    &general::Output,
     &general::Async,
+    &general::Output,
     &general::Repeat,
     &general::Run,
     &general::Wait,
-    &gui::Plot,
     &gui::BarGraph,
-    &collections::CreateTable,
-    &collections::Get,
-    &collections::Insert,
-    &collections::Where,
-    &collections::Select,
-    &collections::Rows,
-    &test::Assert,
-    &test::AssertEqual,
-    &time::Local,
-    &time::Now,
+    &gui::Plot,
     &logic::If,
     &network::Download,
-    &random::RandomBoolean,
-    &random::RandomFloat,
-    &random::RandomInteger,
-    &random::RandomString,
-    &random::Random,
     &package_management::CoprRepositories,
     &package_management::EnableRpmRepositories,
     &package_management::InstallPackage,
     &package_management::UninstallPackage,
     &package_management::UpgradePackages,
-    &disks::ListDisks,
-    &disks::Partition,
+    &random::Random,
+    &random::RandomBoolean,
+    &random::RandomFloat,
+    &random::RandomInteger,
+    &random::RandomString,
+    &test::Assert,
+    &test::AssertEqual,
+    &time::Local,
+    &time::Now,
 ];
 
 /// A whale macro function.
@@ -419,111 +422,6 @@ pub struct MacroInfo<'a> {
 //             ],
 //             actual: collection.clone(),
 //         })
-//     }
-// }
-
-// pub struct ToCsv;
-
-// impl Macro for ToCsv {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "to_csv",
-//             description: "Convert a value to a string of comma-separated values.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let mut buffer = Vec::new();
-//         let mut writer = csv::Writer::from_writer(&mut buffer);
-
-//         match argument {
-//             Value::String(string) => {
-//                 writer.write_record([string])?;
-//             }
-//             Value::Float(float) => {
-//                 writer.write_record(&[float.to_string()])?;
-//             }
-//             Value::Integer(integer) => {
-//                 writer.write_record(&[integer.to_string()])?;
-//             }
-//             Value::Boolean(boolean) => {
-//                 writer.write_record(&[boolean.to_string()])?;
-//             }
-//             Value::List(list) => {
-//                 let string_list = list.iter().map(|value| value.to_string());
-
-//                 writer.write_record(string_list)?;
-//             }
-//             Value::Empty => {}
-//             Value::Map(map) => {
-//                 writer.write_record(map.inner().keys())?;
-//                 writer.write_record(map.inner().values().map(|value| value.to_string()))?;
-//             }
-//             Value::Table(table) => {
-//                 writer.write_record(table.column_names())?;
-
-//                 for row in table.rows() {
-//                     let row_string = row.iter().map(|value| value.to_string());
-
-//                     writer.write_record(row_string)?;
-//                 }
-//             }
-//             Value::Function(_) => todo!(),
-//         }
-
-//         writer.flush()?;
-
-//         Ok(Value::String(
-//             String::from_utf8_lossy(writer.get_ref()).to_string(),
-//         ))
-//     }
-// }
-
-// pub struct FromJson;
-
-// impl Macro for FromJson {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "from_json",
-//             description: "Convert JSON to a whale value.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         if let Ok(string) = argument.as_string() {
-//             let json: JsonValue = json::parse(string)?;
-//             let value = Value::try_from(json)?;
-
-//             Ok(value)
-//         } else {
-//             Err(Error::ExpectedString {
-//                 actual: argument.clone(),
-//             })
-//         }
-//     }
-// }
-
-// pub struct Count;
-
-// impl Macro for Count {
-//     fn info(&self) -> MacroInfo<'static> {
-//         MacroInfo {
-//             identifier: "count",
-//             description: "Return the number of items in a value.",
-//         }
-//     }
-
-//     fn run(&self, argument: &Value) -> Result<Value> {
-//         let len = match argument {
-//             Value::String(string) => string.len(),
-//             Value::List(list) => list.len(),
-//             Value::Map(map) => map.len(),
-//             Value::Table(table) => table.len(),
-//             Value::Function(_) | Value::Float(_) | Value::Integer(_) | Value::Boolean(_) => 1,
-//             Value::Empty => 0,
-//         };
-
-//         Ok(Value::Integer(len as i64))
 //     }
 // }
 

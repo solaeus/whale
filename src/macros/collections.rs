@@ -2,6 +2,30 @@
 
 use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType, VariableMap};
 
+// pub struct Count;
+
+// impl Macro for Count {
+//     fn info(&self) -> MacroInfo<'static> {
+//         MacroInfo {
+//             identifier: "count",
+//             description: "Return the number of items in a value.",
+//         }
+//     }
+
+//     fn run(&self, argument: &Value) -> Result<Value> {
+//         let len = match argument {
+//             Value::String(string) => string.len(),
+//             Value::List(list) => list.len(),
+//             Value::Map(map) => map.len(),
+//             Value::Table(table) => table.len(),
+//             Value::Function(_) | Value::Float(_) | Value::Integer(_) | Value::Boolean(_) => 1,
+//             Value::Empty => 0,
+//         };
+
+//         Ok(Value::Integer(len as i64))
+//     }
+// }
+
 pub struct CreateTable;
 
 impl Macro for CreateTable {
