@@ -29,6 +29,17 @@ output "The time is " + local_time();
 
 ## Features
 
+### Data Visualization
+
+When you're done downloading and processing your data, you will need a way to
+display it. Unfortunately the command line is a text interface that struggles to
+render data as charts and graphs. Whale is able to instantly spin up GUI windows
+with beautifully rendered data. Scatter plots, bar graphs and pie charts are
+available from directly with whale. 
+
+[bar_graph_demo.webm](https://github.com/solaeus/whale/assets/112188538/923a29a8-29b0-42fb-b0c0-2d68bd14d270)
+
+
 ### Powerful macros
 
 Built-in tools called **macros** reduce complex tasks to plain, simple code.
