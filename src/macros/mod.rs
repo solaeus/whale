@@ -39,7 +39,8 @@ mod time;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 50] = [
+pub const MACRO_LIST: [&'static dyn Macro; 51] = [
+    &collections::Count,
     &collections::CreateTable,
     &collections::Get,
     &collections::Insert,
