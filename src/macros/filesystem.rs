@@ -6,7 +6,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::{Error, Macro, MacroInfo, Result, Table, Value, ValueType};
+use crate::{Error, Macro, MacroInfo, Result, Table, Time, Value, ValueType};
 
 pub struct Append;
 
@@ -135,18 +135,25 @@ impl Macro for ReadDir {
                 entry.file_name().into_string().unwrap_or_default()
             };
             let metadata = entry.path().metadata()?;
-            let created = metadata.accessed()?.elapsed()?.as_secs() / 60;
-            let accessed = metadata.accessed()?.elapsed()?.as_secs() / 60;
-            let modified = metadata.modified()?.elapsed()?.as_secs() / 60;
+
+            let created_timestamp = metadata.accessed()?.elapsed()?.as_micros();
+            let created = Time::from_timestamp(created_timestamp as i64);
+
+            let accessed_timestamp = metadata.accessed()?.elapsed()?.as_micros();
+            let accessed = Time::from_timestamp(accessed_timestamp as i64);
+
+            let modified_timestamp = metadata.modified()?.elapsed()?.as_micros();
+            let modified = Time::from_timestamp(modified_timestamp as i64);
+
             let read_only = metadata.permissions().readonly();
             let size = metadata.len();
 
             file_table.insert(vec![
                 Value::String(file_name),
                 Value::Integer(size as i64),
-                Value::Integer(created as i64),
-                Value::Integer(accessed as i64),
-                Value::Integer(modified as i64),
+                Value::Time(created),
+                Value::Time(accessed),
+                Value::Time(modified),
                 Value::Boolean(read_only),
             ])?;
         }

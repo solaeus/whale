@@ -1,4 +1,4 @@
-use chrono::Utc;
+use std::time::Instant;
 
 use crate::{Macro, MacroInfo, Result, Time, Value};
 
@@ -16,7 +16,7 @@ impl Macro for Now {
     fn run(&self, argument: &crate::Value) -> Result<Value> {
         argument.as_empty()?;
 
-        let time = Time::new(Utc::now(), Some(0));
+        let time = Time::monotonic(Instant::now());
 
         Ok(Value::Time(time))
     }
@@ -36,6 +36,6 @@ impl Macro for Local {
     fn run(&self, argument: &crate::Value) -> Result<Value> {
         let argument = argument.as_time()?;
 
-        Ok(Value::String(argument.local()))
+        Ok(Value::String(argument.as_local()))
     }
 }
