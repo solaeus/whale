@@ -1,11 +1,14 @@
-create_user = '(random_integer(), random_string(), random_integer(0, 100))';
+create_user = '
+	names = ("bob", "bill", "mary", "susan");
+	(random_integer(), names:random(), random_integer(0, 100))
+';
 
 create_table(
 	("id", "name", "age"),
 	(
 	 	repeat (
 			create_user,
-			100
+			10
 		)
 	)
 )

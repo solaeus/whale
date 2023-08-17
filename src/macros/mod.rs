@@ -39,7 +39,7 @@ mod time;
 ///
 /// This list is used to match identifiers with macros and to provide info to
 /// the shell.
-pub const MACRO_LIST: [&'static dyn Macro; 46] = [
+pub const MACRO_LIST: [&'static dyn Macro; 47] = [
     &command::Bash,
     &command::Fish,
     &command::Raw,
@@ -79,6 +79,7 @@ pub const MACRO_LIST: [&'static dyn Macro; 46] = [
     &random::RandomFloat,
     &random::RandomInteger,
     &random::RandomString,
+    &random::Random,
     &package_management::CoprRepositories,
     &package_management::EnableRpmRepositories,
     &package_management::InstallPackage,

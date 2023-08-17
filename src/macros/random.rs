@@ -117,3 +117,28 @@ impl Macro for RandomFloat {
         Ok(Value::Float(random()))
     }
 }
+
+pub struct Random;
+
+impl Macro for Random {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "random",
+            description: "Select a random item from a collection.",
+            group: "random",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        if let Ok(list) = argument.as_list() {
+            let random_index = thread_rng().gen_range(0..list.len());
+            let random_item = list.get(random_index).unwrap();
+
+            Ok(random_item.clone())
+        } else {
+            Err(Error::ExpectedCollection {
+                actual: argument.clone(),
+            })
+        }
+    }
+}
