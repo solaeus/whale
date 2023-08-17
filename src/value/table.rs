@@ -1,4 +1,5 @@
 use crate::{Error, Result, Value, VariableMap};
+use clap::ValueEnum;
 use comfy_table::{Cell, Color, ContentArrangement, Table as ComfyTable};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -78,8 +79,22 @@ impl Table {
             let mut new_row = Vec::new();
 
             for (i, value) in row.iter().enumerate() {
-                if matching_column_indexes.contains(&i) {
-                    new_row.push(value.clone());
+                let column_name = self.column_names.get(i).unwrap();
+                let new_table_column_index = new_table.column_names.iter().enumerate().find_map(
+                    |(index, new_column_name)| {
+                        if new_column_name == column_name {
+                            Some(index)
+                        } else {
+                            None
+                        }
+                    },
+                );
+
+                if let Some(index) = new_table_column_index {
+                    while new_row.len() < index + 1 {
+                        new_row.push(Value::Empty);
+                    }
+                    new_row[index] = value.clone();
                 }
             }
 
