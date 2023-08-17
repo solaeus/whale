@@ -161,6 +161,7 @@ The value can be any of the following data types:
 - map
 - table
 - function
+- time
 - empty
 
 Here are some examples of variables in whale.
@@ -334,6 +335,24 @@ math.subtract = 'input.0 - input.1';
 
 assert_eq(math.add(2, 2), 4);
 assert_eq(math.subtract(100, 1), 99);
+```
+
+### Time
+
+Whale can record, parse and convert time values. Whale can parse TOML datetime
+values or can create time values using macros.
+
+```whale
+dob = from_toml("1979-05-27T07:32:00-08:00")
+
+output "Date of birth = " + dob:local();
+```
+
+```whale
+time = now();
+
+output "Universal time is " + time:utc();
+output "Local time is " + time:local();
 ```
 
 [evalexpr]: https://github.com/ISibboI/evalexpr
