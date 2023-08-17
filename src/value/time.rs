@@ -1,6 +1,6 @@
 use std::{
     fmt::{self, Display, Formatter},
-    time::Instant,
+    time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
 use chrono::{DateTime, FixedOffset, Local as LocalTime, NaiveDateTime};
@@ -75,5 +75,14 @@ impl<'de> Deserialize<'de> for Time {
         D: serde::Deserializer<'de>,
     {
         todo!()
+    }
+}
+
+impl From<SystemTime> for Time {
+    fn from(value: SystemTime) -> Self {
+        let timestamp = value.duration_since(UNIX_EPOCH).unwrap().as_micros();
+        let naive = NaiveDateTime::from_timestamp_micros(timestamp as i64).unwrap();
+
+        Time::Utc(naive)
     }
 }

@@ -136,14 +136,14 @@ impl Macro for ReadDir {
             };
             let metadata = entry.path().metadata()?;
 
-            let created_timestamp = metadata.accessed()?.elapsed()?.as_micros();
-            let created = Time::from_timestamp(created_timestamp as i64);
+            let created_timestamp = metadata.accessed()?;
+            let created = Time::from(created_timestamp);
 
-            let accessed_timestamp = metadata.accessed()?.elapsed()?.as_micros();
-            let accessed = Time::from_timestamp(accessed_timestamp as i64);
+            let accessed_timestamp = metadata.accessed()?;
+            let accessed = Time::from(accessed_timestamp);
 
-            let modified_timestamp = metadata.modified()?.elapsed()?.as_micros();
-            let modified = Time::from_timestamp(modified_timestamp as i64);
+            let modified_timestamp = metadata.modified()?;
+            let modified = Time::from(modified_timestamp);
 
             let read_only = metadata.permissions().readonly();
             let size = metadata.len();
