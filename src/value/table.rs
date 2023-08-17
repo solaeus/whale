@@ -238,13 +238,9 @@ impl From<&Vec<Value>> for Table {
         let mut table = Table::new(vec!["index".to_string(), "item".to_string()]);
 
         for (i, value) in list.iter().enumerate() {
-            if let Ok(list) = value.as_list() {
-                table.insert(list.clone()).unwrap();
-            } else {
-                table
-                    .insert(vec![Value::Integer(i as i64), value.clone()])
-                    .unwrap();
-            }
+            table
+                .insert(vec![Value::Integer(i as i64), value.clone()])
+                .unwrap();
         }
 
         table

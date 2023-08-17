@@ -37,6 +37,30 @@ impl Macro for CreateTable {
     }
 }
 
+pub struct Rows;
+
+impl Macro for Rows {
+    fn info(&self) -> MacroInfo<'static> {
+        MacroInfo {
+            identifier: "rows",
+            description: "Extract a table's rows as a list.",
+            group: "collections",
+        }
+    }
+
+    fn run(&self, argument: &Value) -> Result<Value> {
+        let table = argument.as_table()?;
+
+        let rows = table
+            .rows()
+            .iter()
+            .map(|row| Value::List(row.clone()))
+            .collect();
+
+        Ok(Value::List(rows))
+    }
+}
+
 pub struct Get;
 
 impl Macro for Get {
